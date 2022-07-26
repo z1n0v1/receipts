@@ -1,0 +1,11 @@
+package eu.zinovi.receipts.domain.model.service;
+
+import lombok.Data;
+
+import java.util.UUID;
+
+@Data
+public class ItemDeleteServiceModel {
+    private UUID receiptId;
+    private Integer position;
+}

@@ -1,0 +1,17 @@
+runtime: java17
+instance_class: F4
+
+handlers:
+  - url: /.*
+    script: this field is required, but ignored
+
+vpc_access_connector:
+  name: projects/receipt-ocr-353617/locations/europe-west3/connectors/postgres
+
+automatic_scaling:
+  min_pending_latency: 10.0s
+  max_pending_latency: 15.0s
+
+
+#  min-pending-latency: 10000ms
+#  max-pending-latency: auto

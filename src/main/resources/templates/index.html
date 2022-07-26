@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Начало </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+
+    <div class="row">
+        <div class="col">
+            <h1>Бележки.бг - обуздай месечните си разходи</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            Снимай касовите си бележки. Задай имена на купените продукти. Проследи разходите си. Толкова е просто.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col" th:object="${indexStatistics}" th:text="|
+            *{numUsers} потребители ни се довериха. Присъедини се и ти !
+        |">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col" th:object="${indexStatistics}" th:text="|
+            Обработихме *{numReceipts} касови бележки от *{numCompanies} търговци на стойност *{totalReceiptsSum} лв.
+            Направените от нашите потребители разходи днес са *{todayReceiptsSum} лв.
+        |">
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div id="">
+                <!--                        <span class="label">Влез с </span>-->
+                <a href="/oauth2/authorization/google">
+                    <div class="g-customBtn">
+                        <span class="g-icon"></span>
+                        <span class="g-buttonText">Влез с Google</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+
+</body>
+</html>

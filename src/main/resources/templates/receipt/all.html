@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Бележки - Всички </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+    <div class="row">
+        <div class="col text-center">
+            <form id="receipt-form"
+                  enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <label for="receipt-upload" class="form-label btn btn-primary">Качи касова бележка
+                    <span id="spinner-upload" class="spinner-border spinner-border-sm d-none" role="status"
+                          aria-hidden="true"></span>
+                </label>
+
+                <input class="form-control" type="file" id="receipt-upload"
+                       style="visibility: hidden" name="file" accept="image/*"
+                       onchange="uploadReceipt(this);">
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table id="receipts-table" class="display table table-sm table-hover w-100">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th scope="col" class="text-start">Дата</th>
+                    <th scope="col" class="text-end">Сума</th>
+                    <th scope="col" class="text-center">Категории</th>
+                    <th scope="col" class="text-center">Търговец</th>
+                    <th scope="col" class="text-center">Магазин</th>
+                    <th></th>
+                    <!--                <th scope="col" class="text-end">Арт.</th>-->
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+
+</body>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var csrfHeader = [[${_csrf.headerName}]];
+    var csrfToken = [[${_csrf.token}]];
+
+    liveUpdatesInit();
+
+    var receiptDeleteAction = false;
+
+    let orderDesc = [1, 'desc'];
+    var table = $('#receipts-table').on($.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
+        try {
+            newPageAlert(JSON.parse(settings.jqXHR.responseText).message, 'danger');
+        } catch (ex) {
+            location.reload();
+        }
+    }).DataTable({
+        "pageLength": 25,
+        // "bFilter": false,
+        stateSave: true, // Should we save the state of the table ?
+        order: [orderDesc],
+        columns: [
+            {name: 'receiptId', visible: false, searchable: false, orderable: false},
+            {name: "dateOfPurchase", className: 'text-start', searchable: false, orderable: true},
+            {name: "total", className: 'text-end', searchable: false, orderable: true},
+            {name: "categories", className: 'text-center', searchable: true, orderable: false},
+            {name: "companyName", className: 'text-start', searchable: true, orderable: false},
+            {name: "storeName", className: 'text-start', searchable: true, orderable: false,},
+            {
+                name: "delete", className: 'text-center', searchable: false, orderable: false,
+                render: function (data, type, row) {
+                    let btn = ""
+                    /*[# sec:authorize="hasAuthority('CAP_DELETE_RECEIPT')"]*/
+                    btn = '<button class="btn btn-danger btn-sm" onclick="deleteReceipt('
+                        + "'" + row[0] + "'" + ')">Изтрий</button>';
+                    /*[/]*/
+                    return btn;
+                }
+            },
+        ],
+        serverSide: true,
+        "processing": false,
+        ajax: {
+
+            url: '/api/receipts/list',
+            type: 'POST',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            data: function (d) {
+                return JSON.stringify(d)
+            },
+            contentType: "application/json",
+        }
+
+    });
+
+
+    function deleteReceipt(id) {
+        $.ajax({
+            url: '/api/receipts/delete',
+            type: 'DELETE',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            data: JSON.stringify({
+                receiptId: id
+            }),
+            contentType: "application/json",
+            success: function (data) {
+                newPageAlert("Касовата бележка бе изтрита успешно", 'success', true);
+                receiptDeleteAction = true;
+                table.ajax.reload();
+            },
+            error: function (data) {
+                try {
+                    newPageAlert(data.responseJSON.message, 'danger');
+                    receiptDeleteAction = true;
+                } catch (ex) {
+                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
+                    receiptDeleteAction = true;
+                }
+
+            }
+        });
+    }
+
+    table.on('click', 'tr', function (e) {
+        // sleep(200).then(() => {
+        // console.log(e)
+        let data = table.row(this).data();
+        if (e.target.textContent === 'Изтрий') {
+            receiptDeleteAction = false;
+        } else {
+            window.location.href = '/receipts/details/' + data[0];
+        }
+        // });
+    });
+
+
+    /*]]>*/
+</script>
+
+</html>

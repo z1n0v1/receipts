@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <title>Receipts</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/datatables.min.css"/>
+    <link href="/css/styles.css" rel="stylesheet">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YB6KVTFG5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-5YB6KVTFG5');
+    </script>
+</head>
+<body>
+
+<header th:fragment="header">
+    <div class="row">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" th:href="@{/}">Касови бележки</a>
+            <span class="w-100"></span>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="container-fluid">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-nowrap">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Начало</a>
+                        </li>
+                        <th:block sec:authorize="isAuthenticated()">
+                            <li sec:authorize="hasAuthority('CAP_ADD_RECEIPT')" class="nav-item">
+                                <a class="nav-link" href="/receipts/add">Добави</a>
+                            </li>
+                            <li sec:authorize="hasAnyAuthority('CAP_LIST_RECEIPTS', 'CAP_LIST_ALL_RECEIPTS')"
+                                class="nav-item">
+                                <a class="nav-link" href="/receipts/all">Всички</a>
+                            </li>
+                            <li sec:authorize="hasAuthority('CAP_ADMIN')" class="nav-item">
+                                <a class="nav-link" href="/admin/">Администрация</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/user/details"
+                                   th:text="${#authentication.getPrincipal().getDisplayName()}">User</a>
+                            </li>
+                            <li class="nav-item">
+                                <form th:action="@{/user/logout}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button class="btn btn-secondary" type="submit">Изход</button>
+                                </form>
+                            </li>
+                        </th:block>
+                        <li sec:authorize="isAnonymous()" class="nav-item">
+                            <a class="text-white btn btn-secondary" href="/user/login">Вход</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!--    <div class="col">-->
+        <!--        <h1 class="display-1 text-center">Receipts</h1>-->
+        <!--    </div>-->
+    </div>
+    <div class="row m-1">
+        <div class="col">
+            <div class="">
+                <a href="#" onclick="history.back()">Назад</a> -
+                <strong id="document-title"></strong>
+                <small id="page-alert" class="alert d-inline-block d-none alert-success text-center rounded-pill" role="alert"
+                       style="display: none"></small>
+            </div>
+        </div>
+    </div>
+</header>
+
+<footer th:fragment="footer">
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/js/datatables.min.js"></script>
+    <script type="text/javascript" src="/js/chart.min.js"></script>
+    <script type="text/javascript" src="/js/sockjs.min.js"></script>
+    <script type="text/javascript" src="/js/stomp.min.js"></script>
+    <script src="/js/common.js"></script>
+
+    <!--    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMp8o1D7z6F6cAs9JXXQ1htNELbvd4QCA&libraries=places&&callback=initMap"></script>-->
+
+</footer>
+</body>
+</html>

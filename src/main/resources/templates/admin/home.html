@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Администрация - Начало </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+    <div class="row">
+        <div class="pt-4 col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12">
+            <div class="w-100 text-center">
+                <a class="btn btn-primary" href="/admin/roles">Роли</a>
+                <a class="btn btn-primary" href="/admin/users">Потребители</a>
+                <a class="btn btn-primary" href="/admin/categories">Категории</a>
+            </div>
+            <div id="alert" style="display: none" class="alert alert-danger alert-dismissible fade show" role="alert">
+            </div>
+            <table id="receipts-table" class="display table table-sm table-hover w-100">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th scope="col" class="text-start">Добавена</th>
+                    <th scope="col" class="text-start">Потребител</th>
+                    <th scope="col" class="text-center">Обр.</th>
+                    <th scope="col" class="text-end">Сума</th>
+                    <th scope="col" class="text-end">Арт.</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12">
+            <table class="table table-striped w-100" th:object="${statistics}">
+                <thead>
+                <tr>
+                    <th scope="col" class="text-end">Бележки</th>
+                    <th scope="col" class="text-end">Днес</th>
+                    <th scope="col" class="text-end">Ден</th>
+                    <th scope="col" class="text-end">Седмица</th>
+                    <th scope="col" class="text-end">Месец</th>
+                    <th scope="col" class="text-end">Всички</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th class="text-end" scope="row">Брой</th>
+                    <td class="text-end" th:text="*{todayReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastDayReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastWeekReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastMonthReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{totalReceiptsCount}"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Необработени</th>
+                    <td class="text-end" th:text="*{todayUnprocessedReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastDayUnprocessedReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastWeekUnprocessedReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastMonthUnprocessedReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{totalUnprocessedReceiptsCount}"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Неточни</th>
+                    <td class="text-end" th:text="*{todayErroneousReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastDayErroneousReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastWeekErroneousReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{lastMonthErroneousReceiptsCount}"></td>
+                    <td class="text-end" th:text="*{totalErroneousReceiptsCount}"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Сума</th>
+                    <td class="text-end" th:text="|*{todayReceiptsAmount}лв.|"></td>
+                    <td class="text-end" th:text="|*{lastDayReceiptsAmount}лв.|"></td>
+                    <td class="text-end" th:text="|*{lastWeekReceiptsAmount}лв.|"></td>
+                    <td class="text-end" th:text="|*{lastMonthReceiptsAmount}лв.|"></td>
+                    <td class="text-end" th:text="|*{totalReceiptsAmount}лв.|"></td>
+                </tr>
+            </table>
+            <table class="table table-striped w-100" th:object="${statistics}">
+                <thead>
+                <tr>
+                    <th class="text-end" scope="row"></th>
+                    <th scope="col" class="text-end">Днес</th>
+                    <th scope="col" class="text-end">Ден</th>
+                    <th scope="col" class="text-end">Седмица</th>
+                    <th scope="col" class="text-end">Месец</th>
+                    <th scope="col" class="text-end">Всички</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th class="text-end" scope="row">Артикули</th>
+                    <td class="text-end" th:text="|*{todayItemsCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayItemsCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekItemsCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthItemsCount}|"></td>
+                    <td class="text-end" th:text="|*{totalItemsCount}|"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Компании</th>
+                    <td class="text-end" th:text="|*{todayCompaniesCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayCompaniesCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekCompaniesCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthCompaniesCount}|"></td>
+                    <td class="text-end" th:text="|*{totalCompaniesCount}|"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Магазини</th>
+                    <td class="text-end" th:text="|*{todayStoresCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayStoresCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekStoresCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthStoresCount}|"></td>
+                    <td class="text-end" th:text="|*{totalStoresCount}|"></td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="table table-striped w-100" th:object="${statistics}">
+                <thead>
+                <tr>
+                    <th class="text-end" scope="row">Потребители</th>
+                    <th scope="col" class="text-end">Днес</th>
+                    <th scope="col" class="text-end">Ден</th>
+                    <th scope="col" class="text-end">Седмица</th>
+                    <th scope="col" class="text-end">Месец</th>
+                    <th scope="col" class="text-end">Всички</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th class="text-end" scope="row">Нови</th>
+                    <td class="text-end" th:text="|*{todayNewUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayNewUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekNewUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthNewUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{totalUsersCount}|"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Активни</th>
+                    <td class="text-end" th:text="|*{todayDayActiveUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayActiveUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekActiveUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthActiveUsersCount}|"></td>
+                    <td class="text-end"></td>
+                </tr>
+                <tr>
+                    <th class="text-end" scope="row">Google</th>
+                    <td class="text-end" th:text="|*{todayDayNewGoogleUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastDayNewGoogleUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastWeekNewGoogleUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{lastMonthNewGoogleUsersCount}|"></td>
+                    <td class="text-end" th:text="|*{totalGoogleUsersCount}|"></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    let orderDesc = [1, 'desc'];
+    var table = $('#receipts-table').on($.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
+        // location.reload();
+        // console.log(settings, helpPage, message);
+        // console.log(JSON.parse(settings.jqXHR.responseText).message);
+        let alert = $('#alert');
+        try {
+            alert.text(JSON.parse(settings.jqXHR.responseText).message);
+        } catch (ex) {
+            location.reload();
+        }
+        // alert.html("Нещо се обърка. Моля " +
+        //     "<a href='/user/login'>влезте</a>" + " отново в системата.");
+        alert.show();
+        alert.fadeOut(8000);
+    }).DataTable({
+        "bFilter": false,
+        stateSave: true,
+        order: [orderDesc],
+        columns: [
+            {name: 'receiptId', visible: false},
+            {name: "addedOn", className: 'text-start', searchable: false},
+            {name: "addedBy", className: 'text-start', searchable: false, orderable: false},
+            {name: "isProcessed", className: 'text-center', searchable: false},
+            {name: "total", className: 'text-end', searchable: false, orderable: false},
+            {name: "itemsTotal", className: 'text-end', searchable: false, orderable: false}
+        ],
+        serverSide: true,
+        "processing": false,
+        ajax: {
+
+            url: '/api/admin/receipt/all',
+            type: 'POST',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            data: function (d) {
+                return JSON.stringify(d)
+            },
+            contentType: "application/json",
+        }
+    });
+
+    table.on('click', 'tr', function () {
+        let data = table.row(this).data();
+        window.location.href = '/admin/receipts/view/' + data[0];
+    });
+
+    /*]]>*/
+</script>
+</body>
+</html>

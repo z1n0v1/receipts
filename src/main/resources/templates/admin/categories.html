@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title> Администрация - Категории </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+
+    <div class="row">
+        <div class="col text-center">
+            <button type="button" class="btn btn-primary" id="category-new-add-btn" onclick="addCategoryModal()">
+                Нова категория
+            </button>
+        </div>
+    </div>
+
+    <div class="row" id="categories"></div>
+
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+<div class="modal fade" id="category-edit-modal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Редакция на категория </h5>
+                <button type="button" class="close category-edit-modal-close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="category-edit-form">
+                <input type="hidden" id="category-edit-id" name="category-edit-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="category-edit-name">Категория</label>
+                        <input type="text" class="form-control" id="category-edit-name"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-edit-color">Цвят: </label>
+                        <input type="color" id="category-edit-color">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <small id="modal-edit-alert" class="alert alert-success text-center rounded-pill" role="alert"
+                               style="display: none"></small>
+                    </div>
+                    <div id="alert-modal-edit-category" class="alert-danger" style="display: none"></div>
+                    <button type="button" class="btn btn-secondary category-edit-modal-close" data-dismiss="modal">
+                        Затвори
+                    </button>
+                    <button type="button" class="btn btn-primary" id="category-edit-save-btn"
+                            onclick="saveCategory()">Запиши промените
+                    </button>
+                    <button type="button" class="btn btn-danger" id="category-edit-delete-btn"
+                            onclick="deleteCategory()" style="display: none">Изтрий
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="category-add-modal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Добавяне на категория </h5>
+                <button type="button" class="close category-add-modal-close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="category-add-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="category-add-name">Категория</label>
+                        <input type="text" class="form-control" id="category-add-name"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-add-color">Цвят: </label>
+                        <input type="color" id="category-add-color">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                    <small id="modal-add-alert" class="alert alert-success text-center rounded-pill" role="alert"
+                           style="display: none"></small>
+                    </div>
+                    <div id="alert-modal-category-add" class="alert-danger" style="display: none"></div>
+                    <button type="button" class="btn btn-secondary category-add-modal-close"
+                            data-dismiss="modal">
+                        Затвори
+                    </button>
+                    <button type="button" class="btn btn-primary" id="category-add-save-btn"
+                            onclick="addCategory()">Добави
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    let categoriesData = {};
+
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '/api/admin/category/all',
+            type: 'GET',
+            dataType: 'json',
+            contentType: "application/json",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                let html = '';
+
+                for (let i = 0; i < data.length; i++) {
+                    html += '<div class="col-lg-2 col-md-3 col-4 m-2 border text-center"' +
+                        ' onclick="editCategory(' + "'" + data[i].id + "')" + '">';
+                    html += '<strong>' + data[i].name + ' </strong>';
+                    html += '<span>(' + data[i].itemsCount + ')</span>';
+                    html += '<div><input type="color" value="' + data[i].color + '" disabled></div>';
+                    html += '</div>';
+
+                    categoryData = {
+                        id: data[i].id,
+                        name: data[i].name,
+                        color: data[i].color,
+                        itemsCount: data[i].itemsCount
+                    }
+                    categoriesData[data[i].id] = categoryData;
+                }
+                $('#categories').append(html);
+            },
+            error: function (request, status, error) {
+                try {
+                    newPageAlert(JSON.parse(request.responseText).message, "danger");
+                } catch (e) {
+                    location.reload();
+                }
+            }
+        });
+
+    });
+
+    $('.category-edit-modal-close').on('click', function () {
+        $('#category-edit-modal').modal('toggle');
+    });
+
+    $('.category-add-modal-close').on('click', function () {
+        $('#category-add-modal').modal('toggle');
+    });
+
+    function saveCategory() {
+        let category = {
+            id: $('#category-edit-id').val(),
+            name: $('#category-edit-name').val(),
+            color: $('#category-edit-color').val()
+        };
+
+        $.ajax({
+            url: '/api/admin/category',
+            type: 'PUT',
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(category),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                // newPageAlert(data.message, "success");
+                // $('#category-edit-modal').modal('hide');
+                location.reload();
+            },
+            error: function (request, status, error) {
+                try {
+                    newPageAlert(request.responseJSON.message, "danger", false, '#modal-edit-alert');
+                    // $('#category-edit-modal').modal('toggle');
+                } catch (e) {
+                    location.reload();
+                }
+            }
+        });
+    }
+
+    function editCategory(id) {
+        $('#category-edit-id').val(id);
+        $('#category-edit-name').val(categoriesData[id].name);
+        $('#category-edit-color').val(categoriesData[id].color);
+
+        if (categoriesData[id].itemsCount === 0) {
+            $('#category-edit-delete-btn').show();
+        } else {
+            $('#category-edit-delete-btn').hide();
+        }
+
+        $('#category-edit-modal').modal('show');
+    }
+
+    function addCategory() {
+        let category = {
+            name: $('#category-add-name').val(),
+            color: $('#category-add-color').val()
+        };
+
+        $.ajax({
+            url: '/api/admin/category',
+            type: 'POST',
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(category),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                // newPageAlert(data.message, "success");
+                // $('#category-edit-modal').modal('hide');
+                location.reload();
+                // console.log(data);
+            },
+            error: function (request, status, error) {
+                try {
+                    newPageAlert(request.responseJSON.message, "danger", false, "#alert-modal-category-add");
+                    // $('#category-add-modal').modal('toggle');
+                } catch (e) {
+                    location.reload();
+                    // console.log(request);
+                }
+            }
+        });
+    }
+
+    function deleteCategory() {
+        let category = {
+            id: $('#category-edit-id').val()
+        };
+
+        $.ajax({
+            url: '/api/admin/category',
+            type: 'DELETE',
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(category),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                // newPageAlert(data.message, "success");
+                // $('#category-edit-modal').modal('hide');
+                location.reload();
+            },
+            error: function (request, status, error) {
+                try {
+                    newPageAlert(request.responseJSON.message, "danger", false, "#modal-edit-alert");
+                    // $('#category-edit-modal').modal('toggle');
+                } catch (e) {
+                    location.reload();
+                }
+            }
+        });
+    }
+
+    function addCategoryModal() {
+        $('#category-add-modal').modal('show');
+    }
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

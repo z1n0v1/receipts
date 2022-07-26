@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Администрация - Детайли </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+    <div class="row">
+        <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <img th:src="${receipt.imageUrl}" id="admin-receipt-img" class="img-thumbnail w-100"/>
+            <canvas id="admin-receipt-canvas" class="h-auto w-100"></canvas>
+        </div>
+        <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div>
+                <strong> ЕИК: </strong>
+                <span th:text="${receipt.companyEik}"></span>
+            </div>
+            <div>
+                <strong> Име на магазин: </strong>
+                <span th:text="${receipt.storeName}"></span>
+            </div>
+            <div>
+                <strong> Адрес на магазин: </strong>
+                <span id="store-address" th:text="${receipt.storeAddress}"></span>
+            </div>
+            <div>
+                <strong> Дата:</strong>
+                <span th:text="${#temporals.format(receipt.date,'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <div class="pt-3">
+                <strong> Обща сума:</strong>
+                <span th:text="${receipt.total}"></span>
+                <span th:text="|( Артикули: ${receipt.itemsTotal})|"></span>
+            </div>
+
+        </div>
+        <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <!--    <div class="col-6">-->
+            <pre th:text="${receipt.receiptLines}"></pre>
+        </div>
+    </div>
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        let bucket = [[${bucket}]];
+        drawMLPolygons([[${receipt.imageId}]], bucket , 'admin-receipt-canvas', 'admin-receipt-img');
+    });
+    /*]]>*/
+</script>
+</body>
+</html>
+
+</body>
+</html>

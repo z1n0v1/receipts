@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title> Вход </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<!--<head th:replace="fragments/common::head"></head>-->
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+    <main>
+        <div class="row pt-5">
+            <div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3  col-lg-4 offset-lg-4 border pt-2">
+                <h1 class="text-center"> Вход </h1>
+                <div class="alert-danger" th:if="${param.error}">
+                    Невалидно потребителско име или парола.
+                </div>
+                <div class="alert-danger" th:if="${param.logout}">
+                    Успешно излязане от системата.
+                </div>
+                <div class="alert-info" th:if="${verifyEmail}">
+                    Проверете вашия имейл за потвърждение на регистрацията.
+                </div>
+                <div class="col text-center pt-2">
+
+                        <div id="">
+                            <!--                        <span class="label">Влез с </span>-->
+                            <a href="/oauth2/authorization/google">
+                            <div class="g-customBtn">
+                                <span class="g-icon"></span>
+                                <span class="g-buttonText">Влез с Google</span>
+                            </div>
+                            </a>
+                        </div>
+
+                </div>
+                <form action="/user/login" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Имейл</label>
+                        <input type="email" class="form-control" id="email" name="username" placeholder="Email">
+                    </div>
+                    <div class="form-group pt-1">
+                        <label for="password" class="form-label">Парола</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="Password">
+                    </div>
+                    <div class="text-center pt-2">
+                        <button type="submit" class=" btn btn-primary">Влез</button>
+                    </div>
+                    <div class="text-center pt-2">
+                        <a href="/user/register">Регистрация</a>
+                    </div>
+
+                </form>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+</body>
+</html>

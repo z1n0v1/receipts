@@ -1,0 +1,539 @@
+package eu.zinovi.receipts.service;
+
+import com.google.cloud.storage.Acl;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.vision.v1.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import eu.zinovi.receipts.domain.model.entity.*;
+import eu.zinovi.receipts.domain.model.service.ReceiptPolyJsonServiceModel;
+import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
+import eu.zinovi.receipts.repository.ReceiptImageRepository;
+import eu.zinovi.receipts.repository.ReceiptRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import javax.transaction.Transactional;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static eu.zinovi.receipts.util.ImageProcessing.processUploadedReceipt;
+import static eu.zinovi.receipts.util.ImageProcessing.readQRCode;
+
+@Service
+public class ReceiptProcessService {
+    private final UserService userService;
+    private final MessagingService messagingService;
+    private final CompanyService companyService;
+    private final StoreService storeService;
+    private final CategoryService categoryService;
+    private final ItemService itemService;
+    private final ReceiptImageRepository receiptImageRepository;
+    private final ReceiptRepository receiptRepository;
+    private final ImageAnnotatorClient imageAnnotatorClient;
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    private final Storage storage;
+    private final Gson gson;
+
+    @Value("${receipts.google.storage.bucket}")
+    private String bucket;
+
+    public ReceiptProcessService(UserService userService, MessagingService messagingService, CompanyService companyService, StoreService storeService, CategoryService categoryService, ItemService itemService, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, ImageAnnotatorClient imageAnnotatorClient, Storage storage, Gson gson) {
+        this.userService = userService;
+        this.messagingService = messagingService;
+        this.companyService = companyService;
+        this.storeService = storeService;
+        this.categoryService = categoryService;
+        this.itemService = itemService;
+        this.receiptImageRepository = receiptImageRepository;
+        this.receiptRepository = receiptRepository;
+        this.imageAnnotatorClient = imageAnnotatorClient;
+        this.storage = storage;
+        this.gson = gson;
+    }
+
+    @Transactional
+    public UUID uploadReceipt(MultipartFile file) throws ReceiptUploadException {
+
+        String fileExtension = null;
+        String fileName = file.getOriginalFilename();
+
+        if (file.getContentType() != null) {
+            String[] contentType = file.getContentType().split("/");
+            if (contentType.length > 1) {
+                fileExtension = contentType[1];
+            }
+        }
+
+        if (fileExtension == null || file.isEmpty() || file.getSize() > 10000000 ||
+                (!fileExtension.equals("jpeg")
+                        && !fileExtension.equals("png")
+                        && !fileExtension.equals("jpg"))) {
+            throw new ReceiptUploadException("Неподдържан файлов формат.");
+        }
+
+        ReceiptImage receiptImage = new ReceiptImage();
+        receiptImage.setIsProcessed(false);
+        receiptImage.setAddedOn(LocalDateTime.now());
+        receiptImage.setUser(userService.getCurrentUser());
+        receiptImageRepository.save(receiptImage);
+
+        receiptImage.setImageUrl("https://" + bucket + ".storage.googleapis.com/receipts/"
+                + receiptImage.getId() + ".jpg");
+        String receiptPath = "receipts/" + receiptImage.getId() + ".jpg";
+        BlobId blobId = BlobId.of(
+                bucket,
+                receiptPath);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+
+        try {
+            ByteArrayInputStream image = processUploadedReceipt(ImageIO.read(file.getInputStream()));
+
+            storage.createFrom(blobInfo, image);
+            storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+
+        } catch (IOException e) {
+            receiptImageRepository.delete(receiptImage);
+            throw new ReceiptUploadException("Грешка при качване на файла.", e);
+        }
+
+        //
+        List<AnnotateImageRequest> requests = new ArrayList<>();
+
+        ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri
+                ("gs://" + bucket + "/receipts/" + receiptImage.getId() + ".jpg").build();
+        Image img = Image.newBuilder().setSource(imgSource).build();
+        Feature feat = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).build();
+        AnnotateImageRequest request =
+                AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
+        requests.add(request);
+
+
+        messagingService.sendMessage(fileName + ": анализ..");
+        BatchAnnotateImagesResponse response = imageAnnotatorClient.batchAnnotateImages(requests);
+        messagingService.sendMessage(fileName + ": успешен анализ");
+        if (response.getResponsesList().size() == 0) {
+            throw new ReceiptUploadException("Неуспешен анализ.");
+        }
+
+        String json = gson.toJson(response);
+
+
+        blobId = BlobId.of(
+                bucket,
+                "json/" + receiptImage.getId() + ".json");
+        blobInfo = BlobInfo.newBuilder(blobId).build();
+
+        try {
+            storage.createFrom(blobInfo, new ByteArrayInputStream(json.getBytes()));
+        } catch (IOException e) {
+            throw new ReceiptUploadException("Грешка при качване на файла.", e);
+        }
+        blobId = BlobId.of(
+                bucket,
+                "json/poly/" + receiptImage.getId() + ".json");
+        blobInfo = BlobInfo.newBuilder(blobId).build();
+
+
+        String processedMLJson = processMLToJason(response);
+
+        try {
+            InputStream mlPolyJson = new ByteArrayInputStream(processedMLJson.getBytes());
+            storage.createFrom(blobInfo, mlPolyJson);
+            storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+        } catch (IOException e) {
+            throw new ReceiptUploadException("Грешка при качване на файла.", e);
+        }
+
+        BufferedImage bufferedImage;
+        try {
+            bufferedImage = ImageIO.read(file.getInputStream());
+        } catch (IOException e) {
+            throw new ReceiptUploadException("Грешка при зареждане на изображението.", e);
+        }
+        receiptImageRepository.save(receiptImage);
+
+        return processReceipt(bufferedImage, processedMLJson, receiptImage, fileName);
+    }
+
+    private String processMLToJason(BatchAnnotateImagesResponse response) {
+        List<ReceiptPolyJsonServiceModel> polygons = new ArrayList<>();
+
+        for (AnnotateImageResponse imageResponse : response.getResponsesList()) {
+            for (EntityAnnotation entityAnnotation : imageResponse.getTextAnnotationsList()) {
+                ReceiptPolyJsonServiceModel receiptPolyModelView = ReceiptPolyJsonServiceModel.builder()
+                        .x1(entityAnnotation.getBoundingPoly().getVertices(0).getX())
+                        .y1(entityAnnotation.getBoundingPoly().getVertices(0).getY())
+                        .x2(entityAnnotation.getBoundingPoly().getVertices(1).getX())
+                        .y2(entityAnnotation.getBoundingPoly().getVertices(1).getY())
+                        .x3(entityAnnotation.getBoundingPoly().getVertices(2).getX())
+                        .y3(entityAnnotation.getBoundingPoly().getVertices(2).getY())
+                        .x4(entityAnnotation.getBoundingPoly().getVertices(3).getX())
+                        .y4(entityAnnotation.getBoundingPoly().getVertices(3).getY())
+                        .text(entityAnnotation.getDescription())
+                        .build();
+                polygons.add(receiptPolyModelView);
+            }
+        }
+        return gson.toJson(polygons);
+    }
+
+
+
+    @Transactional
+    public UUID processReceipt(BufferedImage bufferedImage, String processedMLJson, ReceiptImage receiptImage,
+                               String fileName) {
+
+        Receipt receipt = new Receipt();
+        receipt.setReceiptImage(receiptImage);
+        receipt.setAnalyzed(false);
+        receipt.setUser(userService.getCurrentUser());
+
+        // Read the QR code
+        String code = readQRCode(bufferedImage);
+        boolean hasQRCode = code != null;
+        boolean totalFound = hasQRCode;
+
+        if (hasQRCode) {
+            LocalDateTime qrReceiptDate = LocalDateTime.parse(
+                    code.split("\\*")[2] + " " + code.split("\\*")[3],
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            BigDecimal qrTotal = new BigDecimal(code.split("\\*")[4]);
+            receipt.setDateOfPurchase(qrReceiptDate);
+            receipt.setTotal(qrTotal);
+        }
+
+        // Get receipt lines from mlPolyJson
+        List<String> receiptLines = mlPolyJsonToReceiptLines(processedMLJson);
+        StringBuilder receiptText = new StringBuilder();
+        for (String line : receiptLines) {
+            receiptText.append(line).append("\n");
+        }
+        receipt.setReceiptLines(receiptText.toString());
+//        receipt.setDateOfPurchase(LocalDateTime.now());
+        receiptRepository.save(receipt);
+        receiptImage.setReceipt(receipt);
+        receiptImageRepository.save(receiptImage);
+
+        // Find EIK, store name and store address :
+
+        String eik = null;
+        int itemListStartIndex = 0;
+        String storeName = "";
+        String storeAddress = "";
+        Pattern eikPattern = Pattern.compile("\\d{9}");
+        for (int i = 0; i < Math.min(receiptLines.size(), 10); i++) {
+
+     /*
+            if (Pattern.compile("ЕИК|EUK").matcher(receiptLines.get(i)).find()) {
+                String eikString = receiptLines.get(i)
+                        .replace("ЕИК", "")
+                        .replace("EUK", "")
+                        .replace(":", "")
+                        .replace(" ", "")
+                        .trim();
+             */
+            Matcher matcher = eikPattern.matcher(receiptLines.get(i));
+            if (matcher.find()) {
+                eik = matcher.group();
+                storeName = receiptLines.get(i + 1);
+                storeAddress = receiptLines.get(i + 2);
+                itemListStartIndex = i + 3;
+                break;
+            }
+
+                    /*
+                storeName = receiptLines.get(i + 1);
+                storeAddress = receiptLines.get(i + 2);
+                itemListStartIndex = i + 3;
+                break;
+            }
+*/
+        }
+        if (eik == null) {
+            throw new ReceiptUploadException("ЕИК не е разчетен!");
+        }
+        Company company = companyService.findByEik(eik);
+        if (company == null) {
+            throw new ReceiptUploadException("Фирмата не е разчетена!");
+        }
+        receipt.setCompany(company);
+
+        receipt.setStore(storeService.findByNameAndAddressAndCompany(storeName, storeAddress, company));
+
+        receiptRepository.save(receipt);
+
+        // Find total and date
+        BigDecimal total = null;
+        int itemListEndIndex = receiptLines.size();
+
+        LocalDate date = null;
+        LocalTime time = null;
+
+        Pattern datePattern = Pattern.compile("\\d\\d[-.]\\d\\d[-.]\\d{4,4}");
+        Pattern timePattern = Pattern.compile("^\\d\\d:\\d\\d:\\d\\d");
+        Pattern costPattern = Pattern.compile("-{0,1}\\d+[.|,]\\d\\d$");
+        Pattern quantityPattern = Pattern.compile("\\d+[.|,]\\d\\d\\d");
+
+        for (int i = receiptLines.size() - 1; i > itemListStartIndex; i--) {
+            String currentLine = cyrillizeSymbols(
+                    stripRecipeLine(receiptLines.get(i)));
+
+            if (currentLine.toLowerCase().contains("обща") && currentLine.toLowerCase().contains("сума")) {
+                itemListEndIndex = i;
+                Matcher matcher = costPattern.matcher(currentLine);
+                if (matcher.find()) {
+                    try {
+                        total = new BigDecimal(matcher.group().replace(",", "."));
+                        totalFound = true;
+                    } catch (NumberFormatException e) {
+                        LOGGER.error("Error parsing total!");
+                    }
+                    if (!hasQRCode) {
+                        receipt.setTotal(total);
+                    }
+                    break;
+                }
+            }
+            if (!hasQRCode) {
+                Matcher matcher = datePattern.matcher(currentLine);
+                if (matcher.find()) {
+                    try {
+                        date = LocalDate.parse(matcher.group().replace(".", "-"),
+                                DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    } catch (DateTimeParseException e) {
+                        LOGGER.error("Error parsing date: " + matcher.group());
+                    }
+                }
+                matcher = timePattern.matcher(currentLine);
+                if (matcher.find()) {
+                    try {
+                        time = LocalTime.parse(matcher.group(), DateTimeFormatter.ofPattern("HH:mm:ss"));
+                    } catch (DateTimeParseException e) {
+                        LOGGER.error("Error parsing time: " + matcher.group());
+                    }
+                }
+            }
+            if (receipt.getDateOfPurchase() == null) {
+                receipt.setDateOfPurchase(LocalDateTime.of(date != null ? date : LocalDate.now(),
+                        time != null ? time : LocalTime.now()));
+            }
+        }
+
+        if (!totalFound) {
+            throw new ReceiptUploadException("Сумата не е разчетена!");
+        }
+
+        List<Item> items = new ArrayList<>();
+
+        // TODO: Find items and their prices
+
+        Matcher matcher;
+
+        for (int i = itemListStartIndex; i < itemListEndIndex; i++) {
+            String currentLine = stripRecipeLine(receiptLines.get(i));
+
+            String nextLine;
+            if (itemListEndIndex > i + 1) {
+                nextLine = stripRecipeLine(receiptLines.get(i + 1));
+            } else {
+                nextLine = "";
+            }
+            String secondToNextLine;
+            if (itemListEndIndex > i + 2) {
+                secondToNextLine = stripRecipeLine(receiptLines.get(i + 2));
+            } else {
+                secondToNextLine = "";
+            }
+
+
+            // Quantity check
+            matcher = quantityPattern.matcher(currentLine);
+            if (matcher.find()) {
+                BigDecimal quantity = new BigDecimal(matcher.group().replace(',', '.'))
+                        .setScale(3, RoundingMode.HALF_UP);
+                matcher = costPattern.matcher(currentLine.substring(matcher.end()).trim()
+                        .replace(" ", "")
+                        .replace("=", "")
+                        .replace("x", ""));
+                if (matcher.find()) {
+                    BigDecimal pricePerUnit = new BigDecimal(matcher.group().replace(",", "."));
+                    BigDecimal price = pricePerUnit.multiply(quantity)
+                            .setScale(2, RoundingMode.HALF_EVEN);
+                    if (!items.isEmpty()) {
+                        if (items.get(items.size() - 1).getPrice().compareTo(price) == 0) {
+                            items.get(items.size() - 1).setQuantity(quantity);
+                            continue;
+                        }
+                    }
+                    matcher = costPattern.matcher(nextLine);
+                    if (matcher.find()) {
+                        BigDecimal currentPrice = new BigDecimal(matcher.group().replace(",", "."));
+                        Item item = new Item();
+                        item.setQuantity(quantity);
+                        item.setPrice(currentPrice);
+                        items.add(item);
+                        i++;
+
+                    } else {
+                        matcher = costPattern.matcher(secondToNextLine);
+                        if (matcher.find()) {
+                            BigDecimal currentPrice = new BigDecimal(matcher.group().replace(",", "."));
+                            Item item = new Item();
+                            item.setQuantity(quantity);
+                            item.setPrice(currentPrice);
+                            items.add(item);
+                            i += 2;
+                        }
+                    }
+                }
+            } else {
+
+                // item check
+                matcher = costPattern.matcher(currentLine);
+                if (matcher.find()) {
+                    BigDecimal currentPrice = new BigDecimal(matcher.group().replace(",", "."));
+                    Item item = new Item();
+                    item.setPrice(currentPrice);
+                    item.setQuantity(BigDecimal.ONE);
+                    items.add(item);
+                }
+            }
+        }
+
+        BigDecimal itemsTotal = BigDecimal.ZERO;
+        Category other = categoryService.findByName("Други").orElse(null);
+        for (Item item : items) {
+            itemsTotal = itemsTotal.add(item.getPrice());
+//            item.setName("");
+            item.setCategory(other);
+        }
+
+        // ItemsTotal cleanup
+        // fix for a strange case where total is null
+        while (receipt.getTotal() != null && itemsTotal.compareTo(receipt.getTotal()) > 0) {
+            Item item = items.get(items.size() - 1);
+            itemsTotal = itemsTotal.subtract(item.getPrice());
+            items.remove(items.size() - 1);
+        }
+
+
+        receipt.setItemsTotal(itemsTotal);
+//        receipt.setAnalyzed(true);
+        receiptRepository.save(receipt);
+
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).setReceipt(receipt);
+            items.get(i).setPosition(i + 1);
+            itemService.save(items.get(i));
+        }
+
+        receiptImage.setIsProcessed(true);
+        receiptImage.setReceipt(receipt);
+        receiptImageRepository.save(receiptImage);
+        messagingService.sendMessage(fileName + ": " +
+                        receipt.getTotal() + "лв. - " +
+                        company.getName() + " - " +
+                        receipt.getDateOfPurchase()
+                                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                "success");
+        return receipt.getId();
+    }
+
+    public List<String> mlPolyJsonToReceiptLines(String processedMLJson) {
+        List<ReceiptPolyJsonServiceModel> polygons = gson.fromJson(processedMLJson,
+                new TypeToken<ArrayList<ReceiptPolyJsonServiceModel>>() {
+                }.getType());
+
+        polygons.sort((a, b) -> {
+            double height = a.getY3() - a.getY1();
+            double delta = Math.abs(a.getY3() - b.getY3());
+
+
+            if (delta > height / 2) {
+                return a.getY1() - b.getY1();
+
+            }
+            return a.getX1() - b.getX1();
+        });
+
+        List<String> receiptLines = new ArrayList<>();
+
+        StringBuilder line = new StringBuilder();
+//        if (polygons.size() > 0) {
+//            line.append(polygons.get(0).getText());
+//        }
+        for (int i = 1; i < polygons.size() - 1; i++) {
+            ReceiptPolyJsonServiceModel last = polygons.get(i - 1);
+            ReceiptPolyJsonServiceModel current = polygons.get(i);
+
+            double currentRelativeCenter = (current.getY3() - current.getY1()) / (double) 2;
+            double currentCenter = current.getY1() + currentRelativeCenter;
+            if (currentCenter > last.getY3()) {
+                if (line.length() > 0) {
+                    receiptLines.add(line.toString());
+                    line = new StringBuilder();
+                }
+            }
+            line.append(current.getText()).append(" ");
+        }
+        if (line.length() > 0) {
+            receiptLines.add(line.toString());
+        }
+        return receiptLines;
+    }
+
+    private String stripRecipeLine(String line) {
+        line = line.trim();
+        if (line.startsWith("# ") ||
+                line.startsWith("H ")) {
+            line = line.substring(2);
+        }
+        if (line.endsWith(" #") ||
+                line.endsWith(" Б") ||
+                line.endsWith(" б") ||
+                line.endsWith(" T") ||
+                line.endsWith(" Т") ||
+                line.endsWith(" Г") ||
+                line.endsWith(" г") ||
+                line.endsWith(" r") ||
+                line.endsWith(" 5") ||
+                line.endsWith(" Н") ||
+                line.endsWith(" Е") ||
+                line.endsWith(" E") ||
+                line.endsWith(" СЕ") ||
+                line.endsWith(" 6")) {
+            line = line.substring(0, line.length() - 2);
+        }
+        return line.trim();
+    }
+
+    private String cyrillizeSymbols(String stripRecipeLine) {
+        return stripRecipeLine.replace("A", "А")
+                .replace("a", "а")
+                .replace("O", "О")
+                .replace("o", "о")
+                .replace("y", "у")
+                .replace("Y", "У");
+    }
+}

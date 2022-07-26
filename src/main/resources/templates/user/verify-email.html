@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title> Потребител - Потвърждаване на имейл адреса </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+
+    <p>Моля, потвърдете вашия имейл адрес като натиснете предоставения линк.</p>
+    Или
+    <span id="">
+        <a href="/oauth2/authorization/google">
+            <span class="g-customBtn">
+                <span class="g-icon"></span>
+                <span class="g-buttonText">Влез с Google</span>
+            </span>
+        </a>
+    </span>
+    <p  sec:authorize="isAuthenticated()">
+        <a href="/user/verifyEmail?again=true">Пращане отново</a>
+    </p>
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+
+</body>
+</html>

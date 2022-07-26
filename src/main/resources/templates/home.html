@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Начало </title>
+    <th:block th:replace="fragments/common::head"></th:block>
+</head>
+<body>
+<div class="container pt-5">
+    <header th:replace="fragments/common::header"></header>
+    <div class="row">
+        <div class="col text-center">
+            <form id="receipt-form"
+                  enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <label for="receipt-upload" class="form-label btn btn-primary">Качи касова бележка
+                    <span id="spinner-upload" class="spinner-border spinner-border-sm d-none" role="status"
+                          aria-hidden="true"></span>
+                </label>
+
+                <input class="form-control" type="file" id="receipt-upload"
+                       style="visibility: hidden" name="file" accept="image/*"
+                       onchange="uploadReceipt(this);">
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div>
+                <canvas id="last-month-expenses-by-week" width="400" height="200"></canvas>
+            </div>
+            <div>
+                <h5>Разходи за последния месец: <span id="last-month-expenses"></span> лв.</h5>
+            </div>
+            <div>
+                <h5>Общо разходи: <span id="total-expenses"></span> лв.</h5>
+            </div>
+            <div>
+                <h5>Касови бележки последния месец: <span id="last-month-receipts"></span></h5>
+            </div>
+            <div>
+                <h5>Общо касови бележки: <span id="total-receipts"></span></h5>
+            </div>
+            <div>
+                <h5>Брой търговци: <span id="total-sellers"></span></h5>
+            </div>
+            <div>
+                <h5>Брой магазини: <span id="total-stores"></span></h5>
+            </div>
+
+        </div>
+        <div class="col-xxl-8 col-xl-8 col-lg-6 col-md-6 col-sm-12">
+            <div class="row">
+                <div class="col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                    <div>
+                        <div class="text-center">
+                            <h5>Разходи за последния месец по категория:</h5>
+                        </div>
+                        <canvas id="monthly-expenses-by-type" width="400" height="400"></canvas>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12">
+                    <div>
+                        <div class="text-center">
+                            <h5>Общо разходи по категория:</h5>
+                        </div>
+                        <canvas id="total-expenses-by-type" width="400" height="400"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+    <th:block th:text="${principal}"></th:block>
+    <footer th:replace="fragments/common::footer"></footer>
+</div>
+</body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var csrfHeader = [[${_csrf.headerName}]];
+    var csrfToken = [[${_csrf.token}]];
+
+    liveUpdatesInit();
+
+    $(document).ready(function () {
+
+
+
+        $.ajax({
+            url: '/api/home/expenses/last-month/by-week/line',
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                let ctx = document.getElementById('last-month-expenses-by-week');
+                new Chart(ctx, data);
+            },
+            error: function (data) {
+                try {
+                    newPageAlert(data.responseJSON.message, 'danger');
+                    receiptDeleteAction = true;
+                } catch (ex) {
+                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
+                    receiptDeleteAction = true;
+                }
+            }
+        });
+
+        $.ajax({
+            url: '/api/home/expenses/categories/last-month/pie',
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                let ctx = document.getElementById('monthly-expenses-by-type');
+                new Chart(ctx, data);
+            },
+            error: function (data) {
+                try {
+                    newPageAlert(data.responseJSON.message, 'danger');
+                    receiptDeleteAction = true;
+                } catch (ex) {
+                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
+                    receiptDeleteAction = true;
+                }
+            }
+        });
+
+        $.ajax({
+            url: '/api/home/expenses/categories/total/pie',
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                let ctx = document.getElementById('total-expenses-by-type');
+                new Chart(ctx, data);
+            },
+            error: function (data) {
+                try {
+                    newPageAlert(data.responseJSON.message, 'danger');
+                    receiptDeleteAction = true;
+                } catch (ex) {
+                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
+                    receiptDeleteAction = true;
+                }
+            }
+        });
+
+        $.ajax({
+            url: '/api/home/statistics',
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
+            },
+            success: function (data) {
+                $('#last-month-expenses').text(data.lastMonthExpenses);
+                $('#total-expenses').text(data.totalExpenses);
+                $('#last-month-receipts').text(data.lastMonthReceipts);
+                $('#total-receipts').text(data.totalReceipts);
+                $('#total-sellers').text(data.numCompanies);
+                $('#total-stores').text(data.numStores);
+            },
+            error: function (data) {
+                try {
+                    newPageAlert(data.responseJSON.message, 'danger');
+                    receiptDeleteAction = true;
+                } catch (ex) {
+                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
+                    receiptDeleteAction = true;
+                }
+            }
+
+        })
+    });
+
+
+    /*]]>*/
+</script>
+</html>
