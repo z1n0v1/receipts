@@ -597,7 +597,8 @@
 
     </script>
     <script async
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMp8o1D7z6F6cAs9JXXQ1htNELbvd4QCA&callback=initMap&libraries=places&v=weekly">
+            th:src="'https://maps.googleapis.com/maps/api/js?key=' +
+            ${googleMapsApiKey} +'&callback=initMap&libraries=places&v=weekly'">
     </script>
 </div>
 

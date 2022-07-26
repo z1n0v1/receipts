@@ -2,6 +2,7 @@ package eu.zinovi.receipts.controller;
 
 import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,9 @@ public class ReceiptController {
 
     private final ReceiptsService receiptService;
     private final UserService userService;
+
+    @Value("${receipts.google.maps.api-key}")
+    private String googleMapsApiKey;
 
     public ReceiptController(ReceiptsService receiptService, UserService userService) {
         this.receiptService = receiptService;
@@ -55,6 +59,7 @@ public class ReceiptController {
             return "redirect:/receipt/all";
         }
         model.addAttribute("receipt", receiptService.getReceiptDetails(id));
+        model.addAttribute("googleMapsApiKey", googleMapsApiKey);
 
         return "receipt/details";
     }
