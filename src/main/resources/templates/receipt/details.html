@@ -182,7 +182,7 @@
 
         receiptSaveBtn.on('click', function () {
             $.ajax({
-                url: '/api/receipts/save',
+                url: '/api/receipt',
                 type: 'PUT',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);

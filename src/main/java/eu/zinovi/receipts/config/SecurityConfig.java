@@ -33,8 +33,8 @@ public class SecurityConfig {
                     .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                     .antMatchers("/", "/user/register", "/user/verifyEmail").permitAll()
                 // Authority checks
-                    .antMatchers("/receipts/add").hasAuthority("CAP_ADD_RECEIPT")
-                    .antMatchers("/receipts/all")
+                    .antMatchers("/receipt/add").hasAuthority("CAP_ADD_RECEIPT")
+                    .antMatchers("/receipt/all")
                         .hasAnyAuthority("CAP_LIST_RECEIPTS", "CAP_LIST_ALL_RECEIPTS")
                     .antMatchers("/user/settings").hasAuthority("CAP_EDIT_USER")
                     .antMatchers("/admin").hasAuthority("CAP_ADMIN")

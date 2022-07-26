@@ -8,11 +8,11 @@
 <body>
 <div class="container pt-5">
     <header th:replace="fragments/common::header"></header>
-    <h1>Добавяне на касова бележка</h1>
+    <h1>Добавяне на касови бележки</h1>
     <div class="row">
         <div class="d-flex justify-content-center mt-3">
             <div class="alert-success" th:if="${message} != null" th:text="${message}"></div>
-            <form method="POST" enctype="multipart/form-data" action="/receipts/add">
+            <form method="POST" enctype="multipart/form-data" action="/receipt/add">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="form-group">
                     <button id="btn-upload" class="btn btn-primary" type="button" onclick="file_upload()">
@@ -61,7 +61,7 @@
             for (let f of input.files) {
                 data.append('file', f);
             }
-            xhr.open("post", "/api/receipts/add");
+            xhr.open("post", "/api/receipt");
             // xhr.channel.QueryInterface(Components.interfaces.nsIHttpChannel).redirectionLimit = 0;
             // xhr.channel.QueryInterface(Components.interfaces.nsIHttpChannel).redirectionLimit = 0;
             xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);

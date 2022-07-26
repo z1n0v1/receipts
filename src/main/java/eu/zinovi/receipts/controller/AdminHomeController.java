@@ -60,7 +60,7 @@ public class AdminHomeController {
         return "admin/users";
     }
 
-    @GetMapping("/receipts/view/{receiptId}")
+    @GetMapping("/receipt/{receiptId}")
     public String viewReceipt(@PathVariable("receiptId") UUID receiptId, Model model) {
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADMIN_VIEW_RECEIPT")) {
             return "redirect:/";

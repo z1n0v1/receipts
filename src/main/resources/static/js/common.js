@@ -14,7 +14,7 @@ function uploadReceipt(e) {
     formData.append('file', e.files[0]);
 
     $.ajax({
-        url: '/api/receipts/add',
+        url: '/api/receipt',
         type: 'POST',
         data: formData,
         contentType: false,
@@ -23,11 +23,21 @@ function uploadReceipt(e) {
             xhr.setRequestHeader(csrfHeader, csrfToken);
         },
         success: function (data) {
-            location.href = '/receipts/details/' + data[0];
+            if (data.length > 0) {
+                location.href = '/receipt/details/' + data[0];
+            } else {
+                upBtn.disabled = false;
+                spinner.addClass('d-none');
+                sleep(3000).then(() => {
+                    newPageAlert('Възникна проблем с разчитането на касовата бележка', 'danger', true);
+                });
+            }
+            // console.log('success', data);
         },
         error: function (data) {
+            // console.log('error', data);
             try {
-                newPageAlert(JSON.parse(xhr.responseText).message, "danger", true);
+                newPageAlert(JSON.parse(data.responseText).message, "danger", true);
             } catch (e) {
                 location.reload();
             }

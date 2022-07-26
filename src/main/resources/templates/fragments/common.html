@@ -46,11 +46,11 @@
                         </li>
                         <th:block sec:authorize="isAuthenticated()">
                             <li sec:authorize="hasAuthority('CAP_ADD_RECEIPT')" class="nav-item">
-                                <a class="nav-link" href="/receipts/add">Добави</a>
+                                <a class="nav-link" href="/receipt/add">Добави</a>
                             </li>
                             <li sec:authorize="hasAnyAuthority('CAP_LIST_RECEIPTS', 'CAP_LIST_ALL_RECEIPTS')"
                                 class="nav-item">
-                                <a class="nav-link" href="/receipts/all">Всички</a>
+                                <a class="nav-link" href="/receipt/all">Всички</a>
                             </li>
                             <li sec:authorize="hasAuthority('CAP_ADMIN')" class="nav-item">
                                 <a class="nav-link" href="/admin/">Администрация</a>

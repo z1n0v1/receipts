@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/receipts")
+@RequestMapping("/api")
 public class ReceiptRestController {
     private final ReceiptDeleteBindingToService receiptDeleteBindingToService;
     private final ReceiptEditBindingToService receiptEditBindingToService;
@@ -44,7 +44,7 @@ public class ReceiptRestController {
     }
 
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST,
+    @RequestMapping(value = "/receipt", method = RequestMethod.POST,
             consumes = "multipart/form-data")
     public ResponseEntity<Set<UUID>> uploadReceipt(
             @RequestParam("file") MultipartFile[] files) {
@@ -68,7 +68,7 @@ public class ReceiptRestController {
         return ResponseEntity.ok(receiptUuids);
     }
 
-    @RequestMapping(value = "/list", method = RequestMethod.POST,
+    @RequestMapping(value = "/receipt/list", method = RequestMethod.POST,
             consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<ToDatatable> getReceipts(
             @Valid @RequestBody FromDatatable fromDatatable,
@@ -89,26 +89,7 @@ public class ReceiptRestController {
         }
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.DELETE,
-            consumes = {"application/json"})
-    public ResponseEntity<?> deleteReceipt(
-            @Valid @RequestBody ReceiptDeleteBindingModel receiptDeleteBindingModel,
-                                           BindingResult bindingResult) {
-
-        if (!userService.checkCapability("CAP_DELETE_RECEIPT")) {
-            throw new AccessDeniedException("Нямате право да изтривате касови бележки");
-        }
-        if (bindingResult.hasErrors()) {
-            throw new FieldViolationException(bindingResult.getAllErrors());
-        }
-
-        receiptsService.deleteReceipt(
-                receiptDeleteBindingToService.map(receiptDeleteBindingModel));
-
-        return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping(value = "/save", method = RequestMethod.PUT,
+    @RequestMapping(value = "/receipt", method = RequestMethod.PUT,
             consumes = {"application/json"})
     public ResponseEntity<?> saveReceipt(
             @Valid @RequestBody ReceiptEditBindingModel receiptEditBindingModel,
@@ -127,4 +108,22 @@ public class ReceiptRestController {
         return ResponseEntity.ok().build();
     }
 
+    @RequestMapping(value = "/receipt", method = RequestMethod.DELETE,
+            consumes = {"application/json"})
+    public ResponseEntity<?> deleteReceipt(
+            @Valid @RequestBody ReceiptDeleteBindingModel receiptDeleteBindingModel,
+                                           BindingResult bindingResult) {
+
+        if (!userService.checkCapability("CAP_DELETE_RECEIPT")) {
+            throw new AccessDeniedException("Нямате право да изтривате касови бележки");
+        }
+        if (bindingResult.hasErrors()) {
+            throw new FieldViolationException(bindingResult.getAllErrors());
+        }
+
+        receiptsService.deleteReceipt(
+                receiptDeleteBindingToService.map(receiptDeleteBindingModel));
+
+        return ResponseEntity.ok().build();
+    }
 }

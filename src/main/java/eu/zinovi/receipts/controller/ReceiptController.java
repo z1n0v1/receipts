@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/receipts")
+@RequestMapping("/receipt")
 public class ReceiptController {
 
     private final ReceiptsService receiptService;
