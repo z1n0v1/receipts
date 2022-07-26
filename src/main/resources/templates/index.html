@@ -10,6 +10,20 @@
     <header th:replace="fragments/common::header"></header>
 
     <div class="row">
+        <div class="col text-center">
+            <div id="">
+                <!--                        <span class="label">Влез с </span>-->
+                <a href="/oauth2/authorization/google">
+                    <div class="g-customBtn">
+                        <span class="g-icon"></span>
+                        <span class="g-buttonText">Влез с Google</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col">
             <h1>Бележки.бг - обуздай месечните си разходи</h1>
         </div>
@@ -32,20 +46,6 @@
             Направените от нашите потребители разходи днес са *{todayReceiptsSum} лв.
         |">
 
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div id="">
-                <!--                        <span class="label">Влез с </span>-->
-                <a href="/oauth2/authorization/google">
-                    <div class="g-customBtn">
-                        <span class="g-icon"></span>
-                        <span class="g-buttonText">Влез с Google</span>
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
 
