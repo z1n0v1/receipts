@@ -101,7 +101,7 @@ public class EmailVerificationService {
     private String getEmailBody(String verificationToken) {
         return  "<p> Моля потвърдете вашата електронна поща </p>" +
                 "<p> <a href=\"" + this.baseUrl + "/user/verifyEmail?code=" + verificationToken + "\">" +
-                this.baseUrl + "/user/verifyEmail?code=" + verificationToken + "</a></p>";
+                this.baseUrl + "/user/email/verify?code=" + verificationToken + "</a></p>";
     }
 
 }
