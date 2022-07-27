@@ -67,7 +67,6 @@ public class ReceiptRestController {
             try {
                 ReceiptProcessApi receiptProcessApi;
                 try {
-                    System.out.println("Google credentials: " + googleCreds.length());
                     receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
                 } catch (IOException e) {
                     throw new ReceiptUploadException("Грешка при зареждане на касови бележките");
