@@ -12,6 +12,7 @@ import eu.zinovi.receipts.repository.RoleRepository;
 import eu.zinovi.receipts.repository.UserRepository;
 import eu.zinovi.receipts.service.StatisticsService;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,9 @@ public class AuthSeed implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AuthSeed.class);
 
+    @Value("${receipts.user.demo.password}")
+    private String demoPassword;
+
     public AuthSeed(UserRepository userRepository, RoleRepository roleRepository, CapabilityRepository capabilityRepository, CategoryRepository categoryRepository, StatisticsService statisticsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -48,7 +52,7 @@ public class AuthSeed implements CommandLineRunner {
 //        capability.setName(CAP_EDIT_RECEIPT);
 //        capability.setDescription(CAP_EDIT_RECEIPT.getDescription());
 //        capabilityRepository.save(capability);
-
+/*
         Capability capability = capabilityRepository.getByName(CAP_EDIT_RECEIPT).orElse(null);
         if (capability == null) {
             capability = new Capability();
@@ -66,7 +70,7 @@ public class AuthSeed implements CommandLineRunner {
             role.getCapabilities().add(capability);
             roleRepository.save(role);
         }
-
+*/
         // Calculate the statistics in case there was problem with the cron job
         statisticsService.calculateStatistics();
 
@@ -146,7 +150,7 @@ public class AuthSeed implements CommandLineRunner {
             demoUser.setRegisteredOn(LocalDateTime.now());
 
             // No creds here, move along
-            demoUser.setPassword(passwordEncoder.encode(System.getenv("DEMO_USER_PASSWORD")));
+            demoUser.setPassword(passwordEncoder.encode(demoPassword));
             demoUser.setEnabled(true);
             demoUser.setEmailVerified(true);
             demoUser.setEmailLoginDisabled(false);
