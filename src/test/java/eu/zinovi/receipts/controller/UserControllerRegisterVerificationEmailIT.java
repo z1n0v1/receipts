@@ -1,6 +1,7 @@
 package eu.zinovi.receipts.controller;
 
 import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.mail.internet.MimeMessage;
 
@@ -34,7 +36,7 @@ public class UserControllerRegisterVerificationEmailIT {
 
     @BeforeEach
     public void setUp() {
-        greenMail = new GreenMail(new com.icegreen.greenmail.util.ServerSetup(mailport, mailhost, "smtp"));
+        greenMail = new GreenMail(new ServerSetup(mailport, mailhost, "smtp"));
         greenMail.start();
     }
 
@@ -46,7 +48,7 @@ public class UserControllerRegisterVerificationEmailIT {
     @Test
     void testRegistration() throws Exception {
         mockMvc.perform(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/user/register")
+                MockMvcRequestBuilders.post("/user/register")
                         .param("email", "test@test")
                         .param("displayName", "displaytest")
                         .param("firstName", "firstName")
