@@ -24,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -68,6 +67,7 @@ public class ReceiptRestController {
             try {
                 ReceiptProcessApi receiptProcessApi;
                 try {
+                    System.out.println("Google credentials: " + googleCreds.length());
                     receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
                 } catch (IOException e) {
                     throw new ReceiptUploadException("Грешка при зареждане на касови бележките");
