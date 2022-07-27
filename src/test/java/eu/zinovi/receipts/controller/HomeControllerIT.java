@@ -42,10 +42,18 @@ public class HomeControllerIT {
     }
 
     @Test
+    @WithMockEmailUser
+    public void testHomeWithoutCap() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/home"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
     @WithAnonymousUser
     public void testHomeAnonymous() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/home"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"));
+                .andExpect(redirectedUrl("http://localhost/user/login"));
     }
 }
