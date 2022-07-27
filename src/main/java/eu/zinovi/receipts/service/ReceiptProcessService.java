@@ -12,9 +12,9 @@ import eu.zinovi.receipts.domain.model.service.ReceiptPolyJsonServiceModel;
 import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
+import eu.zinovi.receipts.util.ReceiptProcessApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +23,6 @@ import javax.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -37,7 +36,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static eu.zinovi.receipts.util.ImageProcessing.processUploadedReceipt;
+import static eu.zinovi.receipts.util.ImageProcessing.graphicallyProcessReceipt;
 import static eu.zinovi.receipts.util.ImageProcessing.readQRCode;
 
 @Service
@@ -55,10 +54,7 @@ public class ReceiptProcessService {
     private final Storage storage;
     private final Gson gson;
 
-    @Value("${receipts.google.storage.bucket}")
-    private String bucket;
-
-    public ReceiptProcessService(UserService userService, MessagingService messagingService, CompanyService companyService, StoreService storeService, CategoryService categoryService, ItemService itemService, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, ImageAnnotatorClient imageAnnotatorClient, Storage storage, Gson gson) {
+    public ReceiptProcessService(UserService userService, MessagingService messagingService, CompanyService companyService, StoreService storeService, CategoryService categoryService, ItemService itemService, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, Gson gson) {
         this.userService = userService;
         this.messagingService = messagingService;
         this.companyService = companyService;
@@ -73,7 +69,7 @@ public class ReceiptProcessService {
     }
 
     @Transactional
-    public UUID uploadReceipt(MultipartFile file) throws ReceiptUploadException {
+    public UUID uploadReceipt(MultipartFile file, ReceiptProcessApi receiptProcessApi) throws ReceiptUploadException {
 
         String fileExtension = null;
         String fileName = file.getOriginalFilename();
@@ -92,117 +88,44 @@ public class ReceiptProcessService {
             throw new ReceiptUploadException("Неподдържан файлов формат.");
         }
 
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file.getInputStream());
+        } catch (IOException e) {
+            throw new ReceiptUploadException("Неподдържан файлов формат.");
+        }
+
+        String qrCode = readQRCode(image);
+
+        messagingService.sendMessage(fileName + ": Обработка...");
+        ByteArrayInputStream processedImageStream = graphicallyProcessReceipt(image);
+
         ReceiptImage receiptImage = new ReceiptImage();
         receiptImage.setIsProcessed(false);
         receiptImage.setAddedOn(LocalDateTime.now());
         receiptImage.setUser(userService.getCurrentUser());
         receiptImageRepository.save(receiptImage);
 
-        receiptImage.setImageUrl("https://" + bucket + ".storage.googleapis.com/receipts/"
-                + receiptImage.getId() + ".jpg");
-        String receiptPath = "receipts/" + receiptImage.getId() + ".jpg";
-        BlobId blobId = BlobId.of(
-                bucket,
-                receiptPath);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+//        try {
+////            receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
+//        } catch (IOException ex) {
+//            throw new ReceiptUploadException("Грешка при инициализация.");
+//        }
+        receiptProcessApi.setReceiptId(receiptImage.getId());
 
-        try {
-            ByteArrayInputStream image = processUploadedReceipt(ImageIO.read(file.getInputStream()));
+        receiptImage.setImageUrl(receiptProcessApi.uploadReceipt(processedImageStream));
 
-            storage.createFrom(blobInfo, image);
-            storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
+        messagingService.sendMessage(fileName + ": Анализ...");
+        String polyJson = receiptProcessApi.doOCR();
 
-        } catch (IOException e) {
-            receiptImageRepository.delete(receiptImage);
-            throw new ReceiptUploadException("Грешка при качване на файла.", e);
-        }
-
-        //
-        List<AnnotateImageRequest> requests = new ArrayList<>();
-
-        ImageSource imgSource = ImageSource.newBuilder().setGcsImageUri
-                ("gs://" + bucket + "/receipts/" + receiptImage.getId() + ".jpg").build();
-        Image img = Image.newBuilder().setSource(imgSource).build();
-        Feature feat = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).build();
-        AnnotateImageRequest request =
-                AnnotateImageRequest.newBuilder().addFeatures(feat).setImage(img).build();
-        requests.add(request);
-
-
-        messagingService.sendMessage(fileName + ": анализ..");
-        BatchAnnotateImagesResponse response = imageAnnotatorClient.batchAnnotateImages(requests);
-        messagingService.sendMessage(fileName + ": успешен анализ");
-        if (response.getResponsesList().size() == 0) {
-            throw new ReceiptUploadException("Неуспешен анализ.");
-        }
-
-        String json = gson.toJson(response);
-
-
-        blobId = BlobId.of(
-                bucket,
-                "json/" + receiptImage.getId() + ".json");
-        blobInfo = BlobInfo.newBuilder(blobId).build();
-
-        try {
-            storage.createFrom(blobInfo, new ByteArrayInputStream(json.getBytes()));
-        } catch (IOException e) {
-            throw new ReceiptUploadException("Грешка при качване на файла.", e);
-        }
-        blobId = BlobId.of(
-                bucket,
-                "json/poly/" + receiptImage.getId() + ".json");
-        blobInfo = BlobInfo.newBuilder(blobId).build();
-
-
-        String processedMLJson = processMLToJason(response);
-
-        try {
-            InputStream mlPolyJson = new ByteArrayInputStream(processedMLJson.getBytes());
-            storage.createFrom(blobInfo, mlPolyJson);
-            storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-        } catch (IOException e) {
-            throw new ReceiptUploadException("Грешка при качване на файла.", e);
-        }
-
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage = ImageIO.read(file.getInputStream());
-        } catch (IOException e) {
-            throw new ReceiptUploadException("Грешка при зареждане на изображението.", e);
-        }
         receiptImageRepository.save(receiptImage);
 
-        return processReceipt(bufferedImage, processedMLJson, receiptImage, fileName);
+        return parseReceipt(polyJson, receiptImage, fileName, qrCode);
     }
-
-    private String processMLToJason(BatchAnnotateImagesResponse response) {
-        List<ReceiptPolyJsonServiceModel> polygons = new ArrayList<>();
-
-        for (AnnotateImageResponse imageResponse : response.getResponsesList()) {
-            for (EntityAnnotation entityAnnotation : imageResponse.getTextAnnotationsList()) {
-                ReceiptPolyJsonServiceModel receiptPolyModelView = ReceiptPolyJsonServiceModel.builder()
-                        .x1(entityAnnotation.getBoundingPoly().getVertices(0).getX())
-                        .y1(entityAnnotation.getBoundingPoly().getVertices(0).getY())
-                        .x2(entityAnnotation.getBoundingPoly().getVertices(1).getX())
-                        .y2(entityAnnotation.getBoundingPoly().getVertices(1).getY())
-                        .x3(entityAnnotation.getBoundingPoly().getVertices(2).getX())
-                        .y3(entityAnnotation.getBoundingPoly().getVertices(2).getY())
-                        .x4(entityAnnotation.getBoundingPoly().getVertices(3).getX())
-                        .y4(entityAnnotation.getBoundingPoly().getVertices(3).getY())
-                        .text(entityAnnotation.getDescription())
-                        .build();
-                polygons.add(receiptPolyModelView);
-            }
-        }
-        return gson.toJson(polygons);
-    }
-
-
 
     @Transactional
-    public UUID processReceipt(BufferedImage bufferedImage, String processedMLJson, ReceiptImage receiptImage,
-                               String fileName) {
+    public UUID parseReceipt(String processedMLJson, ReceiptImage receiptImage,
+                             String fileName, String qrCode) {
 
         Receipt receipt = new Receipt();
         receipt.setReceiptImage(receiptImage);
@@ -210,15 +133,14 @@ public class ReceiptProcessService {
         receipt.setUser(userService.getCurrentUser());
 
         // Read the QR code
-        String code = readQRCode(bufferedImage);
-        boolean hasQRCode = code != null;
+        boolean hasQRCode = qrCode != null;
         boolean totalFound = hasQRCode;
 
         if (hasQRCode) {
             LocalDateTime qrReceiptDate = LocalDateTime.parse(
-                    code.split("\\*")[2] + " " + code.split("\\*")[3],
+                    qrCode.split("\\*")[2] + " " + qrCode.split("\\*")[3],
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            BigDecimal qrTotal = new BigDecimal(code.split("\\*")[4]);
+            BigDecimal qrTotal = new BigDecimal(qrCode.split("\\*")[4]);
             receipt.setDateOfPurchase(qrReceiptDate);
             receipt.setTotal(qrTotal);
         }

@@ -31,7 +31,7 @@ import java.io.InputStream;
 import java.util.List;
 
 public class ImageProcessing {
-    public static ByteArrayInputStream processUploadedReceipt(BufferedImage image) {
+    public static ByteArrayInputStream graphicallyProcessReceipt(BufferedImage image) {
         GrayF32 gray = ConvertBufferedImage.convertFromSingle(image, null, GrayF32.class);
 
         DetectLineSegment<GrayF32> detector = FactoryDetectLine.

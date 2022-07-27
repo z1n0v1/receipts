@@ -13,12 +13,16 @@ import eu.zinovi.receipts.service.MessagingService;
 import eu.zinovi.receipts.service.ReceiptProcessService;
 import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.util.ReceiptProcessApi;
+import eu.zinovi.receipts.util.impl.GoogleReceiptProcessApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +38,12 @@ public class ReceiptRestController {
     private final UserService userService;
     private final MessagingService messagingService;
 
+    @Value("${receipts.google.credentials}")
+    private String googleCreds;
+
+    @Value("${receipts.google.storage.bucket}")
+    private String bucket;
+
     public ReceiptRestController(ReceiptDeleteBindingToService receiptDeleteBindingToService, ReceiptEditBindingToService receiptEditBindingToService, ReceiptProcessService receiptProcessService, ReceiptsService receiptsService, UserService userService, MessagingService messagingService) {
         this.receiptDeleteBindingToService = receiptDeleteBindingToService;
         this.receiptEditBindingToService = receiptEditBindingToService;
@@ -42,7 +52,6 @@ public class ReceiptRestController {
         this.userService = userService;
         this.messagingService = messagingService;
     }
-
 
     @RequestMapping(value = "/receipt", method = RequestMethod.POST,
             consumes = "multipart/form-data")
@@ -57,7 +66,14 @@ public class ReceiptRestController {
         messagingService.sendMessage("Обработка...");
         for (MultipartFile file : files) {
             try {
-                receiptUuids.add(receiptProcessService.uploadReceipt(file));
+                ReceiptProcessApi receiptProcessApi;
+                try {
+                    receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
+                } catch (IOException e) {
+                    throw new ReceiptUploadException("Грешка при зареждане на касови бележките");
+                }
+                receiptUuids.add(receiptProcessService.uploadReceipt(file, receiptProcessApi));
+
                 System.gc(); // Needed for memory cleanup after the image processing
             } catch (ReceiptUploadException ex) {
                 messagingService.sendMessage(file.getOriginalFilename() + ": " + ex.getMessage(), "danger");
