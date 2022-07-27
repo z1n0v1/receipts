@@ -49,9 +49,7 @@ public class ReceiptProcessService {
     private final ItemService itemService;
     private final ReceiptImageRepository receiptImageRepository;
     private final ReceiptRepository receiptRepository;
-    private final ImageAnnotatorClient imageAnnotatorClient;
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-    private final Storage storage;
     private final Gson gson;
 
     public ReceiptProcessService(UserService userService, MessagingService messagingService, CompanyService companyService, StoreService storeService, CategoryService categoryService, ItemService itemService, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, Gson gson) {
@@ -63,8 +61,6 @@ public class ReceiptProcessService {
         this.itemService = itemService;
         this.receiptImageRepository = receiptImageRepository;
         this.receiptRepository = receiptRepository;
-        this.imageAnnotatorClient = imageAnnotatorClient;
-        this.storage = storage;
         this.gson = gson;
     }
 
