@@ -21,7 +21,8 @@ public class EmailUser implements UserDetails, CredentialsContainer {
     private final boolean enabled;
     private final Collection<GrantedAuthority> authorities;
 
-    public EmailUser(String displayName, String picture, String email, String password, boolean emailVerified, boolean enabled, Collection<GrantedAuthority> authorities) {
+    public EmailUser(String displayName, String picture, String email, String password, boolean emailVerified,
+                     boolean enabled, Collection<GrantedAuthority> authorities) {
         this.displayName = displayName;
         this.picture = picture;
         this.email = email;

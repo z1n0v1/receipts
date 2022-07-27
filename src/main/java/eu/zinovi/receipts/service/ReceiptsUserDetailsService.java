@@ -6,10 +6,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import javax.transaction.Transactional;
 
-public class AppUserDetailsService implements UserDetailsService {
+public class ReceiptsUserDetailsService implements UserDetailsService {
     private final AuthService authService;
 
-    public AppUserDetailsService(AuthService authService) {
+    public ReceiptsUserDetailsService(AuthService authService) {
         this.authService = authService;
     }
 

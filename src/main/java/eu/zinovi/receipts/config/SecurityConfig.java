@@ -1,6 +1,6 @@
 package eu.zinovi.receipts.config;
 
-import eu.zinovi.receipts.service.AppUserDetailsService;
+import eu.zinovi.receipts.service.ReceiptsUserDetailsService;
 import eu.zinovi.receipts.service.AuthService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +14,6 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.transaction.Transactional;
 
 @Configuration
 public class SecurityConfig {
@@ -59,7 +57,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(AuthService authService) {
-        return new AppUserDetailsService(authService);
+        return new ReceiptsUserDetailsService(authService);
     }
 
     public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(AuthService authService) {
