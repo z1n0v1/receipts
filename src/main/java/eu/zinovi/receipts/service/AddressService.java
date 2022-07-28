@@ -1,5 +1,6 @@
 package eu.zinovi.receipts.service;
 
+import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.domain.model.entity.Address;
 import eu.zinovi.receipts.domain.model.entity.Receipt;
 import eu.zinovi.receipts.domain.model.mapper.ReceiptToAdminView;
@@ -47,7 +48,7 @@ public class AddressService {
 
     @Transactional
     public AdminReceiptView getReceipt(UUID receiptId) {
-        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();
+        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow(EntityNotFoundException::new);
 
         return receiptToAdminView.map(receipt);
     }

@@ -33,7 +33,7 @@ public class AdminHomeController {
     public String admin(Model model) {
 
         if (!userService.checkCapability("CAP_ADMIN")) {
-            return "redirect:/";
+            return "redirect:/home";
         }
 
         model.addAttribute("statistics", statisticsService.getStatistics());
@@ -44,7 +44,7 @@ public class AdminHomeController {
     @GetMapping("/roles")
     public String roles() {
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_ROLES")) {
-            return "redirect:/";
+            return "redirect:/home";
         }
 
         return "admin/roles";
@@ -54,30 +54,30 @@ public class AdminHomeController {
     @GetMapping("/users")
     public String users() {
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_USERS")) {
-            return "redirect:/";
+            return "redirect:/home";
         }
 
         return "admin/users";
     }
 
+    @GetMapping("/categories")
+    public String categories() {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CATEGORIES")) {
+            return "redirect:/home";
+        }
+
+        return "admin/categories";
+    }
+
     @GetMapping("/receipt/{receiptId}")
     public String viewReceipt(@PathVariable("receiptId") UUID receiptId, Model model) {
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADMIN_VIEW_RECEIPT")) {
-            return "redirect:/";
+            return "redirect:/home";
         }
 
         model.addAttribute("receipt", addressService.getReceipt(receiptId));
         model.addAttribute("bucket", bucket);
 
         return "admin/receipt-view";
-    }
-
-    @GetMapping("/categories")
-    public String categories() {
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CATEGORIES")) {
-            return "redirect:/";
-        }
-
-        return "admin/categories";
     }
 }
