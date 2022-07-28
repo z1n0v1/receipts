@@ -49,7 +49,7 @@ public class HomeRestController {
     public ResponseEntity<LineChart> lastMonthExpensesByWeekLineChart() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате разходите по категории");
+            throw new AccessDeniedException("Нямате право да разглеждате седмичните разходи през последния месец");
         }
 
         return ResponseEntity.ok(expensesService.lastMonthExpensesByWeekLineChart());
@@ -60,7 +60,7 @@ public class HomeRestController {
     public ResponseEntity<HomeStatisticsView> statistics() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате разходите по категории");
+            throw new AccessDeniedException("Нямате право да разглеждате статистиката");
         }
 
         return ResponseEntity.ok(expensesService.statistics());
