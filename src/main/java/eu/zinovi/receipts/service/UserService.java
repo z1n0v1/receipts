@@ -59,7 +59,8 @@ public class UserService {
 
     public void changePassword(UserSettingsServiceModel userSettingsServiceModel) {
         User user = userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Потребителят не е намерен"));
+
         user.setPassword(passwordEncoder.encode(userSettingsServiceModel.getPassword()));
         userRepository.saveAndFlush(user);
 
