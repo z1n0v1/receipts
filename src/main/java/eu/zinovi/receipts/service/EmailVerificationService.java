@@ -9,7 +9,6 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import eu.zinovi.receipts.domain.exception.EmailVerificationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -100,7 +99,7 @@ public class EmailVerificationService {
 
     private String getEmailBody(String verificationToken) {
         return  "<p> Моля потвърдете вашата електронна поща </p>" +
-                "<p> <a href=\"" + this.baseUrl + "/user/verifyEmail?code=" + verificationToken + "\">" +
+                "<p> <a href=\"" + this.baseUrl + "/user/verify/email?code=" + verificationToken + "\">" +
                 this.baseUrl + "/user/email/verify?code=" + verificationToken + "</a></p>";
     }
 

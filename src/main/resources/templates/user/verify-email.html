@@ -21,10 +21,17 @@
         </a>
     </span>
     <p  sec:authorize="isAuthenticated()">
-        <a href="/user/verifyEmail?again=true">Пращане отново</a>
+        <a href="/user/verify/email?again=true">Пращане отново</a>
     </p>
     <footer th:replace="fragments/common::footer"></footer>
 </div>
-
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        let verifyEmailAction = [[${verifyEmailAction}]];
+        if (verifyEmailAction) {
+            newPageAlert('Изпратен е линк за потвърждение на имейл адреса.', 'success', true);
+        }
+    /*]]>*/
+</script>
 </body>
 </html>

@@ -1,9 +1,5 @@
 package eu.zinovi.receipts.service;
 
-import com.google.cloud.storage.Acl;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
 import eu.zinovi.receipts.domain.model.binding.user.UserDetailsBindingModel;
 import eu.zinovi.receipts.domain.model.mapper.UserToBindingDetails;
 import eu.zinovi.receipts.domain.model.mapper.UserToDetails;
@@ -16,7 +12,7 @@ import eu.zinovi.receipts.repository.RoleRepository;
 import eu.zinovi.receipts.repository.UserRepository;
 import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.domain.user.GoogleOAuth2User;
-import org.springframework.beans.factory.annotation.Value;
+import eu.zinovi.receipts.util.CloudStorage;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +23,6 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static eu.zinovi.receipts.util.ImageProcessing.compressAndScaleProfilePicture;
 
 @Service
 public class UserService {
@@ -41,12 +35,7 @@ public class UserService {
     private final EmailVerificationService emailVerificationService;
     private final VerificationTokenService verificationTokenService;
 
-    private final Storage storage;
-
-    @Value("${receipts.google.storage.bucket}")
-    private String bucket;
-
-    public UserService(UserToBindingDetails userToBindingDetails, UserToDetails userToDetails, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService, Storage storage) {
+    public UserService(UserToBindingDetails userToBindingDetails, UserToDetails userToDetails, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService) {
         this.userToBindingDetails = userToBindingDetails;
         this.userToDetails = userToDetails;
         this.roleRepository = roleRepository;
@@ -54,7 +43,6 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationService = emailVerificationService;
         this.verificationTokenService = verificationTokenService;
-        this.storage = storage;
     }
 
     public boolean checkCapability(String capability) {
@@ -67,7 +55,6 @@ public class UserService {
         return userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
                 .map(u -> passwordEncoder.matches(password, u.getPassword()))
                 .orElse(false);
-//        return authentication.getCredentials().equals(passwordEncoder.encode(password));
     }
 
     public void changePassword(UserSettingsServiceModel userSettingsServiceModel) {
@@ -81,7 +68,7 @@ public class UserService {
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-if (principal instanceof EmailUser) {
+        if (principal instanceof EmailUser) {
             return userRepository.getByEmail(((EmailUser) principal).getEmail()).orElse(null);
         } else if (principal instanceof GoogleOAuth2User) {
             return userRepository.getByEmail(((GoogleOAuth2User) principal).getEmail()).orElse(null);
@@ -154,7 +141,7 @@ if (principal instanceof EmailUser) {
         return userToDetails.map(getCurrentUser());
     }
 
-    public void savePicture(MultipartFile picture) {
+    public void savePicture(MultipartFile picture, CloudStorage cloudStorage) throws IOException {
 
         String fileExtension = null;
 
@@ -172,23 +159,11 @@ if (principal instanceof EmailUser) {
             throw new IllegalArgumentException("Неподдържан файлов формат.");
         }
 
+        String pictureURL = cloudStorage.uploadFile(picture.getInputStream(),
+                "avatars", UUID.randomUUID().toString(), true);
+
         User user = getCurrentUser();
-
-        String avatarPath = "avatars/" + UUID.randomUUID() + ".jpg";
-
-        BlobId blobId = BlobId.of(
-                bucket,
-                avatarPath);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-        try {
-            storage.createFrom(blobInfo, compressAndScaleProfilePicture(picture.getInputStream()));
-        } catch (IOException e) {
-            throw new RuntimeException("Грешка при записване на изображението.");
-        }
-//        storage.createFrom(blobInfo,  new ByteArrayInputStream(os.toByteArray()));
-        storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-
-        user.setPicture("https://" + bucket + ".storage.googleapis.com/" + avatarPath);
+        user.setPicture(pictureURL);
         userRepository.save(user);
     }
 

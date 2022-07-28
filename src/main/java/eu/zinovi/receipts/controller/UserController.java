@@ -12,6 +12,8 @@ import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.service.EmailVerificationService;
 import eu.zinovi.receipts.service.UserService;
 import eu.zinovi.receipts.service.VerificationTokenService;
+import eu.zinovi.receipts.util.impl.GoogleCloudStorage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +34,12 @@ public class UserController {
     private final VerificationTokenService verificationTokenService;
     private final UserService userService;
     private final UserSettingsServiceModelMapper userSettingsServiceModelMapper;
+
+    @Value("${receipts.google.credentials}")
+    private String googleCreds;
+
+    @Value("${receipts.google.storage.bucket}")
+    private String bucket;
 
     public UserController(UserRegisterBindingToService userRegisterBindingToService, UserPasswordSetBindingToService userPasswordSetBindingToService, UserDetailsBindingToService userDetailsBindingToService, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService, UserService userService, UserSettingsServiceModelMapper userSettingsServiceModelMapper) {
         this.userRegisterBindingToService = userRegisterBindingToService;
@@ -79,7 +87,7 @@ public class UserController {
 
 
     @GetMapping("/details")
-    public String settings(Model model) {
+    public String details(Model model) {
 
         if (!userService.checkCapability("CAP_VIEW_USER_DETAILS")) {
             return "redirect:/home";
@@ -132,14 +140,14 @@ public class UserController {
     }
 
     @PostMapping("/details/picture/save")
-    public String settingsPictureSave(@RequestParam("picture") MultipartFile picture, RedirectAttributes redirectAttributes) {
+    public String savePicture(@RequestParam("picture") MultipartFile picture, RedirectAttributes redirectAttributes) {
 
         if (!userService.checkCapability("CAP_EDIT_USER")) {
-            return "redirect:/user/details/edit";
+            return "redirect:/user/details";
         }
 
         try {
-            userService.savePicture(picture);
+            userService.savePicture(picture, new GoogleCloudStorage(googleCreds, bucket));
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/user/details/edit";
@@ -149,7 +157,7 @@ public class UserController {
     }
 
     @GetMapping("/details/password/change")
-    public String settingsPasswordChange() {
+    public String userPasswordChange() {
 
         if (!userService.checkCapability("CAP_EDIT_USER") || !userService.checkCapability("CAP_CHANGE_PASSWORD")) {
             return "redirect:/user/details";
@@ -223,9 +231,10 @@ public class UserController {
         return new UserPasswordSetBindingModel();
     }
 
-    @GetMapping("/verifyEmail")
+    @GetMapping("/verify/email")
     public String verifyEmail(@RequestParam(value = "code", required = false) String code,
-                              @RequestParam(value = "again", required = false) Boolean again) {
+                              @RequestParam(value = "again", required = false) Boolean again,
+                              RedirectAttributes redirectAttributes) {
 
         // principal instanceof EmailUser doesn't work if we inject Principal in the controller
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -236,7 +245,8 @@ public class UserController {
 
         if (principal instanceof EmailUser user && again != null && again) {
             emailVerificationService.sendVerificationEmail(user.getEmail());
-            return "redirect:/home";
+            redirectAttributes.addFlashAttribute("emailVerificationSent", true);
+            return "redirect:/user/verify/email";
         }
 
         if (verificationTokenService.verifyToken(code)) {

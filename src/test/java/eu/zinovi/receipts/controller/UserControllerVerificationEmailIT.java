@@ -2,6 +2,7 @@ package eu.zinovi.receipts.controller;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
+import eu.zinovi.receipts.WithMockEmailUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerRegisterVerificationEmailIT {
+public class UserControllerVerificationEmailIT {
 
     @Value("${mail.host}")
     private String mailhost;
@@ -66,5 +67,14 @@ public class UserControllerRegisterVerificationEmailIT {
 
         Assertions.assertTrue(welcomeMessage.getContent().toString().
                 contains("Моля потвърдете вашата електронна поща"));
+    }
+
+    @Test
+    @WithMockEmailUser(emailVerified = false)
+    public void testVerifyEmailAgainGet() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/verify/email?again=true")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/verify/email"));
     }
 }

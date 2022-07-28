@@ -5,11 +5,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Logger;
 
 public class EmailVerificationInterceptor implements HandlerInterceptor {
     private final UserService userService;
-    private final static Logger LOGGER = Logger.getLogger(EmailVerificationInterceptor.class.getName());
 
     public EmailVerificationInterceptor(UserService userService) {
         this.userService = userService;
@@ -25,7 +23,7 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
                         request.getRequestURI().startsWith("/js") ||
                         request.getRequestURI().startsWith("/css") ||
                         request.getRequestURI().startsWith("/image") ||
-                        request.getRequestURI().startsWith("/user/verifyEmail")
+                        request.getRequestURI().startsWith("/user/verify/email")
                 )) {
             return true;
         }
@@ -34,7 +32,7 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
         }
 
         if (userService.emailNotVerified(request.getRemoteUser())) {
-            response.sendRedirect("/user/verifyEmail");
+            response.sendRedirect("/user/verify/email");
             return false;
         }
         return true;
