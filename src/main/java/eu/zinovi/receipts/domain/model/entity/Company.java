@@ -1,13 +1,10 @@
 package eu.zinovi.receipts.domain.model.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Getter @Setter @ToString @NoArgsConstructor @Entity
+@Getter @Setter @ToString @NoArgsConstructor @AllArgsConstructor @Entity
 @Table(name = "companies", schema = "public", indexes = {
         @Index(columnList = "eik", unique = true)
 })
