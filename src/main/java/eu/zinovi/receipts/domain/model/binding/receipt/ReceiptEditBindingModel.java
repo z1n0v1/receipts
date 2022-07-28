@@ -1,22 +1,22 @@
 package eu.zinovi.receipts.domain.model.binding.receipt;
 
-import lombok.Data;
+import eu.zinovi.receipts.domain.model.validation.ReceiptExists;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter @Setter @ToString @EqualsAndHashCode @NoArgsConstructor @AllArgsConstructor
 public class ReceiptEditBindingModel {
 
     @NotNull(message = "Не е подаден идентификатор на касовия бележка")
-    @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-            message = "Не е подаден валиден идентификатор на касовия бележка")
+    @ReceiptExists
     private String id;
 
     @NotNull(message = "Не е подаден ЕИК на компанията")
-    @Pattern(regexp = "^[0-9]{9}$", message = "ЕИК-то трябва да е съставен от 9 цифри")
+    @Pattern(regexp = "^[0-9]{9}$", message = "ЕИК трябва да е съставен от 9 цифри")
     private String eik;
 
     @NotBlank(message = "Не е подадено името на магазина")

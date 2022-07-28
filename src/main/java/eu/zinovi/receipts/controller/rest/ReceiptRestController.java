@@ -80,6 +80,9 @@ public class ReceiptRestController {
         }
         System.gc(); // Needed for memory cleanup after the image processing
 
+        if (receiptUuids.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.ok(receiptUuids);
     }
 
