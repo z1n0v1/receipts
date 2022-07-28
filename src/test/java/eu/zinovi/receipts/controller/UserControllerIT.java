@@ -190,6 +190,18 @@ public class UserControllerIT {
     }
 
     @Test
+    @WithMockEmailUser(roles = {"CAP_EDIT_USER", "CAP_CHANGE_PASSWORD"})
+    public void testUserDetailsValidPasswordChangePostWithCsrf() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/details/password/change")
+                        .param("oldPassword", "bogus_data")
+                        .param("newPassword", "password")
+                        .param("confirmPassword", "password")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/details"));
+    }
+
+    @Test
     @WithMockEmailUser
     public void testUserDetailsPasswordSetGetWithoutCap() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/user/details/password/set"))
