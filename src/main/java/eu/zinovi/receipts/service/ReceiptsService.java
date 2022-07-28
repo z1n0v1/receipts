@@ -102,11 +102,8 @@ public class ReceiptsService {
     @Transactional
     public ReceiptDetailsView getReceiptDetails(UUID id) {
 
-        Receipt receipt = receiptRepository.findById(id).orElse(null);
-
-        if (receipt == null) {
-            return null;
-        }
+        Receipt receipt = receiptRepository.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
 
         return receiptToReceiptDetailsView.map(receipt);
 
