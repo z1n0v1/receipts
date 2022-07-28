@@ -65,4 +65,8 @@ public class CategoryService {
                 .orElseThrow(EntityNotFoundException::new);
         categoryRepository.delete(category);
     }
+
+    public boolean existsByName(String category) {
+        return categoryRepository.existsByName(category);
+    }
 }

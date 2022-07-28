@@ -1,30 +1,34 @@
 package eu.zinovi.receipts.domain.model.binding.item;
 
+import eu.zinovi.receipts.domain.model.validation.CategoryExists;
+import eu.zinovi.receipts.domain.model.validation.ReceiptExists;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
-@Data
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ItemAddBindingModel {
-    @NotNull
-    @Pattern(regexp="^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+    @NotNull(message = "Номера на бележката е задължителен")
+    @ReceiptExists
     private String receiptId;
 
-    @NotBlank
+    @NotBlank(message = "Категорията е задължителна")
+    @CategoryExists
     private String category;
 
-    @NotNull
+    @NotNull(message = "Невалидно име на артикул")
     private String name;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "Невалидно количеество на артикул")
+    @Positive(message = "Невалидно количество на артикул")
     private BigDecimal quantity;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "Невалидна цена на артикул")
+    @Positive(message = "Невалидна цена на артикул")
     private BigDecimal price;
 }

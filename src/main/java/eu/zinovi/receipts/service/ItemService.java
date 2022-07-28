@@ -1,10 +1,8 @@
 package eu.zinovi.receipts.service;
 
-import com.google.gson.Gson;
 import eu.zinovi.receipts.domain.model.entity.Item;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
-import eu.zinovi.receipts.domain.model.mapper.ItemToView;
 import eu.zinovi.receipts.domain.model.service.ItemEditServiceModel;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.ItemRepository;
@@ -32,19 +30,28 @@ public class ItemService {
         itemRepository.save(item);
     }
 
-    @Transactional
-    public String[][] getItems(UUID receiptId) {
-
-        List<Item> items = itemRepository.findByReceiptIdOrderByPosition(receiptId);
-        String[][] result = new String[items.size()][4];
-        for (int i = 0; i < items.size(); i++) {
-            result[i][0] = items.get(i).getPosition().toString();
-            result[i][1] = items.get(i).getName();
-            result[i][2] = items.get(i).getQuantity().toString();
-            result[i][3] = items.get(i).getPrice().toString();
-        }
-        return result;
+//    @Transactional
+//    public String[][] getItems(UUID receiptId) {
+//
+//        List<Item> items = itemRepository.findByReceiptIdOrderByPosition(receiptId);
+//        String[][] result = new String[items.size()][4];
+//        for (int i = 0; i < items.size(); i++) {
+//            result[i][0] = items.get(i).getPosition().toString();
+//            result[i][1] = items.get(i).getName();
+//            result[i][2] = items.get(i).getQuantity().toString();
+//            result[i][3] = items.get(i).getPrice().toString();
+//        }
+//        return result;
+//    }
+    public List<Item> getItems(UUID receiptId) {
+        return itemRepository.findByReceiptIdOrderByPosition(receiptId);
     }
+
+//    @Transactional
+//    public Item getItemByReceiptIdAndPosition(UUID receiptId, Integer position) {
+//        return itemRepository.findByReceiptIdAndPosition(receiptId, position)
+//                .orElseThrow(EntityNotFoundException::new);
+//    }
 
     public ToDatatable getItemListDatatable(UUID receiptId, FromDatatable fromDatatable) {
 

@@ -1,9 +1,6 @@
 package eu.zinovi.receipts.domain.model.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
-@Getter @Setter @NoArgsConstructor @ToString @Entity
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @ToString @Entity
 @Table(name = "items", schema = "public")
 public class Item extends BaseEntity {
 

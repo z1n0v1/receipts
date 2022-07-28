@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -60,8 +63,12 @@ public class RestExceptionControllerAdvice extends ResponseEntityExceptionHandle
             FieldViolationException ex) {
         ApiError apiError = new ApiError(HttpStatus.EXPECTATION_FAILED);
         StringBuilder sb = new StringBuilder();
+        Set<String> errors = new TreeSet<>();
         for (ObjectError error : ex.getErrors()) {
-            sb.append(error.getDefaultMessage()).append("\n");
+            errors.add(error.getDefaultMessage());
+        }
+        for (String error : errors) {
+            sb.append(error).append("\n");
         }
         apiError.setMessage(sb.toString());
         return buildResponseEntity(apiError);

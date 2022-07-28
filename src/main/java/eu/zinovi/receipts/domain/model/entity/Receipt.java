@@ -1,8 +1,6 @@
 package eu.zinovi.receipts.domain.model.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -10,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter @ToString @Entity
+@Getter @Setter @ToString @AllArgsConstructor @Entity
 @Table(name = "receipts", schema = "public")
 public class Receipt extends BaseEntity {
 

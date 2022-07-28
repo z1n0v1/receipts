@@ -1,6 +1,8 @@
 package eu.zinovi.receipts.domain.model.datatable;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -9,25 +11,25 @@ import javax.validation.constraints.PositiveOrZero;
 
 
 // TODO: Validate
-@Data
+@Data @NoArgsConstructor @AllArgsConstructor
 public class FromDatatable {
 
-    @NotNull
+    @NotNull(message = "Трябва да има идентификатор на заявката")
     private Long draw;
 
-    @NotNull
-    @PositiveOrZero
+    @NotNull(message = "Трябва да има начало на списъка")
+    @PositiveOrZero(message = "Началото на списъка трябва да е положително число")
     private Integer start;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "Трябва да има дължина на списъка")
+    @Positive(message = "Дължината на списъка трябва да е положително число")
     private Integer length;
 
     private String  searchValue;
     private String orderColumn;
     private String orderDir;
 
-    @NotEmpty
+    @NotEmpty(message = "Таблицата тябва да има дефинирани колони")
     private DatatableColumn[] columns;
 
     private DatatableOrder[] order;

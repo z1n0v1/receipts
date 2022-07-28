@@ -50,7 +50,7 @@ public class ItemListRestController {
 
     @RequestMapping(value = "/item", method = RequestMethod.POST,
             consumes = "application/json")
-    public ResponseEntity<?> add(
+    public ResponseEntity<?> addItem(
             @Valid @RequestBody ItemAddBindingModel itemAddBindingModel,
             BindingResult bindingResult) {
 
@@ -103,12 +103,12 @@ public class ItemListRestController {
 
     @RequestMapping(value = "/item", method = RequestMethod.DELETE,
             consumes = "application/json")
-    public ResponseEntity<?> delete(
+    public ResponseEntity<?> deleteItem(
             @Valid @RequestBody ItemDeleteBindingModel itemDeleteBindingModel,
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_DELETE_ITEM")) {
-            throw new AccessDeniedException("Нямате право да триете продукти");
+            throw new AccessDeniedException("Нямате право да триете артикули");
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
