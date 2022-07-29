@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Getter @Setter @ToString @NoArgsConstructor @RequiredArgsConstructor @Entity
 @Table(name = "addresses", schema = "public", indexes = {
@@ -22,4 +23,18 @@ public class Address extends BaseEntity {
 
     @Column(name = "street")
     private String street;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Address address = (Address) o;
+        return Objects.equals(value, address.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), value);
+    }
 }

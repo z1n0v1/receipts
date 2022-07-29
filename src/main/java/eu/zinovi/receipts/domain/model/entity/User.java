@@ -1,18 +1,14 @@
 package eu.zinovi.receipts.domain.model.entity;
 
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
-@Getter @Setter @ToString @RequiredArgsConstructor
-//@Entity(name = "users", schema = "receipts")
-@Entity
+@Getter @Setter @ToString @Entity
 @Table(name = "users", schema = "public")
 public class User extends BaseEntity {
 
@@ -53,10 +49,29 @@ public class User extends BaseEntity {
     private LocalDateTime lastSeen;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE) @ToString.Exclude
-    private Collection<ReceiptImage> receiptImages = new ArrayList<>();
+    private Collection<ReceiptImage> receiptImages;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE) @ToString.Exclude
-    private Collection<Receipt> receipts = new ArrayList<>();
+    private Collection<Receipt> receipts;
+
+    public User() {
+        receiptImages = new HashSet<>();
+        receipts = new HashSet<>();
+    }
+
+    public User(String firstName, String lastName, String displayName, String email, boolean emailVerified,
+                boolean enabled, boolean emailLoginDisabled, LocalDateTime registeredOn, LocalDateTime lastSeen) {
+        this();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.displayName = displayName;
+        this.email = email;
+        this.emailVerified = emailVerified;
+        this.enabled = enabled;
+        this.emailLoginDisabled = emailLoginDisabled;
+        this.registeredOn = registeredOn;
+        this.lastSeen = lastSeen;
+    }
 
     @ManyToMany
     @JoinTable(
@@ -71,13 +86,14 @@ public class User extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         User user = (User) o;
-        return getId() != null && Objects.equals(getId(), user.getId());
+        return Objects.equals(email, user.email);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(super.hashCode(), email);
     }
 }

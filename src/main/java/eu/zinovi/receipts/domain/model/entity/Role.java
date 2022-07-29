@@ -1,17 +1,16 @@
 package eu.zinovi.receipts.domain.model.entity;
 
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @Entity(name = "roles")
 @Table(name = "roles", schema = "public")
 public class Role extends BaseEntity {
@@ -26,18 +25,28 @@ public class Role extends BaseEntity {
     private Collection<User> users = new ArrayList<>();
 
     @ManyToMany @ToString.Exclude
-    private Collection<Capability> capabilities = new ArrayList<>();
+    private Collection<Capability> capabilities;
+
+    public Role() {
+        capabilities = new HashSet<>();
+    }
+
+    public Role(String name) {
+        this();
+        this.name = name;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Role role = (Role) o;
-        return getId() != null && Objects.equals(getId(), role.getId());
+        return Objects.equals(name, role.name);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(super.hashCode(), name);
     }
 }

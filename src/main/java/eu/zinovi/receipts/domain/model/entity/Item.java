@@ -29,4 +29,6 @@ public class Item extends BaseEntity {
 
     @ManyToOne @ToString.Exclude
     Receipt receipt;
+
+    //TODO equals and hashCode
 }

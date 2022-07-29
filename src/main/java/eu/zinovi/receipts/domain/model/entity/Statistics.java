@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -108,4 +109,17 @@ public class Statistics extends BaseEntity {
     @Column(name = "total_google_users_count", nullable = false)
     private Integer totalGoogleUsersCount;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Statistics that = (Statistics) o;
+        return Objects.equals(dateStatistics, that.dateStatistics) && Objects.equals(lastDayReceiptsCount, that.lastDayReceiptsCount) && Objects.equals(lastDayUnprocessedReceiptsCount, that.lastDayUnprocessedReceiptsCount) && Objects.equals(lastDayErroneousReceiptsCount, that.lastDayErroneousReceiptsCount) && Objects.equals(lastWeekReceiptsCount, that.lastWeekReceiptsCount) && Objects.equals(lastWeekUnprocessedReceiptsCount, that.lastWeekUnprocessedReceiptsCount) && Objects.equals(lastWeekErroneousReceiptsCount, that.lastWeekErroneousReceiptsCount) && Objects.equals(lastMonthReceiptsCount, that.lastMonthReceiptsCount) && Objects.equals(lastMonthUnprocessedReceiptsCount, that.lastMonthUnprocessedReceiptsCount) && Objects.equals(lastMonthErroneousReceiptsCount, that.lastMonthErroneousReceiptsCount) && Objects.equals(totalReceiptsCount, that.totalReceiptsCount) && Objects.equals(totalUnprocessedReceiptsCount, that.totalUnprocessedReceiptsCount) && Objects.equals(totalErroneousReceiptsCount, that.totalErroneousReceiptsCount) && Objects.equals(lastDayReceiptsAmount, that.lastDayReceiptsAmount) && Objects.equals(lastWeekReceiptsAmount, that.lastWeekReceiptsAmount) && Objects.equals(lastMonthReceiptsAmount, that.lastMonthReceiptsAmount) && Objects.equals(totalReceiptsAmount, that.totalReceiptsAmount) && Objects.equals(lastDayItemsCount, that.lastDayItemsCount) && Objects.equals(lastWeekItemsCount, that.lastWeekItemsCount) && Objects.equals(lastMonthItemsCount, that.lastMonthItemsCount) && Objects.equals(totalItemsCount, that.totalItemsCount) && Objects.equals(lastDayCompaniesCount, that.lastDayCompaniesCount) && Objects.equals(lastWeekCompaniesCount, that.lastWeekCompaniesCount) && Objects.equals(lastMonthCompaniesCount, that.lastMonthCompaniesCount) && Objects.equals(totalCompaniesCount, that.totalCompaniesCount) && Objects.equals(lastDayStoresCount, that.lastDayStoresCount) && Objects.equals(lastWeekStoresCount, that.lastWeekStoresCount) && Objects.equals(lastMonthStoresCount, that.lastMonthStoresCount) && Objects.equals(totalStoresCount, that.totalStoresCount) && Objects.equals(lastDayNewUsersCount, that.lastDayNewUsersCount) && Objects.equals(lastWeekNewUsersCount, that.lastWeekNewUsersCount) && Objects.equals(lastMonthNewUsersCount, that.lastMonthNewUsersCount) && Objects.equals(totalUsersCount, that.totalUsersCount) && Objects.equals(lastDayActiveUsersCount, that.lastDayActiveUsersCount) && Objects.equals(lastWeekActiveUsersCount, that.lastWeekActiveUsersCount) && Objects.equals(lastMonthActiveUsersCount, that.lastMonthActiveUsersCount) && Objects.equals(lastDayNewGoogleUsersCount, that.lastDayNewGoogleUsersCount) && Objects.equals(lastWeekNewGoogleUsersCount, that.lastWeekNewGoogleUsersCount) && Objects.equals(lastMonthNewGoogleUsersCount, that.lastMonthNewGoogleUsersCount) && Objects.equals(totalGoogleUsersCount, that.totalGoogleUsersCount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), dateStatistics, lastDayReceiptsCount, lastDayUnprocessedReceiptsCount, lastDayErroneousReceiptsCount, lastWeekReceiptsCount, lastWeekUnprocessedReceiptsCount, lastWeekErroneousReceiptsCount, lastMonthReceiptsCount, lastMonthUnprocessedReceiptsCount, lastMonthErroneousReceiptsCount, totalReceiptsCount, totalUnprocessedReceiptsCount, totalErroneousReceiptsCount, lastDayReceiptsAmount, lastWeekReceiptsAmount, lastMonthReceiptsAmount, totalReceiptsAmount, lastDayItemsCount, lastWeekItemsCount, lastMonthItemsCount, totalItemsCount, lastDayCompaniesCount, lastWeekCompaniesCount, lastMonthCompaniesCount, totalCompaniesCount, lastDayStoresCount, lastWeekStoresCount, lastMonthStoresCount, totalStoresCount, lastDayNewUsersCount, lastWeekNewUsersCount, lastMonthNewUsersCount, totalUsersCount, lastDayActiveUsersCount, lastWeekActiveUsersCount, lastMonthActiveUsersCount, lastDayNewGoogleUsersCount, lastWeekNewGoogleUsersCount, lastMonthNewGoogleUsersCount, totalGoogleUsersCount);
+    }
 }

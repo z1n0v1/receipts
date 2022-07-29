@@ -5,10 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-@Getter @Setter @ToString @AllArgsConstructor @Entity
+@Getter @Setter @ToString @Entity
 @Table(name = "receipts", schema = "public")
 public class Receipt extends BaseEntity {
 
@@ -33,7 +32,7 @@ public class Receipt extends BaseEntity {
     private Store store;
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.REMOVE) @ToString.Exclude
-    private List<Item> Items;
+    private Collection<Item> Items;
 
     @Column(name = "items_total")
 //    @Column(name = "items_total", nullable = false)
@@ -46,6 +45,34 @@ public class Receipt extends BaseEntity {
     private ReceiptImage receiptImage;
 
     public Receipt() {
-        Items = new ArrayList<>();
+        Items = new HashSet<>();
+    }
+
+    public Receipt(LocalDateTime dateOfPurchase, BigDecimal total, String receiptLines, Boolean analyzed, Company company, Store store, List<Item> items, BigDecimal itemsTotal, User user, ReceiptImage receiptImage) {
+        this();
+        this.dateOfPurchase = dateOfPurchase;
+        this.total = total;
+        this.receiptLines = receiptLines;
+        this.analyzed = analyzed;
+        this.company = company;
+        this.store = store;
+        Items = items;
+        this.itemsTotal = itemsTotal;
+        this.user = user;
+        this.receiptImage = receiptImage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Receipt receipt = (Receipt) o;
+        return Objects.equals(receiptLines, receipt.receiptLines);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), receiptLines);
     }
 }
