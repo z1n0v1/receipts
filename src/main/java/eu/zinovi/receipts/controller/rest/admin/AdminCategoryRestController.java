@@ -23,14 +23,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
-public class AdminCategoryRestService {
+public class AdminCategoryRestController {
     private final AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService;
     private final AdminCategoryAddBindingToService adminCategoryAddBindingToService;
     private final AdminCategorySaveBindingToService adminCategorySaveBindingToService;
     private final UserService userService;
     private final CategoryService categoryService;
 
-    public AdminCategoryRestService(AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService, AdminCategoryAddBindingToService adminCategoryAddBindingToService, AdminCategorySaveBindingToService adminCategorySaveBindingToService, UserService userService, CategoryService categoryService) {
+    public AdminCategoryRestController(AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService, AdminCategoryAddBindingToService adminCategoryAddBindingToService, AdminCategorySaveBindingToService adminCategorySaveBindingToService, UserService userService, CategoryService categoryService) {
         this.adminCategoryDeleteBindingToService = adminCategoryDeleteBindingToService;
         this.adminCategoryAddBindingToService = adminCategoryAddBindingToService;
         this.adminCategorySaveBindingToService = adminCategorySaveBindingToService;
