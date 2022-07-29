@@ -27,6 +27,8 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -108,6 +110,30 @@ public class ItemListControllerIT {
         );
         itemRepository.save(item);
         receipt.getItems().add(item);
+
+        item = new Item(
+                "name",
+                BigDecimal.valueOf(100),
+                BigDecimal.valueOf(100),
+                2,
+                category,
+                receipt
+        );
+        itemRepository.save(item);
+        receipt.getItems().add(item);
+
+        item = new Item(
+                "name",
+                BigDecimal.valueOf(100),
+                BigDecimal.valueOf(100),
+                3,
+                category,
+                receipt
+        );
+        itemRepository.save(item);
+        receipt.getItems().add(item);
+
+
         receiptRepository.save(receipt);
     }
 
@@ -338,8 +364,8 @@ public class ItemListControllerIT {
                                 "Item",
                                 BigDecimal.valueOf(0.5),
                                 BigDecimal.valueOf(0.5
-                        )))
-                ))
+                                )))
+                        ))
                 .andExpect(status().isOk());
 
         Item newItem = itemService.getItems(receipt.getId()).stream()
@@ -391,11 +417,18 @@ public class ItemListControllerIT {
                         .contentType("application/json")
                         .content(gson.toJson(new ItemDeleteBindingModel(
                                 receipt.getId().toString(),
-                                1
+                                2
                         )))
                 )
                 .andExpect(status().isOk());
 
-        Assertions.assertEquals(0, itemService.getItems(receipt.getId()).size());
+        List<Item> items = itemService.getItems(receipt.getId()).stream()
+                .sorted(Comparator.comparing(Item::getPosition))
+                .toList();
+
+        Assertions.assertEquals(2, items.size());
+
+        Assertions.assertEquals(items.get(0).getPosition(), 1);
+        Assertions.assertEquals(items.get(1).getPosition(), 2);
     }
 }

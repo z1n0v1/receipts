@@ -129,19 +129,20 @@ public class ReceiptsService {
 
         BigDecimal itemsTotal = BigDecimal.ZERO;
 
-        for (int i = 0; i < receipt.getItems().size(); i++) {
-            if (receipt.getItems().get(i).getPosition().equals(itemDeleteServiceModel.getPosition())) {
-                itemService.delete(receipt.getItems().get(i));
+
+        for (Item item : receipt.getItems()) {
+            if (item.getPosition().equals(itemDeleteServiceModel.getPosition())) {
+                itemService.delete(item);
                 continue;
             }
-            itemsTotal = itemsTotal.add(receipt.getItems().get(i).getPrice());
+            itemsTotal = itemsTotal.add(item.getPrice());
         }
 
-        for (int i = 0; i < receipt.getItems().size(); i++) {
-            if (receipt.getItems().get(i).getPosition() > itemDeleteServiceModel.getPosition()) {
-                receipt.getItems().get(i).setPosition(receipt.getItems().get(i).getPosition() - 1);
+        for (Item item : receipt.getItems()) {
+            if (item.getPosition() > itemDeleteServiceModel.getPosition()) {
+                item.setPosition(item.getPosition() - 1);
+            }
         }
-    }
 
         receipt.setItemsTotal(itemsTotal);
         receiptRepository.save(receipt);
