@@ -1,11 +1,13 @@
 package eu.zinovi.receipts.domain.model.binding.admin;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-@Data
+@Data @NoArgsConstructor @AllArgsConstructor
 public class AdminCategoryDeleteBindingModel {
 
     @NotNull(message = "Невалидно ID на категорията")
