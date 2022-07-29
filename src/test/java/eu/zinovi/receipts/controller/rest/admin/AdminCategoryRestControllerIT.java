@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AdminCategoryRestServiceIT {
+public class AdminCategoryRestControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
