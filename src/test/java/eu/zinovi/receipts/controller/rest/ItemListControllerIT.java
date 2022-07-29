@@ -308,7 +308,7 @@ public class ItemListControllerIT {
                         .contentType("application/json")
                         .content(gson.toJson(fromDatatable)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(1));
+                .andExpect(jsonPath("$.data.length()").value(3));
     }
 
     @Test
