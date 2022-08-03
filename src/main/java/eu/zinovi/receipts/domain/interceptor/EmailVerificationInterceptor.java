@@ -23,7 +23,8 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
                         request.getRequestURI().startsWith("/js") ||
                         request.getRequestURI().startsWith("/css") ||
                         request.getRequestURI().startsWith("/image") ||
-                        request.getRequestURI().startsWith("/user/verify/email")
+                        request.getRequestURI().startsWith("/user/verify/email") ||
+                        request.getRequestURI().startsWith("/legal")
                 )) {
             return true;
         }

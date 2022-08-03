@@ -29,7 +29,8 @@ public class SecurityConfig {
         return http
                 .authorizeRequests()
                     .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                    .antMatchers("/", "/user/register", "/user/verify/email").permitAll()
+                    .antMatchers("/", "/user/register", "/user/verify/email",
+                            "/legal/**").permitAll()
                     .anyRequest().authenticated()
                     .and()
                 .formLogin()

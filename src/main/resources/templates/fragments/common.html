@@ -90,6 +90,24 @@
 </header>
 
 <footer th:fragment="footer">
+    <div class="row pt-5">
+        <div class="col text-center">
+            © <th:block th:text="${#dates.format(#dates.createNow(), 'yyyy')}"/>
+            Зинови Бояджиев.
+            Всички права запазени.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <a href="/legal/terms-and-conditions">Общи условия</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <a href="/legal/privacy-policy">Политика за поверителност</a>
+        </div>
+    </div>
+
     <script src="/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="/js/datatables.min.js"></script>
     <script type="text/javascript" src="/js/chart.min.js"></script>

@@ -5,7 +5,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.8</version>
+        <version>2.7.2</version>
+<!--        <version>2.6.8</version>-->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>eu.zinovi</groupId>
@@ -59,6 +60,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>2.1.212</version>
         </dependency>
 
 <!--        <dependency>-->
@@ -131,6 +133,7 @@
             <groupId>org.boofcv</groupId>
             <artifactId>boofcv-core</artifactId>
             <version>0.40.1</version>
+<!--            <version>0.40.1</version>-->
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
