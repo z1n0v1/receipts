@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
 
 
     public GoogleReceiptProcessApi(String googleCreds, String bucket) throws IOException {
-        JSONObject jsonObject = new JSONObject(googleCreds);
+        JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(googleCreds)));
         InputStream stream = new ByteArrayInputStream(jsonObject.toString().getBytes());
 
         Credentials credentials = GoogleCredentials.fromStream(stream);

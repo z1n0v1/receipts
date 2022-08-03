@@ -37,7 +37,10 @@ public class ReceiptRestController {
     private final UserService userService;
     private final MessagingService messagingService;
 
-    @Value("${receipts.google.credentials}")
+//    @Value("${receipts.google.credentials}")
+//    private String googleCreds;
+
+    @Value("${spring.cloud.gcp.credentials.encoded-key}")
     private String googleCreds;
 
     @Value("${receipts.google.storage.bucket}")

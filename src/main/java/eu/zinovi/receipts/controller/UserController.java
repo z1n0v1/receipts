@@ -35,7 +35,10 @@ public class UserController {
     private final UserService userService;
     private final UserSettingsServiceModelMapper userSettingsServiceModelMapper;
 
-    @Value("${receipts.google.credentials}")
+//    @Value("${receipts.google.credentials}")
+//    private String googleCreds;
+
+    @Value("${spring.cloud.gcp.credentials.encoded-key}")
     private String googleCreds;
 
     @Value("${receipts.google.storage.bucket}")

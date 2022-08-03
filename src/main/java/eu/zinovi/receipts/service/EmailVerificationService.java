@@ -57,9 +57,10 @@ public class EmailVerificationService {
         Content content = new Content("text/html", getEmailBody(verificationToken));
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid(this.sendGridKey);
-        Request request = new Request();
         try {
+            SendGrid sg = new SendGrid(this.sendGridKey);
+            Request request = new Request();
+
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
