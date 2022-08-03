@@ -32,8 +32,15 @@ public class AuthSeed implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AuthSeed.class);
 
+
+    @Value("${receipts.user.demo.email}")
+    private String demoEmail;
     @Value("${receipts.user.demo.password}")
     private String demoPassword;
+    @Value("${receipts.user.admin.email}")
+    private String adminEmail;
+    @Value("${receipts.user.admin.password}")
+    private String adminPassword;
 
     public AuthSeed(UserRepository userRepository, RoleRepository roleRepository, CapabilityRepository capabilityRepository, CategoryRepository categoryRepository, StatisticsService statisticsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -89,10 +96,17 @@ public class AuthSeed implements CommandLineRunner {
 
             User admin = new User();
 //            System.out.println(admin);
-            admin.setFirstName("Zinovi");
-            admin.setLastName("Boyadjiev");
-            admin.setEmail("zinovi@gmail.com");
-            admin.setDisplayName("z");
+            admin.setFirstName("Admin");
+            admin.setLastName("Admin");
+
+            admin.setEmail(adminEmail);
+            if(!(adminPassword == null || adminPassword.trim().isEmpty())) {
+                admin.setPassword(passwordEncoder.encode(adminPassword));
+                admin.setEmailVerified(true);
+                admin.setEmailLoginDisabled(false);
+            } // else the only way to login will be through Google oauth2
+
+            admin.setDisplayName("admin");
             admin.setLastSeen(LocalDateTime.now());
             admin.setRegisteredOn(LocalDateTime.now());
             admin.setEnabled(true);
@@ -143,14 +157,15 @@ public class AuthSeed implements CommandLineRunner {
             User demoUser = new User();
             demoUser.setFirstName("Demo");
             demoUser.setLastName("User");
-            demoUser.setEmail("demo@demo");
-            demoUser.setDisplayName("Demo User");
+            demoUser.setDisplayName("Demo");
             demoUser.setPicture("/images/blank-avatar.png");
             demoUser.setLastSeen(LocalDateTime.now());
             demoUser.setRegisteredOn(LocalDateTime.now());
 
             // No creds here, move along
+            demoUser.setEmail(demoEmail);
             demoUser.setPassword(passwordEncoder.encode(demoPassword));
+
             demoUser.setEnabled(true);
             demoUser.setEmailVerified(true);
             demoUser.setEmailLoginDisabled(false);
