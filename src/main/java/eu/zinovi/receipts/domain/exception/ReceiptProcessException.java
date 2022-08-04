@@ -4,16 +4,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-public class ReceiptUploadException extends RuntimeException{
-    public ReceiptUploadException(String message, Throwable cause) {
+public class ReceiptProcessException extends RuntimeException{
+    public ReceiptProcessException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ReceiptUploadException(String message) {
+    public ReceiptProcessException(String message) {
         super(message);
     }
 
-    public ReceiptUploadException() {
+    public ReceiptProcessException() {
         super("Неуспешно качена бележка");
     }
 }

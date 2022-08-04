@@ -1,15 +1,10 @@
 package eu.zinovi.receipts.service;
 
-import com.google.cloud.storage.Acl;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.vision.v1.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.zinovi.receipts.domain.model.entity.*;
 import eu.zinovi.receipts.domain.model.service.ReceiptPolyJsonServiceModel;
-import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
@@ -65,7 +60,7 @@ public class ReceiptProcessService {
     }
 
     @Transactional
-    public UUID uploadReceipt(MultipartFile file, ReceiptProcessApi receiptProcessApi) throws ReceiptUploadException {
+    public UUID uploadReceipt(MultipartFile file, ReceiptProcessApi receiptProcessApi) throws ReceiptProcessException {
 
         String fileExtension = null;
         String fileName = file.getOriginalFilename();
@@ -81,14 +76,14 @@ public class ReceiptProcessService {
                 (!fileExtension.equals("jpeg")
                         && !fileExtension.equals("png")
                         && !fileExtension.equals("jpg"))) {
-            throw new ReceiptUploadException("Неподдържан файлов формат.");
+            throw new ReceiptProcessException("Неподдържан файлов формат.");
         }
 
         BufferedImage image;
         try {
             image = ImageIO.read(file.getInputStream());
         } catch (IOException e) {
-            throw new ReceiptUploadException("Неподдържан файлов формат.");
+            throw new ReceiptProcessException("Неподдържан файлов формат.");
         }
 
         String qrCode = readQRCode(image);
@@ -189,11 +184,11 @@ public class ReceiptProcessService {
 */
         }
         if (eik == null) {
-            throw new ReceiptUploadException("ЕИК не е разчетен!");
+            throw new ReceiptProcessException("ЕИК не е разчетен!");
         }
         Company company = companyService.findByEik(eik);
         if (company == null) {
-            throw new ReceiptUploadException("Фирмата не е разчетена!");
+            throw new ReceiptProcessException("Фирмата не е разчетена!");
         }
         receipt.setCompany(company);
 
@@ -259,7 +254,7 @@ public class ReceiptProcessService {
         }
 
         if (!totalFound) {
-            throw new ReceiptUploadException("Сумата не е разчетена!");
+            throw new ReceiptProcessException("Сумата не е разчетена!");
         }
 
         List<Item> items = new ArrayList<>();

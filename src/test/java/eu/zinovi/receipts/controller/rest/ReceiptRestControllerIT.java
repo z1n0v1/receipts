@@ -405,6 +405,7 @@ public class ReceiptRestControllerIT {
                         "Касовата бележка не съществува\n"));
     }
 
+    /* Needs Google credentials
     @Test
     @WithMockEmailUser(roles = ("CAP_DELETE_RECEIPT"))
     public void deleteReceiptValidWithCapDeleteReceipts() throws Exception {
@@ -415,4 +416,6 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isOk());
     }
+
+     */
 }

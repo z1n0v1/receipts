@@ -13,6 +13,7 @@ import eu.zinovi.receipts.repository.UserRepository;
 import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.domain.user.GoogleOAuth2User;
 import eu.zinovi.receipts.util.CloudStorage;
+import eu.zinovi.receipts.util.ImageProcessing;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -160,8 +161,11 @@ public class UserService {
             throw new IllegalArgumentException("Неподдържан файлов формат.");
         }
 
-        String pictureURL = cloudStorage.uploadFile(picture.getInputStream(),
-                "avatars", UUID.randomUUID().toString(), true);
+
+        String pictureURL = cloudStorage.uploadFile(
+//                picture.getInputStream(),
+                ImageProcessing.compressAndScaleProfilePicture(picture.getInputStream()),
+                "avatars", UUID.randomUUID().toString() + ".jpg", true);
 
         User user = getCurrentUser();
         user.setPicture(pictureURL);

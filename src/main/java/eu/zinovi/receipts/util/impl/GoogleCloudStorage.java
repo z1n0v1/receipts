@@ -47,7 +47,7 @@ public class GoogleCloudStorage implements CloudStorage {
             storage.createAcl(blobId, Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
         }
 
-        return path == null ? "https://" + bucket + ".storage.googleapis.com/" + path + "/" + fileName :
+        return path != null ? "https://" + bucket + ".storage.googleapis.com/" + path + "/" + fileName :
                 "https://" + bucket + ".storage.googleapis.com/" + fileName;
     }
 

@@ -8,7 +8,7 @@ import eu.zinovi.receipts.domain.model.mapper.ReceiptDeleteBindingToService;
 import eu.zinovi.receipts.domain.model.mapper.ReceiptEditBindingToService;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.service.MessagingService;
 import eu.zinovi.receipts.service.ReceiptProcessService;
 import eu.zinovi.receipts.service.ReceiptsService;
@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -40,7 +39,7 @@ public class ReceiptRestController {
 //    @Value("${receipts.google.credentials}")
 //    private String googleCreds;
 
-    @Value("${spring.cloud.gcp.credentials.encoded-key}")
+    @Value("${receipts.google.gcp.credentials.encoded-key}")
     private String googleCreds;
 
     @Value("${receipts.google.storage.bucket}")
@@ -69,15 +68,15 @@ public class ReceiptRestController {
         for (MultipartFile file : files) {
             try {
                 ReceiptProcessApi receiptProcessApi;
-                try {
+//                try {
                     receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
-                } catch (IOException e) {
-                    throw new ReceiptUploadException("Грешка при зареждане на касови бележките");
-                }
+//                } catch (IOException e) {
+//                    throw new ReceiptProcessException("Грешка при зареждане на касови бележките");
+//                }
                 receiptUuids.add(receiptProcessService.uploadReceipt(file, receiptProcessApi));
 
                 System.gc(); // Needed for memory cleanup after the image processing
-            } catch (ReceiptUploadException ex) {
+            } catch (ReceiptProcessException ex) {
                 messagingService.sendMessage(file.getOriginalFilename() + ": " + ex.getMessage(), "danger");
             }
         }
