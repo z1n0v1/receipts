@@ -65,14 +65,10 @@ public class ReceiptRestController {
 
         Set<UUID> receiptUuids = new HashSet<>();
         messagingService.sendMessage("Обработка...");
+        ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
         for (MultipartFile file : files) {
             try {
-                ReceiptProcessApi receiptProcessApi;
-//                try {
-                    receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
-//                } catch (IOException e) {
-//                    throw new ReceiptProcessException("Грешка при зареждане на касови бележките");
-//                }
+
                 receiptUuids.add(receiptProcessService.uploadReceipt(file, receiptProcessApi));
 
                 System.gc(); // Needed for memory cleanup after the image processing
@@ -81,6 +77,7 @@ public class ReceiptRestController {
             }
         }
         System.gc(); // Needed for memory cleanup after the image processing
+        receiptProcessApi.close();
 
         if (receiptUuids.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -132,7 +129,7 @@ public class ReceiptRestController {
             consumes = {"application/json"})
     public ResponseEntity<?> deleteReceipt(
             @Valid @RequestBody ReceiptDeleteBindingModel receiptDeleteBindingModel,
-                                           BindingResult bindingResult) {
+            BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_DELETE_RECEIPT")) {
             throw new AccessDeniedException("Нямате право да изтривате касови бележки");

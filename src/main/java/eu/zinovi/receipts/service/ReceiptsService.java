@@ -99,6 +99,7 @@ public class ReceiptsService {
 
         ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
         receiptProcessApi.deleteReceipt(receiptImageId);
+        receiptProcessApi.close();
 
     }
 
