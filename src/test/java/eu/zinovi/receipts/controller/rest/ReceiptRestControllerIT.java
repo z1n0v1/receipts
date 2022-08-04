@@ -9,6 +9,7 @@ import eu.zinovi.receipts.domain.model.datatable.DatatableOrder;
 import eu.zinovi.receipts.domain.model.datatable.DatatableSearch;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.entity.*;
+import eu.zinovi.receipts.domain.model.service.CompanyRegisterBGApiServiceModel;
 import eu.zinovi.receipts.repository.*;
 import eu.zinovi.receipts.service.ItemService;
 import eu.zinovi.receipts.service.UserService;
@@ -18,6 +19,7 @@ import eu.zinovi.receipts.util.RegisterBGApi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -146,13 +148,24 @@ public class ReceiptRestControllerIT {
 
     // TODO: fix the file upload tests,
     //  should we mock receiptProcessApi ?
-    /*
+
     @Test
     @WithMockEmailUser(roles = ("CAP_ADD_RECEIPT"))
     public void uploadReceiptWithCap() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/receipts/sample-receipt.jpg");
         byte[] receiptBytes = is.readAllBytes();
         is.close();
+
+        is = this.getClass().getResourceAsStream(
+                "/receipts/poly/7f625f00-6c09-4e9c-a425-0acb9c495816.json");
+        String processedMLJson = new String(is.readAllBytes());
+        is.close();
+
+        Mockito.when(receiptProcessApi.doOCR())
+                .thenReturn(processedMLJson);
+        Mockito.when(registerBGApi.getCompanyInfo(Mockito.anyString()))
+                .thenReturn(new CompanyRegisterBGApiServiceModel(
+                        "Фирма", "Дейност", "Адрес"));
 
         MockMultipartFile file = new MockMultipartFile("file",
                 "sample-receipt.jpg", "image/jpg", receiptBytes);
@@ -162,7 +175,6 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isOk());
     }
-     */
 
     @Test
     @WithMockEmailUser
