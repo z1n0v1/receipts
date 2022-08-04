@@ -140,7 +140,7 @@ public class ReceiptProcessService {
         LocalTime time = null;
 
         Pattern datePattern = Pattern.compile("\\d\\d[-.]\\d\\d[-.]\\d{4,4}");
-        Pattern timePattern = Pattern.compile("^\\d\\d:\\d\\d:\\d\\d");
+        Pattern timePattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d");
         Pattern costPattern = Pattern.compile("-{0,1}\\d+[.|,]\\d\\d$");
         Pattern quantityPattern = Pattern.compile("\\d+[.|,]\\d\\d\\d");
 
@@ -183,10 +183,11 @@ public class ReceiptProcessService {
                     }
                 }
             }
-            if (receipt.getDateOfPurchase() == null) {
-                receipt.setDateOfPurchase(LocalDateTime.of(date != null ? date : LocalDate.now(),
-                        time != null ? time : LocalTime.now()));
-            }
+
+        }
+        if (receipt.getDateOfPurchase() == null) {
+            receipt.setDateOfPurchase(LocalDateTime.of(date != null ? date : LocalDate.now(),
+                    time != null ? time : LocalTime.now()));
         }
 
         if (!totalFound) {
@@ -296,6 +297,8 @@ public class ReceiptProcessService {
             items.get(i).setPosition(i + 1);
             itemService.save(items.get(i));
         }
+
+        receipt.getItems().addAll(items);
 
         receiptImage.setIsProcessed(true);
         receiptImage.setReceipt(receipt);
