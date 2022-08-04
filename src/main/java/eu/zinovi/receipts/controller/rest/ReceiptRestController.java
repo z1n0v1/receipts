@@ -10,7 +10,6 @@ import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
 import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.service.MessagingService;
-import eu.zinovi.receipts.service.ReceiptProcessService;
 import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.UserService;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
@@ -31,7 +30,6 @@ import java.util.UUID;
 public class ReceiptRestController {
     private final ReceiptDeleteBindingToService receiptDeleteBindingToService;
     private final ReceiptEditBindingToService receiptEditBindingToService;
-    private final ReceiptProcessService receiptProcessService;
     private final ReceiptsService receiptsService;
     private final UserService userService;
     private final MessagingService messagingService;
@@ -45,10 +43,9 @@ public class ReceiptRestController {
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
-    public ReceiptRestController(ReceiptDeleteBindingToService receiptDeleteBindingToService, ReceiptEditBindingToService receiptEditBindingToService, ReceiptProcessService receiptProcessService, ReceiptsService receiptsService, UserService userService, MessagingService messagingService) {
+    public ReceiptRestController(ReceiptDeleteBindingToService receiptDeleteBindingToService, ReceiptEditBindingToService receiptEditBindingToService, ReceiptsService receiptsService, UserService userService, MessagingService messagingService) {
         this.receiptDeleteBindingToService = receiptDeleteBindingToService;
         this.receiptEditBindingToService = receiptEditBindingToService;
-        this.receiptProcessService = receiptProcessService;
         this.receiptsService = receiptsService;
         this.userService = userService;
         this.messagingService = messagingService;
@@ -69,7 +66,7 @@ public class ReceiptRestController {
         for (MultipartFile file : files) {
             try {
 
-                receiptUuids.add(receiptProcessService.uploadReceipt(file, receiptProcessApi));
+                receiptUuids.add(receiptsService.uploadReceipt(file, receiptProcessApi));
 
                 System.gc(); // Needed for memory cleanup after the image processing
             } catch (ReceiptProcessException ex) {

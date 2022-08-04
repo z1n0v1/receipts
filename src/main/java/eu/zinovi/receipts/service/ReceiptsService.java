@@ -1,5 +1,6 @@
 package eu.zinovi.receipts.service;
 
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
 import eu.zinovi.receipts.domain.model.entity.*;
@@ -21,15 +22,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static eu.zinovi.receipts.util.ImageProcessing.graphicallyProcessReceipt;
+import static eu.zinovi.receipts.util.ImageProcessing.readQRCode;
 
 @Service
 public class ReceiptsService {
@@ -39,6 +49,8 @@ public class ReceiptsService {
     private final ReceiptImageRepository receiptImageRepository;
     private final ReceiptRepository receiptRepository;
     private final UserService userService;
+    private final MessagingService messagingService;
+    private final ReceiptProcessService receiptProcessService;
     private final CompanyService companyService;
     private final ItemService itemService;
     private final CategoryService categoryService;
@@ -48,7 +60,7 @@ public class ReceiptsService {
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
-    public ReceiptsService(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserService userService, CompanyService companyService,
+    public ReceiptsService(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserService userService, MessagingService messagingService, ReceiptProcessService receiptProcessService, CompanyService companyService,
                            ItemService itemService, CategoryService categoryService, StoreService storeService) {
         this.itemAddServiceToItem = itemAddServiceToItem;
         this.receiptToReceiptDetailsView = receiptToReceiptDetailsView;
@@ -56,11 +68,68 @@ public class ReceiptsService {
         this.receiptImageRepository = receiptImageRepository;
         this.receiptRepository = receiptRepository;
         this.userService = userService;
+        this.messagingService = messagingService;
+        this.receiptProcessService = receiptProcessService;
         this.companyService = companyService;
         this.itemService = itemService;
         this.categoryService = categoryService;
         this.storeService = storeService;
 
+    }
+
+    @Transactional
+    public UUID uploadReceipt(MultipartFile file, ReceiptProcessApi receiptProcessApi) throws ReceiptProcessException {
+
+        String fileExtension = null;
+        String fileName = file.getOriginalFilename();
+
+        if (file.getContentType() != null) {
+            String[] contentType = file.getContentType().split("/");
+            if (contentType.length > 1) {
+                fileExtension = contentType[1];
+            }
+        }
+
+        if (fileExtension == null || file.isEmpty() || file.getSize() > 10000000 ||
+                (!fileExtension.equals("jpeg")
+                        && !fileExtension.equals("png")
+                        && !fileExtension.equals("jpg"))) {
+            throw new ReceiptProcessException("Неподдържан файлов формат.");
+        }
+
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file.getInputStream());
+        } catch (IOException e) {
+            throw new ReceiptProcessException("Неподдържан файлов формат.");
+        }
+
+        String qrCode = readQRCode(image);
+
+        messagingService.sendMessage(fileName + ": Обработка...");
+        ByteArrayInputStream processedImageStream = graphicallyProcessReceipt(image);
+
+        ReceiptImage receiptImage = new ReceiptImage();
+        receiptImage.setIsProcessed(false);
+        receiptImage.setAddedOn(LocalDateTime.now());
+        receiptImage.setUser(userService.getCurrentUser());
+        receiptImageRepository.save(receiptImage);
+
+//        try {
+////            receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
+//        } catch (IOException ex) {
+//            throw new ReceiptUploadException("Грешка при инициализация.");
+//        }
+        receiptProcessApi.setReceiptId(receiptImage.getId());
+
+        receiptImage.setImageUrl(receiptProcessApi.uploadReceipt(processedImageStream));
+
+        messagingService.sendMessage(fileName + ": Анализ...");
+        String polyJson = receiptProcessApi.doOCR();
+
+        receiptImageRepository.save(receiptImage);
+
+        return receiptProcessService.parseReceipt(polyJson, receiptImage, fileName, qrCode);
     }
 
     @Transactional
