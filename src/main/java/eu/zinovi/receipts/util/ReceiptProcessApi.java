@@ -11,4 +11,6 @@ public interface ReceiptProcessApi {
     void deleteReceipt(String receiptId);
 
     String doOCR();
+
+    void close();
 }

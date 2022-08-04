@@ -120,6 +120,11 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
         return null;
     }
 
+    @Override
+    public void close() {
+        imageAnnotatorClient.close();
+    }
+
     private void GCSDelete(String path, String fileName) throws IOException {
         storage.delete(bucket, path + "/" + fileName);
     }
