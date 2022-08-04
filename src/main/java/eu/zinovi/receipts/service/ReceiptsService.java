@@ -14,8 +14,8 @@ import eu.zinovi.receipts.domain.model.view.ReceiptListView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
+import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
-import eu.zinovi.receipts.util.impl.GoogleReceiptProcessApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,13 +55,10 @@ public class ReceiptsService {
     private final ItemService itemService;
     private final CategoryService categoryService;
     private final StoreService storeService;
-    @Value("${receipts.google.gcp.credentials.encoded-key}")
-    private String googleCreds;
-    @Value("${receipts.google.storage.bucket}")
-    private String bucket;
+    private final ReceiptProcessApi receiptProcessApi;
 
     public ReceiptsService(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserService userService, MessagingService messagingService, ReceiptProcessService receiptProcessService, CompanyService companyService,
-                           ItemService itemService, CategoryService categoryService, StoreService storeService) {
+                           ItemService itemService, CategoryService categoryService, StoreService storeService, ReceiptProcessApi receiptProcessApi) {
         this.itemAddServiceToItem = itemAddServiceToItem;
         this.receiptToReceiptDetailsView = receiptToReceiptDetailsView;
         this.receiptToListView = receiptToListView;
@@ -75,10 +72,11 @@ public class ReceiptsService {
         this.categoryService = categoryService;
         this.storeService = storeService;
 
+        this.receiptProcessApi = receiptProcessApi;
     }
 
     @Transactional
-    public UUID uploadReceipt(MultipartFile file, ReceiptProcessApi receiptProcessApi) throws ReceiptProcessException {
+    public UUID uploadReceipt(MultipartFile file) throws ReceiptProcessException {
 
         String fileExtension = null;
         String fileName = file.getOriginalFilename();
@@ -166,7 +164,7 @@ public class ReceiptsService {
 
         receiptRepository.delete(receipt);
 
-        ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
+//        ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
         receiptProcessApi.deleteReceipt(receiptImageId);
         receiptProcessApi.close();
 

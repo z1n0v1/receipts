@@ -12,12 +12,16 @@ import eu.zinovi.receipts.domain.model.entity.*;
 import eu.zinovi.receipts.repository.*;
 import eu.zinovi.receipts.service.ItemService;
 import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.util.CloudStorage;
+import eu.zinovi.receipts.util.ReceiptProcessApi;
+import eu.zinovi.receipts.util.RegisterBGApi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -35,6 +39,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ReceiptRestControllerIT {
+
+    @MockBean
+    ReceiptProcessApi receiptProcessApi;
+
+    @MockBean
+    CloudStorage cloudStorage;
+
+    @MockBean
+    RegisterBGApi registerBGApi;
 
     @Autowired
     private MockMvc mockMvc;
@@ -405,7 +418,7 @@ public class ReceiptRestControllerIT {
                         "Касовата бележка не съществува\n"));
     }
 
-    /* Needs Google credentials
+
     @Test
     @WithMockEmailUser(roles = ("CAP_DELETE_RECEIPT"))
     public void deleteReceiptValidWithCapDeleteReceipts() throws Exception {
@@ -416,6 +429,4 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isOk());
     }
-
-     */
 }

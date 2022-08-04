@@ -12,8 +12,6 @@ import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.service.MessagingService;
 import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.UserService;
-import eu.zinovi.receipts.util.ReceiptProcessApi;
-import eu.zinovi.receipts.util.impl.GoogleReceiptProcessApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -34,15 +32,6 @@ public class ReceiptRestController {
     private final UserService userService;
     private final MessagingService messagingService;
 
-//    @Value("${receipts.google.credentials}")
-//    private String googleCreds;
-
-    @Value("${receipts.google.gcp.credentials.encoded-key}")
-    private String googleCreds;
-
-    @Value("${receipts.google.storage.bucket}")
-    private String bucket;
-
     public ReceiptRestController(ReceiptDeleteBindingToService receiptDeleteBindingToService, ReceiptEditBindingToService receiptEditBindingToService, ReceiptsService receiptsService, UserService userService, MessagingService messagingService) {
         this.receiptDeleteBindingToService = receiptDeleteBindingToService;
         this.receiptEditBindingToService = receiptEditBindingToService;
@@ -62,11 +51,9 @@ public class ReceiptRestController {
 
         Set<UUID> receiptUuids = new HashSet<>();
         messagingService.sendMessage("Обработка...");
-        ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
         for (MultipartFile file : files) {
             try {
-
-                receiptUuids.add(receiptsService.uploadReceipt(file, receiptProcessApi));
+                receiptUuids.add(receiptsService.uploadReceipt(file));
 
                 System.gc(); // Needed for memory cleanup after the image processing
             } catch (ReceiptProcessException ex) {
@@ -74,7 +61,7 @@ public class ReceiptRestController {
             }
         }
         System.gc(); // Needed for memory cleanup after the image processing
-        receiptProcessApi.close();
+//        receiptProcessApi.close();
 
         if (receiptUuids.isEmpty()) {
             return ResponseEntity.noContent().build();

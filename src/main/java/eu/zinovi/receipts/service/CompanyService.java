@@ -2,13 +2,11 @@ package eu.zinovi.receipts.service;
 
 import eu.zinovi.receipts.domain.model.entity.Company;
 import eu.zinovi.receipts.domain.model.mapper.CompanyToReceiptCompanyByEik;
+import eu.zinovi.receipts.domain.model.service.CompanyRegisterBGApiServiceModel;
 import eu.zinovi.receipts.domain.model.view.ReceiptCompanyByEikView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.CompanyRepository;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import eu.zinovi.receipts.util.RegisterBGApi;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,11 +17,13 @@ public class CompanyService {
     private final CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik;
     private final CompanyRepository companyRepository;
     private final AddressService addressService;
+    private final RegisterBGApi registerBGApi;
 
-    public CompanyService(CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik, CompanyRepository companyRepository, AddressService addressService) {
+    public CompanyService(CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik, CompanyRepository companyRepository, AddressService addressService, RegisterBGApi registerBGApi) {
         this.companyToReceiptCompanyByEik = companyToReceiptCompanyByEik;
         this.companyRepository = companyRepository;
         this.addressService = addressService;
+        this.registerBGApi = registerBGApi;
     }
 
     public Company findByEik(String eik) {
@@ -34,10 +34,11 @@ public class CompanyService {
 
         // Scrape company registry for company details
 
-        String companyName;
-        String companyActivity;
-        String companyAddress = null;
+//        String companyName;
+//        String companyActivity;
+//        String companyAddress = null;
 
+        /*
         try {
             Document searchResult = Jsoup.connect(String.format(
                     "https://papagal.bg/search_results/%s?type=company", eik)).get();
@@ -57,12 +58,6 @@ public class CompanyService {
                             "span.full-subject-of-activity")
                     .get(0).text();
 
-            /*
-             companyAddress = companyInfoPage.select(
-                            "body > div.container.inner-page > div:nth-child(2) > div > dl > dd:nth-child(20)")
-                    .get(0).textNodes().get(0).text().replace("\n", " ");
-             */
-
             for (Element element :companyInfoPage.select(
                     "body > div.container.inner-page > div:nth-child(2) > div > dl > *")) {
                 if (element.text().equals("Седалище адрес")) {
@@ -73,12 +68,19 @@ public class CompanyService {
         } catch (Exception e) {
             return null;
         }
+        */
+
+        CompanyRegisterBGApiServiceModel companyRegisterBGApiServiceModel = registerBGApi.getCompanyInfo(eik);
+
+        if (companyRegisterBGApiServiceModel == null) {
+            return null;
+        }
 
         Company companyEntity = new Company();
         companyEntity.setEik(eik);
-        companyEntity.setName(companyName);
-        companyEntity.setActivity(companyActivity);
-        companyEntity.setAddress(addressService.getAddress(companyAddress));
+        companyEntity.setName(companyRegisterBGApiServiceModel.getCompanyName());
+        companyEntity.setActivity(companyRegisterBGApiServiceModel.getCompanyActivity());
+        companyEntity.setAddress(addressService.getAddress(companyRegisterBGApiServiceModel.getCompanyAddress()));
         companyRepository.save(companyEntity);
         return companyEntity;
     }
