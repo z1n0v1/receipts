@@ -3,6 +3,7 @@ package eu.zinovi.receipts.util.impl;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.util.CloudStorage;
 import org.json.JSONObject;
 
@@ -16,13 +17,17 @@ public class GoogleCloudStorage implements CloudStorage {
     private final Storage storage;
     private final String bucket;
 
-    public GoogleCloudStorage(String googleCreds, String bucket) throws IOException {
+    public GoogleCloudStorage(String googleCreds, String bucket){
 
         JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(googleCreds)));
         InputStream stream = new ByteArrayInputStream(jsonObject.toString().getBytes());
 
-        Credentials credentials = GoogleCredentials.fromStream(stream);
-        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        try {
+            Credentials credentials = GoogleCredentials.fromStream(stream);
+            storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        } catch (IOException e) {
+            throw new ReceiptProcessException("Грешка при инициализиране на Google Cloud Storage", e);
+        }
 
         this.bucket = bucket;
     }

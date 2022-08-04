@@ -3,6 +3,9 @@ package eu.zinovi.receipts.controller;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import eu.zinovi.receipts.WithMockEmailUser;
+import eu.zinovi.receipts.util.CloudStorage;
+import eu.zinovi.receipts.util.ReceiptProcessApi;
+import eu.zinovi.receipts.util.RegisterBGApi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -23,6 +27,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class UserControllerVerificationEmailIT {
+
+    @MockBean
+    ReceiptProcessApi receiptProcessApi;
+
+    @MockBean
+    CloudStorage cloudStorage;
+
+    @MockBean
+    RegisterBGApi registerBGApi;
 
     @Value("${mail.host}")
     private String mailhost;

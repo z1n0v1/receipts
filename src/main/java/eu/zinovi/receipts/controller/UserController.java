@@ -12,7 +12,6 @@ import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.service.EmailVerificationService;
 import eu.zinovi.receipts.service.UserService;
 import eu.zinovi.receipts.service.VerificationTokenService;
-import eu.zinovi.receipts.util.impl.GoogleCloudStorage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -34,15 +33,6 @@ public class UserController {
     private final VerificationTokenService verificationTokenService;
     private final UserService userService;
     private final UserSettingsServiceModelMapper userSettingsServiceModelMapper;
-
-//    @Value("${receipts.google.credentials}")
-//    private String googleCreds;
-
-    @Value("${receipts.google.gcp.credentials.encoded-key}")
-    private String googleCreds;
-
-    @Value("${receipts.google.storage.bucket}")
-    private String bucket;
 
     public UserController(UserRegisterBindingToService userRegisterBindingToService, UserPasswordSetBindingToService userPasswordSetBindingToService, UserDetailsBindingToService userDetailsBindingToService, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService, UserService userService, UserSettingsServiceModelMapper userSettingsServiceModelMapper) {
         this.userRegisterBindingToService = userRegisterBindingToService;
@@ -150,7 +140,7 @@ public class UserController {
         }
 
         try {
-            userService.savePicture(picture, new GoogleCloudStorage(googleCreds, bucket));
+            userService.savePicture(picture);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/user/details/edit";

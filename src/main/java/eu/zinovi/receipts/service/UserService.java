@@ -35,8 +35,9 @@ public class UserService {
 
     private final EmailVerificationService emailVerificationService;
     private final VerificationTokenService verificationTokenService;
+    private final CloudStorage cloudStorage;
 
-    public UserService(UserToBindingDetails userToBindingDetails, UserToDetails userToDetails, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService) {
+    public UserService(UserToBindingDetails userToBindingDetails, UserToDetails userToDetails, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmailVerificationService emailVerificationService, VerificationTokenService verificationTokenService, CloudStorage cloudStorage) {
         this.userToBindingDetails = userToBindingDetails;
         this.userToDetails = userToDetails;
         this.roleRepository = roleRepository;
@@ -44,6 +45,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.emailVerificationService = emailVerificationService;
         this.verificationTokenService = verificationTokenService;
+        this.cloudStorage = cloudStorage;
     }
 
     public boolean checkCapability(String capability) {
@@ -143,7 +145,7 @@ public class UserService {
         return userToDetails.map(getCurrentUser());
     }
 
-    public void savePicture(MultipartFile picture, CloudStorage cloudStorage) throws IOException {
+    public void savePicture(MultipartFile picture) throws IOException {
 
         String fileExtension = null;
 
@@ -165,7 +167,7 @@ public class UserService {
         String pictureURL = cloudStorage.uploadFile(
 //                picture.getInputStream(),
                 ImageProcessing.compressAndScaleProfilePicture(picture.getInputStream()),
-                "avatars", UUID.randomUUID().toString() + ".jpg", true);
+                "avatars", UUID.randomUUID() + ".jpg", true);
 
         User user = getCurrentUser();
         user.setPicture(pictureURL);
