@@ -7,7 +7,7 @@ import com.google.cloud.storage.*;
 import com.google.cloud.vision.v1.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.domain.model.service.ReceiptPolyJsonServiceModel;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import org.json.JSONObject;
@@ -31,22 +31,26 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
     private final Gson gson;
 
 
-
-    public GoogleReceiptProcessApi(String googleCreds, String bucket) throws IOException {
+    public GoogleReceiptProcessApi(String googleCreds, String bucket) {
         JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(googleCreds)));
         InputStream stream = new ByteArrayInputStream(jsonObject.toString().getBytes());
 
-        Credentials credentials = GoogleCredentials.fromStream(stream);
+        try {
 
-        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
-        ImageAnnotatorSettings imageAnnotatorSettings =
-                ImageAnnotatorSettings.newBuilder()
-                        .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
-                        .build();
+            Credentials credentials = GoogleCredentials.fromStream(stream);
 
-        imageAnnotatorClient = ImageAnnotatorClient.create(imageAnnotatorSettings);
+            storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
+            ImageAnnotatorSettings imageAnnotatorSettings =
+                    ImageAnnotatorSettings.newBuilder()
+                            .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
+                            .build();
+
+            imageAnnotatorClient = ImageAnnotatorClient.create(imageAnnotatorSettings);
+        } catch (IOException e) {
+            throw new ReceiptProcessException("Грешка при зареждане на ключовете за достъп до Google Cloud Platform");
+        }
         this.bucket = bucket;
 
         gson = new GsonBuilder()
@@ -65,11 +69,21 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
         try {
             GCSUpload(imageStream, "receipts", "jpg", true);
         } catch (IOException e) {
-            throw new ReceiptUploadException("Грешка при качване на касовата бележка");
+            throw new ReceiptProcessException("Грешка при качване на касовата бележка");
         }
         isUploaded = true;
 
         return "https://" + bucket + ".storage.googleapis.com/receipts/" + receiptId + ".jpg";
+    }
+
+    @Override
+    public void deleteReceipt(String receiptId) {
+        try {
+            GCSDelete("receipts", receiptId + ".jpg");
+            GCSDelete("json/poly", receiptId + ".json");
+        } catch (IOException e) {
+            throw new ReceiptProcessException("Грешка при изтриване на касовата бележка");
+        }
     }
 
     @Override
@@ -90,7 +104,7 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
             BatchAnnotateImagesResponse response = imageAnnotatorClient.batchAnnotateImages(requests);
 
             if (response.getResponsesList().size() == 0) {
-                throw new ReceiptUploadException("Неуспешен анализ.");
+                throw new ReceiptProcessException("Неуспешен анализ.");
             }
 
             String polygonsJson = processMLToJason(response);
@@ -99,11 +113,15 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
                 GCSUpload(new ByteArrayInputStream(polygonsJson.getBytes()),
                         "json/poly", "json", true);
             } catch (IOException e) {
-                throw new ReceiptUploadException("Грешка при качване на полигоните");
+                throw new ReceiptProcessException("Грешка при качване на полигоните");
             }
             return polygonsJson;
         }
         return null;
+    }
+
+    private void GCSDelete(String path, String fileName) throws IOException {
+        storage.delete(bucket, path + "/" + fileName);
     }
 
     private void GCSUpload(

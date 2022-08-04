@@ -1,6 +1,5 @@
 package eu.zinovi.receipts.service;
 
-import com.google.cloud.storage.*;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
 import eu.zinovi.receipts.domain.model.entity.*;
@@ -14,6 +13,8 @@ import eu.zinovi.receipts.domain.model.view.ReceiptListView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
+import eu.zinovi.receipts.util.ReceiptProcessApi;
+import eu.zinovi.receipts.util.impl.GoogleReceiptProcessApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,12 +43,13 @@ public class ReceiptsService {
     private final ItemService itemService;
     private final CategoryService categoryService;
     private final StoreService storeService;
-    private final Storage storage;
-
+    @Value("${receipts.google.gcp.credentials.encoded-key}")
+    private String googleCreds;
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
-    public ReceiptsService(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserService userService, CompanyService companyService, Storage storage, ItemService itemService, CategoryService categoryService, StoreService storeService) {
+    public ReceiptsService(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserService userService, CompanyService companyService,
+                           ItemService itemService, CategoryService categoryService, StoreService storeService) {
         this.itemAddServiceToItem = itemAddServiceToItem;
         this.receiptToReceiptDetailsView = receiptToReceiptDetailsView;
         this.receiptToListView = receiptToListView;
@@ -55,10 +57,10 @@ public class ReceiptsService {
         this.receiptRepository = receiptRepository;
         this.userService = userService;
         this.companyService = companyService;
-        this.storage = storage;
         this.itemService = itemService;
         this.categoryService = categoryService;
         this.storeService = storeService;
+
     }
 
     @Transactional
@@ -95,7 +97,8 @@ public class ReceiptsService {
 
         receiptRepository.delete(receipt);
 
-        storage.delete(bucket, "receipts/" + receiptImageId + ".jpg");
+        ReceiptProcessApi receiptProcessApi = new GoogleReceiptProcessApi(googleCreds, bucket);
+        receiptProcessApi.deleteReceipt(receiptImageId);
 
     }
 
@@ -146,7 +149,7 @@ public class ReceiptsService {
 
         receipt.setItemsTotal(itemsTotal);
         receiptRepository.save(receipt);
-}
+    }
 
 
     @Transactional

@@ -50,9 +50,9 @@ public class RestExceptionControllerAdvice extends ResponseEntityExceptionHandle
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(ReceiptUploadException.class)
+    @ExceptionHandler(ReceiptProcessException.class)
     protected ResponseEntity<Object> handleReceiptUploadException(
-            ReceiptUploadException ex) {
+            ReceiptProcessException ex) {
         ApiError apiError = new ApiError(HttpStatus.SERVICE_UNAVAILABLE);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);

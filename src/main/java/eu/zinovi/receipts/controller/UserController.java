@@ -38,7 +38,7 @@ public class UserController {
 //    @Value("${receipts.google.credentials}")
 //    private String googleCreds;
 
-    @Value("${spring.cloud.gcp.credentials.encoded-key}")
+    @Value("${receipts.google.gcp.credentials.encoded-key}")
     private String googleCreds;
 
     @Value("${receipts.google.storage.bucket}")

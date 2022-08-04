@@ -11,7 +11,7 @@ import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.GrayU8;
-import eu.zinovi.receipts.domain.exception.ReceiptUploadException;
+import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import georegression.struct.line.LineSegment2D_F32;
 import georegression.struct.point.Point2D_F32;
 
@@ -84,7 +84,7 @@ public class ImageProcessing {
         try {
             jpgWriter.write(null, outputImage, jpgWriteParam);
         } catch (IOException e) {
-            throw new ReceiptUploadException("Грешка при обработка на изображението.", e);
+            throw new ReceiptProcessException("Грешка при обработка на изображението.", e);
         }
         jpgWriter.dispose();
 
