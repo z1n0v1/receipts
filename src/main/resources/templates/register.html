@@ -8,20 +8,16 @@
 <body>
 <div class="container pt-5">
     <header th:replace="fragments/common::header"></header>
-    <!--    <h1>Регистрация</h1>-->
-
     <div class="row justify-content-center">
         <div class="col-8 my-5 border">
-            <form action="/user/register" method="post" th:object="${userRegisterBindingModel}">
+            <form th:action="@{/user/register}" th:method="post" th:object="${userRegisterBindingModel}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <!--                <div th:each=" e: ${#fields.errors()}" class="alert-danger" th:text="${e}">-->
-                <!--                </div>-->
                 <div class="row p-2">
                     <div class="col-12">
                         <h1 class="text-center">Регистрация</h1>
                     </div>
                     <div class="col-12 text-center pt-2">
-                        <a href="/oauth2/authorization/google">
+                        <a th:href="@{/oauth2/authorization/google}">
                             <div id="">
                                 <!--                        <span class="label">Влез с </span>-->
                                 <div class="g-reg-customBtn">
@@ -64,7 +60,6 @@
                             error message</small>
                     </div>
                 </div>
-
                 <div class="row p-2">
                     <div class="col-6">
                         <label for="password">Парола</label>
@@ -91,6 +86,5 @@
     </div>
     <footer th:replace="fragments/common::footer"></footer>
 </div>
-
 </body>
 </html>

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <title> Бележка - Детайли </title>
     <th:block th:replace="fragments/common::head"></th:block>
@@ -11,8 +10,7 @@
     <header th:replace="fragments/common::header"></header>
     <div class="row">
         <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-4 col-sm-12">
-            <img th:src="${receipt.imageUrl}" id="receipt" class="img-thumbnail w-100"/>
-<!--            <canvas id="myCanvas" class="h-auto w-100"></canvas>-->
+            <img alt="Касова бележка" th:src="${receipt.imageUrl}" id="receipt" class="img-thumbnail w-100"/>
         </div>
         <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-8 col-sm-12 pt-4">
             <div id="map" class="w-100" style="height: 400px"></div>
@@ -71,10 +69,8 @@
             <div class="text-center">
                 <button class="btn btn-primary" id="item-add-btn">Добави артикул</button>
             </div>
-
         </div>
     </div>
-
     <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -105,7 +101,6 @@
                             <input type="number" step="0.01" min="0.01" class="form-control" id="edit-item-price"
                                    placeholder="Цена">
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <div id="alert-modal-edit-item" class="alert-danger" style="display: none"></div>
@@ -150,8 +145,6 @@
                             <input type="number" step="0.01" min="0.01" class="form-control" id="add-item-price"
                                    placeholder="Цена">
                         </div>
-
-
                     </div>
                     <div class="modal-footer">
                         <div id="alert-modal-item-add" class="alert-danger" style="display: none"></div>
@@ -164,438 +157,14 @@
             </div>
         </div>
     </div>
-
     <footer th:replace="fragments/common::footer"></footer>
     <script th:inline="javascript">
         /*<![CDATA[*/
-
-        let companyEik = $('#company-eik');
-        let storeName = $('#store-name');
-        let storeAddress = $('#store-address');
-        let receiptDate = $('#receipt-date');
-        let receiptTotal = $('#receipt-total');
-        let receiptEditBtn = $('#receipt-edit-btn');
-        let receiptSaveBtn = $('#receipt-save-btn');
-        let receiptCancelBtn = $('#receipt-cancel-btn');
-
-        let receiptData = {};
-
-        receiptSaveBtn.on('click', function () {
-            $.ajax({
-                url: '/api/receipt',
-                type: 'PUT',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    id: receiptData.receiptId,
-                    eik: $('#edit-company-eik').val(),
-                    name: $('#edit-store-name').val(),
-                    address: $('#edit-store-address').val(),
-                    date: $('#edit-receipt-date').val(),
-                    total: $('#edit-receipt-total').val()
-                }),
-                success: function (response) {
-                    location.reload();
-                },
-                error: function (response) {
-                    try {
-                        newPageAlert(response.responseJSON.message, "bg-danger");
-                    } catch (e) {
-                        location.reload();
-                    }
-                }
-            });
-        });
-
-        receiptCancelBtn.on('click', function () {
-
-            receiptCancelBtn.hide();
-            receiptSaveBtn.hide();
-
-            companyEik.text(receiptData.companyEik);
-            storeName.text(receiptData.storeName);
-            storeAddress.text(receiptData.storeAddress);
-            receiptDate.text(receiptData.receiptDateText);
-            receiptTotal.text(receiptData.receiptTotal);
-
-            receiptEditBtn.show();
-        });
-
-        receiptEditBtn.on('click', function () {
-            receiptData = {
-                receiptId: [[${receipt.id}]],
-                companyEik: companyEik.text(),
-                storeName: storeName.text(),
-                storeAddress: storeAddress.text(),
-                receiptDate: receiptDate.data('date'),
-                receiptDateText: receiptDate.text(),
-                receiptTotal: receiptTotal.text()
-            };
-
-            receiptEditBtn.hide();
-            receiptSaveBtn.show();
-            receiptCancelBtn.show();
-
-            let companyEik_html = '';
-            companyEik_html += '<button class="btn-sm btn-secondary" id="eik-reload">'
-            companyEik_html += '<img src="/images/reload.svg" width="16" height="16"';
-            companyEik_html += ' class="reload-icon" id="reload-company-eik" alt="ЕИК"></button>';
-
-            companyEik_html += '<input type="text" class="form-control" ';
-            companyEik_html += 'id="edit-company-eik" placeholder="ЕИК" value="' + receiptData.companyEik + '">';
-            companyEik.html(companyEik_html);
-
-            // companyEik.html(`<!--<input type="text" class="form-control" id="edit-receipt-eik" value="`+ eik_value +`">-->`);
-
-            storeName.html(`<input type="text" class="form-control" id="edit-store-name" value="`
-                + receiptData.storeName +`">`);
-            storeAddress.html(`<input type="text" class="form-control" id="edit-store-address" value='`
-                + receiptData.storeAddress +`'>`);
-            receiptDate.html(`<input type="datetime-local" class="form-control" id="edit-receipt-date" value="`
-                + receiptData.receiptDate +`">`);
-            receiptTotal.html(`<input type="number" class="form-control" id="edit-receipt-total" value="`
-                + receiptData.receiptTotal +`">`);
-
-            $('#eik-reload').on('click', function () {
-                $.ajax({
-                    url: '/api/company/eik',
-                    type: 'POST',
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                    },
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        eik: $('#edit-company-eik').val()
-                    }),
-                    success: function (data) {
-                        $('#receipt-company-name').text(data.companyName);
-                        $('#receipt-company-address').text(data.companyAddress);
-                    },
-                    error: function (data) {
-                        try {
-                            newPageAlert(data.responseJSON.message, "bg-danger");
-                        } catch (e) {
-                            location.reload();
-                        }
-                    }
-                });
-            });
-        });
-
-
-        $('#item-add-btn').click(function () {
-            let categories = [];
-            let myerror = false;
-
-            $.ajax({
-                url: '/api/category/all',
-                type: 'GET',
-                contentType: "application/json",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                success: function (data, status, xhr) {
-                    //     if (xhr.responseURL.includes('/user/login')) {
-                    //         location.reload();
-                    //     }
-
-                    categories = data;
-                    // console.log(categories);
-                    $('#add-item-category').empty();
-                    $.each(categories, function (index, value) {
-                        $('#add-item-category').append('<option value="' + value.name + '">' + value.name + '</option>');
-                    });
-                },
-                error: function (request, status, error) {
-                    // alert(request.responseText);
-                    try {
-                        newPageAlert(request.responseJSON.message, "bg-danger", false, "#alert-modal-edit-item");
-                        // pageAlert("bg-danger", "Нещо се обърка. " + JSON.parse(request.responseText),
-                        //     "#alert-modal-edit-item", false);
-                    } catch (e) {
-                        location.reload();
-                    }
-                    myerror = true;
-                }
-
-            });
-
-
-            if (!myerror) {
-                $('#addItemModal').modal('show');
-            }
-        });
-
-        $('.add-item-modal-close').click(function () {
-            $('#addItemModal').modal('toggle');
-        });
-
-        $('#add-item-form').submit(function (e) {
-
-            e.preventDefault();
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/item',
-                data: JSON.stringify({
-                    receiptId: $('#add-item-receipt-id').val(),
-                    category: $('#add-item-category').val(),
-                    name: $('#add-item-name').val(),
-                    quantity: $('#add-item-quantity').val(),
-                    price: $('#add-item-price').val()
-                }),
-                contentType: "application/json",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                success: function (data) {
-                    // console.log(data);
-                    // $('#addItemModal').modal('toggle');
-                    // table.ajax.reload();
-                    location.reload();
-                },
-                error: function (request, status, error) {
-                    // alert(request.responseText);
-                    try {
-                        newPageAlert(request.responseJSON.message, "bg-danger", false, "#alert-modal-item-add");
-                        // pageAlert("bg-danger", "Нещо се обърка. " + JSON.parse(request.responseText),
-                        //     "#alert-modal-edit-item", false);
-                    } catch (e) {
-                        location.reload();
-                    }
-                }
-            });
-
-
-            // $('#addItemModal').modal('toggle');
-            // table.ajax.reload();
-        });
-
-        var table = $('#items-table').on($.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
-            // $('#alert').html("Нещо се обърка.  Моля " +
-            //     "<a href='/user/login'>влезте</a>" +
-            //     " отново в системата.");
-            // $('#alert').show();
-            // $('#alert').fadeOut(8000);
-            try {
-                // alert.text(JSON.parse(settings.jqXHR.responseText).message);
-                newPageAlert(settings.jqXHR.responseJSON.message, "bg-danger");
-            } catch (ex) {
-                location.reload();
-            }
-        }).DataTable({
-            // dom: '<"toolbar">frtip',
-            stateSave: true,
-            columns: [
-                {name: "position", className: 'text-start', searchable: false},
-                {name: "category", className: 'text-start', searchable: true},
-                {name: "name", className: 'text-start', width: '60%', searchable: true},
-                {
-                    name: "quantity", className: 'text-end', render: DataTable.render.number(null, null, 3, null),
-                    searchable: false
-                },
-                {
-                    name: "price", className: 'text-end', render: DataTable.render.number(null, null, 2, null, ' лв.'),
-                    searchable: false
-                }
-            ],
-            serverSide: true,
-            "processing": false,
-            ajax: {
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                url: '/api/item/' + [[${receipt.id}]],
-                type: 'POST',
-                data: function (d) {
-                    return JSON.stringify(d)
-                },
-                contentType: "application/json",
-            }
-        });
-
-        // $('toolbar').html('<button type="button" class="btn btn-primary" id="add-item-btn">Добави артикул</button>');
-
-        table.on('click', 'tr', function () {
-            var data = table.row(this).data();
-            // console.log(data);
-            $('#edit-item-position').val(data[0]);
-            $('#edit-item-category').val(data[1]);
-            $('#edit-item-name').val(data[2]);
-            $('#edit-item-quantity').val(data[3]);
-            $('#edit-item-price').val(data[4]);
-
-            $.ajax({
-                url: '/api/category/all',
-                type: 'GET',
-                dataType: 'json',
-                contentType: "application/json",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                success: function (cdata, status, xhr) {
-                    // if (xhr.responseURL.includes('/user/login')) {
-                    //     location.reload();
-                    // }
-                    categories = cdata;
-                    console.log(categories);
-                    $('#edit-item-category').empty();
-                    $.each(categories, function (index, value) {
-                        let catOption = '<option value="' + value.name + '" ';
-                        if (value.name === data[1]) {
-                            catOption += 'selected';
-                        }
-                        catOption += ' >' + value.name + '</option>';
-
-                        $('#edit-item-category').append(catOption);
-                    });
-                },
-                error: function (request, status, error) {
-                    // alert(request.responseText);
-                    try {
-                        newPageAlert(request.responseJSON.message, "bg-danger", false, "#alert-modal-edit-item");
-                        // pageAlert("bg-danger", "Нещо се обърка. " + JSON.parse(request.responseText),
-                        //     "#alert-modal-edit-item", false);
-                    } catch (e) {
-                        location.reload();
-                    }
-                }
-            });
-
-            $('#editItemModal').modal('toggle');
-        });
-
-        $('.edit-item-modal-close').click(function () {
-            $('#editItemModal').modal('toggle');
-        });
-
-        $('#edit-item-delete').click(() => {
-            let position = $('#edit-item-position').val();
-            let receiptId = $('#edit-item-receipt-id').val();
-            $.ajax({
-                url: '/api/item',
-                contentType: "application/json",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                data: JSON.stringify({
-                    position: position,
-                    receiptId: receiptId
-                }),
-                type: 'DELETE',
-                success: function (data) {
-                    // table.ajax.reload();
-                    // $('#editItemModal').modal('toggle');
-                    location.reload();
-                },
-                error: function (request, status, error) {
-                    try {
-                        newPageAlert(request.responseJSON.message, "bg-danger", false, "#alert-modal-edit-item");
-                        // pageAlert("bg-danger", "Нещо се обърка. " + JSON.parse(request.responseText),
-                        //     "#alert-modal-edit-item", false);
-                    } catch (e) {
-                        location.reload();
-                    }
-                    // alert(request.responseText);
-                }
-            });
-        });
-
-        $('#edit-item-form').submit((e) => {
-            e.preventDefault();
-
-            // let form = $(this);
-
-            $.ajax({
-                type: 'PUT',
-                url: '/api/item',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                data: JSON.stringify({
-                    receiptId: $('#edit-item-receipt-id').val(),
-                    category: $('#edit-item-category').val(),
-                    position: $('#edit-item-position').val(),
-                    name: $('#edit-item-name').val(),
-                    quantity: $('#edit-item-quantity').val(),
-                    price: $('#edit-item-price').val()
-                }),
-                contentType: "application/json",
-                success: function (data) {
-                    // console.log(data);
-                    // $('#editItemModal').modal('toggle');
-                    // table.ajax.reload();
-                    location.reload();
-                },
-                error: function (request, status, error) {
-                    // alert(request.responseText);
-                    try {
-                        newPageAlert(request.responseJSON.message, "bg-danger", false, "#alert-modal-edit-item");
-                        // pageAlert("bg-danger", "Нещо се обърка. " + JSON.parse(request.responseText),
-                        //     "#alert-modal-edit-item", false);
-                    } catch (e) {
-                        location.reload();
-                    }
-                }
-            });
-        });
-
-        var map;
-        var service;
-        var infowindow;
-
-        function initMap() {
-            var sydney = new google.maps.LatLng(-33.867, 151.195);
-
-            // let storeAddress = $('#store-address').val();
-
-            infowindow = new google.maps.InfoWindow();
-
-            // map = new google.maps.Map(
-            //     document.getElementById('map'), {center: sydney, zoom: 15});
-
-            var map = new google.maps.Map(document.getElementById('map'));
-            var request = {
-                query: [[${receipt.storeAddress}]],
-                fields: ['name', 'geometry'],
-            };
-
-            var service = new google.maps.places.PlacesService(map);
-
-            service.findPlaceFromQuery(request, function (results, status) {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    // for (var i = 0; i < results.length; i++) {
-                    //     createMarker(results[i]);
-                    // }
-                    map = new google.maps.Map(
-                        document.getElementById('map'), {center: results[0].geometry.location, zoom: 17});
-                    map.setCenter(results[0].geometry.location);
-                    new google.maps.Marker({
-                        position: results[0].geometry.location,
-                        map: map
-                    });
-                    createMarker(results[0]);
-                }
-            });
-        }
-
-        function createMarker(place) {
-
-            new google.maps.Marker({
-                position: place.geometry.location,
-                map: map
-            });
-        }
-
-        // $( document ).ready( function () {
-        // drawMLPolygons([[${receipt.imageId}]], 'myCanvas', 'receipt');
-        // });
-        // console.log('started');
+        var thisReceiptId = [[${receipt.id}]]
+        var receiptStoreAddress = [[${receipt.storeAddress}]]
         /*]]>*/
-
     </script>
+    <script th:src="@{/js/receipt/details.js}"></script>
     <script async
             th:src="'https://maps.googleapis.com/maps/api/js?key=' +
             ${googleMapsApiKey} +'&callback=initMap&libraries=places&v=weekly'">

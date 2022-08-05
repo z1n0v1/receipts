@@ -11,9 +11,9 @@
     <div class="row">
         <div class="pt-4 col-xxl-6 col-xl-6 col-lg-12 col-md-12 col-sm-12">
             <div class="w-100 text-center">
-                <a class="btn btn-primary" href="/admin/roles">Роли</a>
-                <a class="btn btn-primary" href="/admin/users">Потребители</a>
-                <a class="btn btn-primary" href="/admin/categories">Категории</a>
+                <a class="btn btn-primary" th:href="@{/admin/roles}">Роли</a>
+                <a class="btn btn-primary" th:href="@{/admin/users}">Потребители</a>
+                <a class="btn btn-primary" th:href="@{/admin/categories}">Категории</a>
             </div>
             <div id="alert" style="display: none" class="alert alert-danger alert-dismissible fade show" role="alert">
             </div>
@@ -159,58 +159,6 @@
 
     <footer th:replace="fragments/common::footer"></footer>
 </div>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-
-    let orderDesc = [1, 'desc'];
-    var table = $('#receipts-table').on($.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
-        // location.reload();
-        // console.log(settings, helpPage, message);
-        // console.log(JSON.parse(settings.jqXHR.responseText).message);
-        let alert = $('#alert');
-        try {
-            alert.text(JSON.parse(settings.jqXHR.responseText).message);
-        } catch (ex) {
-            location.reload();
-        }
-        // alert.html("Нещо се обърка. Моля " +
-        //     "<a href='/user/login'>влезте</a>" + " отново в системата.");
-        alert.show();
-        alert.fadeOut(8000);
-    }).DataTable({
-        "bFilter": false,
-        stateSave: true,
-        order: [orderDesc],
-        columns: [
-            {name: 'receiptId', visible: false},
-            {name: "addedOn", className: 'text-start', searchable: false},
-            {name: "addedBy", className: 'text-start', searchable: false, orderable: false},
-            {name: "isProcessed", className: 'text-center', searchable: false},
-            {name: "total", className: 'text-end', searchable: false, orderable: false},
-            {name: "itemsTotal", className: 'text-end', searchable: false, orderable: false}
-        ],
-        serverSide: true,
-        "processing": false,
-        ajax: {
-
-            url: '/api/admin/receipt/all',
-            type: 'POST',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            data: function (d) {
-                return JSON.stringify(d)
-            },
-            contentType: "application/json",
-        }
-    });
-
-    table.on('click', 'tr', function () {
-        let data = table.row(this).data();
-        window.location.href = '/admin/receipt/' + data[0];
-    });
-
-    /*]]>*/
-</script>
+<script th:src="@{/js/admin/home.js}"></script>
 </body>
 </html>

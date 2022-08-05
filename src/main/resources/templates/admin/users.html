@@ -10,14 +10,10 @@
     <header th:replace="fragments/common::header"></header>
 
     <div class="row">
-<!--    <div class="row d-inline-flex flex-row">-->
         <div class="col-12 col-md-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5">
-<!--        <div class="flex-inline w-50">-->
-            <!--        <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-12 d-inline-flex">-->
             <table id="table-users" class="display table table-sm table-hover w-100">
                 <thead>
                 <tr>
-                    <!--                    <th>ID</th>-->
                     <th scope="col" class="text-start">Регистриран</th>
                     <th scope="col" class="text-start">Активен</th>
                     <th scope="col" class="text-center">Емайл</th>
@@ -28,8 +24,6 @@
             </table>
         </div>
         <div class="col-12 col-md-12 col-sm-12 offset-md-1 offset-lg-1 offset-xl-1 offset-xxl-1 col-md-6 col-lg-6 col-xl-6 col-xxl-6">
-<!--        <div class="flex-inline w-50">-->
-            <!--        <div class="col-xxl-8 col-xl-8 col-lg-8 col-md-6 col-sm-12 d-inline-flex">-->
             <div id="form-container" style="display: none">
                 <form class="">
                     <div class="row p-2">
@@ -37,69 +31,61 @@
                             <img referrerpolicy="no-referrer" id="profile-picture" src="#" class="img-thumbnail"
                                  alt="Профилна снимка"/>
                         </div>
-                        <div id="form-role-checkboxes" class="col-10">
-
-                        </div>
+                        <div id="form-role-checkboxes" class="col-10"></div>
                     </div>
                     <div class="row p-2">
                         <div class="col-6 text-end form-group">
-                            <!--                        <div class="col-6 d-inline-flex m-1 form-group">-->
                             <label for="form-email">Имейл:</label>
                             <input type="text" id="form-email" name="Имейл" disabled/>
                         </div>
                         <div class="col-6 text-end form-group">
-                            <!--                        <div class="col-6 d-inline-flex m-1 form-group">-->
                             <label for="form-display-name">Показвано име:</label>
                             <input type="text" id="form-display-name" name="Показвано име"/>
                         </div>
                         <div class="col-6 text-end form-group">
-                            <!--                        <div class="col-6 d-inline-flex m-1 form-group">-->
                             <label for="form-first-name">Име:</label>
                             <input type="text" id="form-first-name" name="Име"/>
                         </div>
                         <div class="col-6 text-end form-group">
-                            <!--                        <div class="col-6 d-inline-flex m-1 form-group">-->
                             <label for="form-last-name">Фамилия:</label>
                             <input type="text" id="form-last-name" name="Фамилия"/>
                         </div>
                     </div>
                     <div class="row p-2 justify-content-end">
                         <div class="col-3 form-group">
-                            <!--                        <div class="d-inline-flex m-1 form-group">-->
                             <label for="form-email-verified">Проверен имейл:</label>
                             <input type="checkbox" id="form-email-verified" name="Проверен имйел">
                         </div>
                         <div class="col-2 form-group">
-                            <!--                        <div class="d-inline-flex m-1 form-group">-->
                             <label for="form-google-id">Гугъл ИД:</label>
                             <input disabled type="checkbox" id="form-google-id" name="Гугъл ИД">
                         </div>
                         <div class="col-2 form-group">
-                            <!--                        <div class="d-inline-flex m-1 form-group">-->
                             <label for="form-enabled">Активиран:</label>
                             <input type="checkbox" id="form-enabled" name="Активиран">
                         </div>
                         <div class="col-4 form-group">
-                            <!--                        <div class="d-inline-flex m-1 form-group">-->
                             <label for="form-email-disabled">Забранен достъм с имейл: </label>
                             <input type="checkbox" id="form-email-disabled" name="Забранено влизане с имейл">
                         </div>
                         <div class="row p-2 justify-content-end">
                             <div class="text-end w-auto col-12 col-sm-5 col-md-5 col-lg-5 col-xl-5 col-xxl-5 form-group">
-                                <!--                            <div class="d-inline-flex m-1 form-group">-->
                                 <label for="form-registered-on">Регистриран на: </label>
-                                <input style="width: 204px" disabled type="datetime-local" id="form-registered-on" name="Регистриран на">
+                                <input style="width: 204px" disabled type="datetime-local" id="form-registered-on"
+                                       name="Регистриран на">
                             </div>
                             <div class="text-end w-auto col-12 col-sm-7 col-md-7 col-lg-7 col-xl-7 col-xxl-7 form-group">
-                                <!--                            <div class="d-inline-flex m-1 form-group">-->
                                 <label for="form-last-seen">Последно влизане: </label>
-                                <input style="width: 204px" disabled type="datetime-local" id="form-last-seen" name="Последно активен">
+                                <input style="width: 204px" disabled type="datetime-local" id="form-last-seen"
+                                       name="Последно активен">
                             </div>
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-6 text-center">
-                                <button type="button" onclick="saveUserDetails()" class="btn btn-primary">Запази</button>
-                                <button type="button" onclick="deleteUserDetails()" class="btn btn-danger">Изтрий</button>
+                                <button type="button" onclick="saveUserDetails()" class="btn btn-primary">Запази
+                                </button>
+                                <button type="button" onclick="deleteUserDetails()" class="btn btn-danger">Изтрий
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -107,216 +93,8 @@
             </div>
         </div>
     </div>
-
     <footer th:replace="fragments/common::footer"></footer>
 </div>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var userDetails;
-
-
-    function loadUserDetails(email) {
-        $.ajax({
-            url: '/api/admin/user',
-            type: 'POST',
-            contentType: "application/json",
-            // data: JSON.stringify(details_data),
-            // srcData: {
-            //     email: email
-            // },
-            data: JSON.stringify({
-                email: email
-            }),
-            // dataType: 'json',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data, status, xhr) {
-                // console.log('data: ', xhr.responseURL);
-                // if (xhr.responseURL.includes('/user/login')) {
-                //     location.reload();
-                // }
-                userDetails = data;
-                // console.log(data);
-                $('#form-container').show();
-                $('#form-email').val(data.email);
-                $('#form-display-name').val(data.displayName);
-                $('#form-first-name').val(data.firstName);
-                $('#form-last-name').val(data.lastName);
-
-                // $('#form-email-verified').prop('checked', data.emailVerified);
-                $('#form-google-id').prop('checked', data.googleId);
-                // $('#form-google-id').val(data.googleId.toString());
-                $('#form-enabled').prop('checked', data.enabled);
-                $('#form-email-disabled').prop('checked', data.emailLoginDisabled);
-                $('#form-registered-on').val(data.registeredOn);
-                $('#form-last-seen').val(data.lastSeen);
-                let profilePicture = $('#profile-picture');
-                if (data.picture) {
-                    profilePicture.show();
-                    profilePicture.attr('src', data.picture);
-                } else {
-                    profilePicture.hide();
-                }
-
-                // Load roles...
-                let roleCheckboxesDiv = $('#form-role-checkboxes');
-                let roleCheckboxHtml = '';
-                for (let role of data.roles) {
-                    roleCheckboxHtml += '<div class="form-check form-check-inline">';
-                    roleCheckboxHtml +=
-                        '<input class="form-check-input" type="checkbox" id="form-role-checkbox-' +
-                        role.name + '" value="' + role.name + '" ';
-                    if (role.selected === true) {
-                        roleCheckboxHtml += 'checked'
-                        console.log(role.selected);
-                    }
-                    if (role.name === "ADMIN") {
-                        roleCheckboxHtml += ' disabled';
-                    }
-                    roleCheckboxHtml += ' >';
-                    roleCheckboxHtml += '<label class="form-check-label" for="form-role-checkbox-' + role.name + '">' + role.name + '</label>';
-                    roleCheckboxHtml += '</div>';
-                }
-                roleCheckboxesDiv.html(roleCheckboxHtml);
-            },
-            error: function (data, status, error) {
-                // alert(request.responseText);
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    // pageAlert('bg-danger', JSON.parse(data.responseText).message,'#page-alert', false);
-                } catch (e) {
-                    location.reload();
-                }
-                // error = true;
-            }
-        });
-    }
-
-    function saveUserDetails() {
-        // e.preventDefault();
-        let details_data = {
-            email: $('#form-email').val(),
-            displayName: $('#form-display-name').val(),
-            firstName: $('#form-first-name').val(),
-            lastName: $('#form-last-name').val(),
-            enabled: $('#form-enabled').prop('checked'),
-            emailLoginDisabled: $('#form-email-disabled').prop('checked'),
-            roles: []
-        };
-        let roleCheckboxes = $('#form-role-checkboxes input');
-        for (let i = 0; i < roleCheckboxes.length; i++) {
-            if (roleCheckboxes[i].checked) {
-                // details_data.roles.push(roleCheckboxes[i].value);
-                details_data.roles.push({
-                    name: roleCheckboxes[i].value,
-                    selected: !!roleCheckboxes[i].checked
-                });
-            }
-        }
-        $.ajax({
-            url: '/api/admin/user',
-            type: 'PUT',
-            contentType: "application/json",
-            data: JSON.stringify(details_data),
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data, status, xhr) {
-                if (xhr.responseURL && xhr.responseURL.includes('/user/login')) {
-                    location.reload();
-                }
-                // console.log(data);
-                newPageAlert("Промените са запазени.", 'success',true);
-                // pageAlert("bg-success", "Промените са запазени.",
-                //     "#page-alert");
-                loadUserDetails(details_data.email);
-            },
-            error: function (data, status, error) {
-                // alert(request.responseText);
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    // pageAlert('bg-danger', JSON.parse(data.responseText).message,'#page-alert', false);
-                } catch (e) {
-                    location.reload();
-                }
-                // error = true;
-            }
-        });
-    }
-
-    function deleteUserDetails() {
-        let details_data = {
-            email: $('#form-email').val()
-        };
-        $.ajax({
-            url: '/api/admin/user',
-            type: 'DELETE',
-            contentType: "application/json",
-            data: JSON.stringify(details_data),
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data) {
-                // console.log(data);
-                location.reload();
-            },
-            error: function (data, status, error) {
-                // alert(request.responseText);
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    // pageAlert('bg-danger', JSON.parse(data.responseText).message,'#page-alert', false);
-                } catch (e) {
-                    location.reload();
-                }
-                // error = true;
-            }
-        });
-    }
-
-    let orderDesc = [1, 'desc'];
-    var table = $('#table-users').on($.fn.dataTable.ext.errMode = function (settings, helpPage, message) {
-        try {
-            // alert.text(JSON.parse(settings.jqXHR.responseText).message);
-            newPageAlert(JSON.parse(settings.jqXHR.responseText).message, 'danger');
-        } catch (ex) {
-            location.reload();
-        }
-    })
-        .DataTable({
-            // "bFilter": false,
-            stateSave: true,
-            order: [orderDesc],
-            columns: [
-                // {name: 'userId', visible: false},
-                {name: "registeredOn", className: 'text-start', searchable: false, orderable: true},
-                {name: "lastSeen", className: 'text-start', searchable: false, orderable: true},
-                {name: "email", className: 'text-center', searchable: true, orderable: false},
-                {name: "receipts", className: 'text-end', searchable: false, orderable: false},
-                {name: "total", className: 'text-end', searchable: false, orderable: false}
-            ],
-            serverSide: true,
-            "processing": false,
-            ajax: {
-                url: '/api/admin/user/all',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-                },
-                type: 'POST',
-                data: function (d) {
-                    return JSON.stringify(d)
-                },
-                contentType: "application/json",
-            }
-        });
-
-    table.on('click', 'tr', function () {
-        let data = table.row(this).data();
-        // console.log(data);
-        loadUserDetails(data[2]);
-    });
-
-    /*]]>*/
-</script>
+<script th:src="@{/js/admin/users.js}"></script>
 </body>
 </html>

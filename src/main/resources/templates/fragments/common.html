@@ -6,10 +6,10 @@
     <title>Receipts</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/css/datatables.min.css"/>
-    <link href="/css/styles.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="/images/favicon.png">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/datatables.min.css}"/>
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.png}">
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-5YB6KVTFG5"></script>
@@ -43,21 +43,21 @@
 
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-nowrap">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">Начало</a>
+                            <a class="nav-link" th:href="@{/}">Начало</a>
                         </li>
                         <th:block sec:authorize="isAuthenticated()">
                             <li sec:authorize="hasAuthority('CAP_ADD_RECEIPT')" class="nav-item">
-                                <a class="nav-link" href="/receipt/add">Добави</a>
+                                <a class="nav-link" th:href="@{/receipt/add}">Добави</a>
                             </li>
                             <li sec:authorize="hasAnyAuthority('CAP_LIST_RECEIPTS', 'CAP_LIST_ALL_RECEIPTS')"
                                 class="nav-item">
-                                <a class="nav-link" href="/receipt/all">Всички</a>
+                                <a class="nav-link" th:href="@{/receipt/all}">Всички</a>
                             </li>
                             <li sec:authorize="hasAuthority('CAP_ADMIN')" class="nav-item">
-                                <a class="nav-link" href="/admin/">Администрация</a>
+                                <a class="nav-link" th:href="@{/admin/}">Администрация</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" href="/user/details"
+                                <a class="nav-link text-dark" th:href="@{/user/details}"
                                    th:text="${#authentication.getPrincipal().getDisplayName()}">User</a>
                             </li>
                             <li class="nav-item">
@@ -68,7 +68,7 @@
                             </li>
                         </th:block>
                         <li sec:authorize="isAnonymous()" class="nav-item">
-                            <a class="text-white btn btn-secondary" href="/user/login">Вход</a>
+                            <a class="text-white btn btn-secondary" th:href="@{/user/login}">Вход</a>
                         </li>
                     </ul>
                 </div>
@@ -83,7 +83,8 @@
             <div class="">
                 <a href="#" onclick="history.back()">Назад</a> -
                 <strong id="document-title"></strong>
-                <small id="page-alert" class="alert d-inline-block d-none alert-success text-center rounded-pill" role="alert"
+                <small id="page-alert" class="alert d-inline-block d-none alert-success text-center rounded-pill"
+                       role="alert"
                        style="display: none"></small>
             </div>
         </div>
@@ -93,30 +94,41 @@
 <footer th:fragment="footer">
     <div class="row pt-5">
         <div class="col text-center">
-            © <th:block th:text="${#dates.format(#dates.createNow(), 'yyyy')}"/>
+            ©
+            <th:block th:text="${#dates.format(#dates.createNow(), 'yyyy')}"/>
             Зинови Бояджиев.
             Всички права запазени.
         </div>
     </div>
     <div class="row">
         <div class="col text-center">
-            <a href="/legal/terms-and-conditions">Общи условия</a>
+            <a th:href="@{/legal/terms-and-conditions}">Общи условия</a>
         </div>
     </div>
     <div class="row">
         <div class="col text-center">
-            <a href="/legal/privacy-policy">Политика за поверителност</a>
+            <a th:href="@{/legal/privacy-policy}">Политика за поверителност</a>
         </div>
     </div>
 
-    <script src="/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript" src="/js/datatables.min.js"></script>
-    <script type="text/javascript" src="/js/chart.min.js"></script>
-    <script type="text/javascript" src="/js/sockjs.min.js"></script>
-    <script type="text/javascript" src="/js/stomp.min.js"></script>
-    <script src="/js/common.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
 
-    <!--    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMp8o1D7z6F6cAs9JXXQ1htNELbvd4QCA&libraries=places&&callback=initMap"></script>-->
+        var csrfHeader = [[${_csrf.headerName}]];
+        var csrfToken = [[${_csrf.token}]];
+        var isAuthenticated;
+
+        /*[# sec:authorize='isFullyAuthenticated()']*/
+        isAuthenticated = true;
+        /*[/]*/
+
+    </script>
+    <script th:src="@{/js/lib/bootstrap.bundle.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/datatables.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/chart.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/sockjs.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/stomp.min.js}"></script>
+    <script th:src="@{/js/common.js}"></script>
 
 </footer>
 </body>

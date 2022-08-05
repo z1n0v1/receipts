@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <title> Вход </title>
     <th:block th:replace="fragments/common::head"></th:block>
 </head>
-<!--<head th:replace="fragments/common::head"></head>-->
 <body>
 <div class="container pt-5">
     <header th:replace="fragments/common::header"></header>
@@ -24,19 +22,16 @@
                     Проверете вашия имейл за потвърждение на регистрацията.
                 </div>
                 <div class="col text-center pt-2">
-
                         <div id="">
-                            <!--                        <span class="label">Влез с </span>-->
-                            <a href="/oauth2/authorization/google">
+                            <a th:href="@{/oauth2/authorization/google}">
                             <div class="g-customBtn">
                                 <span class="g-icon"></span>
                                 <span class="g-buttonText">Влез с Google</span>
                             </div>
                             </a>
                         </div>
-
                 </div>
-                <form action="/user/login" method="post">
+                <form th:action="@{/user/login}" th:method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="form-group">
                         <label for="email" class="form-label">Имейл</label>
@@ -51,18 +46,12 @@
                         <button type="submit" class=" btn btn-primary">Влез</button>
                     </div>
                     <div class="text-center pt-2">
-                        <a href="/user/register">Регистрация</a>
+                        <a th:href="@{/user/register}">Регистрация</a>
                     </div>
-
                 </form>
-
-
             </div>
-
         </div>
-
     </main>
-
     <footer th:replace="fragments/common::footer"></footer>
 </div>
 </body>

@@ -10,7 +10,7 @@
     <header th:replace="fragments/common::header"></header>
     <div class="row">
         <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
-            <img th:src="${receipt.imageUrl}" id="admin-receipt-img" class="img-thumbnail w-100"/>
+            <img alt="Касова бележка" th:src="${receipt.imageUrl}" id="admin-receipt-img" class="img-thumbnail w-100"/>
             <canvas id="admin-receipt-canvas" class="h-auto w-100"></canvas>
         </div>
         <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
@@ -38,12 +38,12 @@
 
         </div>
         <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-12">
-            <!--    <div class="col-6">-->
             <pre th:text="${receipt.receiptLines}"></pre>
         </div>
     </div>
     <footer th:replace="fragments/common::footer"></footer>
 </div>
+<script th:src="@{/js/admin/receipt-view.js}"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
 
@@ -53,8 +53,5 @@
     });
     /*]]>*/
 </script>
-</body>
-</html>
-
 </body>
 </html>

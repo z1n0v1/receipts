@@ -12,7 +12,7 @@
     <div class="row">
         <div class="d-flex justify-content-center mt-3">
             <div class="alert-success" th:if="${message} != null" th:text="${message}"></div>
-            <form method="POST" enctype="multipart/form-data" action="/receipt/add">
+            <form th:method="POST" enctype="multipart/form-data" th:action="@{/receipt/add}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="form-group">
                     <button id="btn-upload" class="btn btn-primary" type="button" onclick="file_upload()">
@@ -35,71 +35,7 @@
         </div>
     </div>
     <footer th:replace="fragments/common::footer"></footer>
-    <script th:inline="javascript">
-
-       liveUpdatesInit();
-
-        function file_upload() {
-            let upBtn = $('#btn-upload');
-            upBtn.disabled = true;
-            let spinner = $('#spinner-upload');
-            spinner.removeClass('d-none');
-
-            let xhr = new XMLHttpRequest();
-            let data = new FormData();
-
-            input = document.getElementById('customFile');
-            let alert = $('#alert');
-            if (!input.value) {
-
-                newPageAlert("Не сте избрали касови бележки!", "danger");
-
-                upBtn.disabled = false;
-                spinner.addClass('d-none');
-                return;
-            }
-            for (let f of input.files) {
-                data.append('file', f);
-            }
-            xhr.open("post", "/api/receipt");
-            // xhr.channel.QueryInterface(Components.interfaces.nsIHttpChannel).redirectionLimit = 0;
-            // xhr.channel.QueryInterface(Components.interfaces.nsIHttpChannel).redirectionLimit = 0;
-            xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            xhr.send(data);
-
-        xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        if (xhr.responseURL.includes('/user/login')) {
-                            location.reload();
-                            return;
-                        }
-                        sleep(4000).then(() => {
-                            if (uploadErrors) {
-                                newPageAlert('Има грешки при качването на касовите бележки!',
-                                    'warning', true);
-                                uploadErrors = false;
-                            } else {
-                                newPageAlert('Качването на касовите бележки е успешно!', 'success', true);
-                            }
-                            spinner.css('display', 'none');
-
-                        });
-                        upBtn.disabled = false;
-                        spinner.css('display', 'none');
-                    } else{
-                        try {
-                            newPageAlert(JSON.parse(xhr.responseText).message, "danger", true);
-                        } catch (e) {
-                            location.reload();
-                        }
-                        upBtn.disabled = false;
-                        spinner.css('display', 'none');
-                    }
-                }
-            };
-        }
-    </script>
+    <script th:src="@{/js/receipt/add.js}"></script>
 </div>
 </body>
 </html>

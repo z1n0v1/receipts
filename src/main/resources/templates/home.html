@@ -47,7 +47,6 @@
             <div>
                 <h5>Брой магазини: <span id="total-stores"></span></h5>
             </div>
-
         </div>
         <div class="col-xxl-8 col-xl-8 col-lg-6 col-md-6 col-sm-12">
             <div class="row">
@@ -70,116 +69,10 @@
 
             </div>
         </div>
-
-
     </div>
     <th:block th:text="${principal}"></th:block>
     <footer th:replace="fragments/common::footer"></footer>
 </div>
 </body>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-
-    var csrfHeader = [[${_csrf.headerName}]];
-    var csrfToken = [[${_csrf.token}]];
-
-    liveUpdatesInit();
-
-    $(document).ready(function () {
-
-
-
-        $.ajax({
-            url: '/api/home/expenses/last-month/by-week/line',
-            type: 'GET',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data) {
-                let ctx = document.getElementById('last-month-expenses-by-week');
-                new Chart(ctx, data);
-            },
-            error: function (data) {
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    receiptDeleteAction = true;
-                } catch (ex) {
-                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
-                    receiptDeleteAction = true;
-                }
-            }
-        });
-
-        $.ajax({
-            url: '/api/home/expenses/categories/last-month/pie',
-            type: 'GET',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data) {
-                let ctx = document.getElementById('monthly-expenses-by-type');
-                new Chart(ctx, data);
-            },
-            error: function (data) {
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    receiptDeleteAction = true;
-                } catch (ex) {
-                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
-                    receiptDeleteAction = true;
-                }
-            }
-        });
-
-        $.ajax({
-            url: '/api/home/expenses/categories/total/pie',
-            type: 'GET',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data) {
-                let ctx = document.getElementById('total-expenses-by-type');
-                new Chart(ctx, data);
-            },
-            error: function (data) {
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    receiptDeleteAction = true;
-                } catch (ex) {
-                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
-                    receiptDeleteAction = true;
-                }
-            }
-        });
-
-        $.ajax({
-            url: '/api/home/statistics',
-            type: 'GET',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader([[${_csrf.headerName}]], [[${_csrf.token}]]);
-            },
-            success: function (data) {
-                $('#last-month-expenses').text(data.lastMonthExpenses);
-                $('#total-expenses').text(data.totalExpenses);
-                $('#last-month-receipts').text(data.lastMonthReceipts);
-                $('#total-receipts').text(data.totalReceipts);
-                $('#total-sellers').text(data.numCompanies);
-                $('#total-stores').text(data.numStores);
-            },
-            error: function (data) {
-                try {
-                    newPageAlert(data.responseJSON.message, 'danger');
-                    receiptDeleteAction = true;
-                } catch (ex) {
-                    newPageAlert('Нещо се обърка. Моля опитайте отново.', 'danger');
-                    receiptDeleteAction = true;
-                }
-            }
-
-        })
-    });
-
-
-    /*]]>*/
-</script>
+<script th:src="@{/js/home.js}"></script>
 </html>
