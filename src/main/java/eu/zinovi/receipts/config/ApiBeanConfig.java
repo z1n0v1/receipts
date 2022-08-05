@@ -6,7 +6,7 @@ import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
 import eu.zinovi.receipts.util.impl.GoogleCloudStorage;
 import eu.zinovi.receipts.util.impl.GoogleReceiptProcessApi;
-import eu.zinovi.receipts.util.impl.RegisterBGApiImpl;
+import eu.zinovi.receipts.util.impl.RegisterBGPapagalScraper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +31,6 @@ public class ApiBeanConfig {
 
     @Bean
     public RegisterBGApi registerBGApi() {
-        return new RegisterBGApiImpl();
+        return new RegisterBGPapagalScraper();
     }
 }

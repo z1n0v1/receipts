@@ -8,7 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class RegisterBGApiImpl implements RegisterBGApi {
+public class RegisterBGPapagalScraper implements RegisterBGApi {
     @Override
     public CompanyRegisterBGApiServiceModel getCompanyInfo(String eik) throws EntityNotFoundException {
         CompanyRegisterBGApiServiceModel companyRegisterBGApiServiceModel = new CompanyRegisterBGApiServiceModel();
