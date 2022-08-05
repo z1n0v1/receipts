@@ -10,12 +10,12 @@ import java.util.Objects;
 
 @Getter @Setter @ToString @NoArgsConstructor @RequiredArgsConstructor @Entity
 @Table(name = "addresses", schema = "public", indexes = {
-        @Index(columnList = "value", unique = true)
+        @Index(columnList = "address_string", unique = true)
 })
 public class Address extends BaseEntity {
 
     @NonNull
-    @Column(name = "value", nullable = false, unique = true)
+    @Column(name = "address_string", nullable = false, unique = true)
     private String value;
 
     @Column(name = "city")
