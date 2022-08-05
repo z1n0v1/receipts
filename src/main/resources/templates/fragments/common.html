@@ -114,11 +114,14 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
 
-        var csrfHeader = [[${_csrf.headerName}]];
-        var csrfToken = [[${_csrf.token}]];
+        var csrfHeader;
+        var csrfToken;
         var isAuthenticated;
 
         /*[# sec:authorize='isFullyAuthenticated()']*/
+        csrfHeader = [[${_csrf.headerName}]];
+        csrfToken = [[${_csrf.token}]];
+
         isAuthenticated = true;
         /*[/]*/
 

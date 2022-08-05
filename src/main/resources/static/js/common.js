@@ -1,14 +1,13 @@
 
-var sockJS = new SockJS('/alert-messages');
-
 $(document).ready(function () {
     $('#document-title').text(document.title);
     if (isAuthenticated) {
         liveUpdatesInit();
-        $(window).on('beforeunload', function () {
-            sockJS.close();
-        });
     }
+        // $(window).on('beforeunload', function () {
+        //     sockJS.close();
+        // });
+
 });
 
 function uploadReceipt(e) {
@@ -55,7 +54,8 @@ function uploadReceipt(e) {
 }
 
 function liveUpdatesInit() {
-    var stompClient = Stomp.over(sockJS);
+    let sockJS = new SockJS('/alert-messages');
+    let stompClient = Stomp.over(sockJS);
     stompClient.debug = null
     var uploadErrors = false;
 
