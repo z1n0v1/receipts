@@ -16,6 +16,7 @@ public interface ReceiptToAdminView {
             @Mapping(source = "company.eik", target = "companyEik"),
             @Mapping(source = "store.name", target = "storeName"),
             @Mapping(source = "store.address.value", target = "storeAddress"),
+            @Mapping(source = "dateOfPurchase", target = "date"),
             @Mapping(source = "itemsTotal", target = "itemsTotal")
     })
     AdminReceiptView map(Receipt receipt);
