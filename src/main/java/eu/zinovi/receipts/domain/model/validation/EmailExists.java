@@ -7,11 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.EMAIL_DONT_EXIST;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Constraint(validatedBy = EmailExistsValidator.class)
 public @interface EmailExists {
-    String message() default "Имейл адресът не е наличен в базата на данни.";
+    String message() default EMAIL_DONT_EXIST;
 
     Class<?>[] groups() default {};
 

@@ -7,11 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.EMAIL_EXISTS;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Constraint(validatedBy = EmailIsFreeValidator.class)
 public @interface EmailIsFree {
-    String message() default "Имейла вече съществува";
+    String message() default EMAIL_EXISTS;
 
     Class<?>[] groups() default {};
 

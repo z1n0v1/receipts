@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.REQUIRED_ROLE_NAME;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminRoleDeleteBindingModel {
 
-    @NotBlank(message = "Ролята не може да е празна")
+    @NotBlank(message = REQUIRED_ROLE_NAME)
     @RoleExists
     private String name;
 

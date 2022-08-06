@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_RECEIPT_EDIT;
+
 @RestController
 @RequestMapping("/api/company")
 public class CompanyRestController {
@@ -33,7 +35,7 @@ public class CompanyRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_EDIT_RECEIPT")) {
-            throw new AccessDeniedException("Нямате право да редактирате касовата бележка");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

@@ -12,28 +12,30 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminUserSaveBindingModel {
 
-    @NotBlank(message = "Името е задължително")
+    @NotBlank(message = REQUIRED_NAME)
     private String firstName;
 
-    @NotBlank(message = "Фамилията е задължителна")
+    @NotBlank(message = REQUIRED_LAST_NAME)
     private String lastName;
 
-    @NotBlank(message = "Псевдонима е задължителен")
+    @NotBlank(message = REQUIRED_DISPLAY_NAME)
     private String displayName;
 
-    @Email(message = "Невалиден имейл")
-    @EmailExists(message = "Няма потребител с такъв имейл")
+    @Email(message = INVALID_EMAIL)
+    @EmailExists(message = USER_EMAIL_DONT_EXIST)
     private String email;
 
-    @NotNull(message = "Активиран е задължително поле")
+    @NotNull(message = REQUIRED_IS_ACTIVE)
     private Boolean enabled;
 
-    @NotNull(message = "Разрешен/Забранен достъп с имейл е задължително поле")
+    @NotNull(message = REQUIRED_IS_EMAIL_LOGIN_DISABLED)
     private Boolean emailLoginDisabled;
 
-    @NotEmpty(message = "Потребителя трябва да има поне една роля")
+    @NotEmpty(message = REQUIRED_MINIMUM_ONE_ROLE)
     private Collection<@Valid AdminUserRoleBindingModel> roles;
 }

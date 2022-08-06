@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.INVALID_EIK;
+
 @Data @RequiredArgsConstructor @NoArgsConstructor
 public class ReceiptEikBindingModel {
 
     @NonNull
-    @NotNull(message = "Невалиден ЕИК")
-    @Pattern(regexp = "^[0-9]{9}$", message = "Невалиден ЕИК")
+    @NotNull(message = INVALID_EIK)
+    @Pattern(regexp = "^[0-9]{9}$", message = INVALID_EIK)
     private String eik;
 }

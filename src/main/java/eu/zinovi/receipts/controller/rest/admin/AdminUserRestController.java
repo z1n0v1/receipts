@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminUserRestController {
@@ -45,7 +47,7 @@ public class AdminUserRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_USERS")) {
-            throw new AccessDeniedException("Нямате право да разглеждате детайлите на потребителя");
+            throw new AccessDeniedException(NO_PERMISSION_USER_DETAILS);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -62,7 +64,7 @@ public class AdminUserRestController {
             BindingResult bindingResult) {
 
         if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_LIST_USERS"))) {
-            throw new AccessDeniedException("Нямате право да разглеждате списъка с потребители");
+            throw new AccessDeniedException(NO_PERMISSION_USER_LIST);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -78,7 +80,7 @@ public class AdminUserRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_ALL_USERS")) {
-            throw new AccessDeniedException("Нямате право да редактирате детайлите на потребителя");
+            throw new AccessDeniedException(NO_PERMISSION_USER_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -97,7 +99,7 @@ public class AdminUserRestController {
             BindingResult bindingResult) {
 
         if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_DELETE_USER"))) {
-            throw new AccessDeniedException("Нямате право да триете потребители");
+            throw new AccessDeniedException(NO_PERMISSION_USER_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

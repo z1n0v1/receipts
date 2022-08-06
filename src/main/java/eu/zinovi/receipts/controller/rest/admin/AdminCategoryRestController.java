@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminCategoryRestController {
@@ -45,7 +47,7 @@ public class AdminCategoryRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADD_CATEGORY")) {
-            throw new AccessDeniedException("Нямате право да добавяте категории");
+            throw new AccessDeniedException(NO_PERMISSION_CATEGORY_ADD);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -62,7 +64,7 @@ public class AdminCategoryRestController {
     public ResponseEntity<List<AdminCategoryView>> allCategories() {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CATEGORIES")) {
-            throw new AccessDeniedException("Нямате право да разглеждате списъка с категории");
+            throw new AccessDeniedException(NO_PERMISSION_CATEGORY_LIST);
         }
 
         return ResponseEntity.ok(categoryService.getAdminAllCategories());
@@ -75,7 +77,7 @@ public class AdminCategoryRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_CATEGORY")) {
-            throw new AccessDeniedException("Нямате право да редактирате категориите");
+            throw new AccessDeniedException(NO_PERMISSION_CATEGORY_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -94,7 +96,7 @@ public class AdminCategoryRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_DELETE_CATEGORY")) {
-            throw new AccessDeniedException("Нямате право да триете категории");
+            throw new AccessDeniedException(NO_PERMISSION_CATEGORY_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

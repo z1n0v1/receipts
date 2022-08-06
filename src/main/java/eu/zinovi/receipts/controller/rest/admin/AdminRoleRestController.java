@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.List;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminRoleRestController {
@@ -45,7 +47,7 @@ public class AdminRoleRestController {
             BindingResult bindingResult) {
 
         if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_ADD_ROLE"))) {
-            throw new AccessDeniedException("Нямате право да добавяте роли");
+            throw new AccessDeniedException(NO_PERMISSION_ROLE_ADD);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -62,7 +64,7 @@ public class AdminRoleRestController {
     public ResponseEntity<List<AdminRoleView>> listRoles() {
 
         if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_LIST_ROLES"))) {
-            throw new AccessDeniedException("Нямате право да разглеждате списъка с роли");
+            throw new AccessDeniedException(NO_PERMISSION_ROLE_LIST);
         }
 
         return ResponseEntity.ok(adminService.listRoles());
@@ -75,7 +77,7 @@ public class AdminRoleRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_ROLE")) {
-            throw new AccessDeniedException("Нямате право да редактирате роли");
+            throw new AccessDeniedException(NO_PERMISSION_ROLE_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -94,7 +96,7 @@ public class AdminRoleRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_DELETE_ROLE")) {
-            throw new AccessDeniedException("Нямате право да изтривате роли");
+            throw new AccessDeniedException(NO_PERMISSION_ROLE_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

@@ -11,24 +11,26 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class ItemAddBindingModel {
-    @NotNull(message = "Номера на бележката е задължителен")
+    @NotNull(message = REQUIRED_RECEIPT_ID)
     @ReceiptExists
     private String receiptId;
 
-    @NotBlank(message = "Категорията е задължителна")
+    @NotBlank(message = REQUIRED_CATEGORY_NAME)
     @CategoryExists
     private String category;
 
-    @NotNull(message = "Невалидно име на артикул")
+    @NotNull(message = INVALID_ITEM_NAME)
     private String name;
 
-    @NotNull(message = "Невалидно количеество на артикул")
-    @Positive(message = "Невалидно количество на артикул")
+    @NotNull(message = INVALID_ITEM_QUANTITY)
+    @Positive(message = INVALID_ITEM_QUANTITY)
     private BigDecimal quantity;
 
-    @NotNull(message = "Невалидна цена на артикул")
-    @Positive(message = "Невалидна цена на артикул")
+    @NotNull(message = INVALID_ITEM_PRICE)
+    @Positive(message = INVALID_ITEM_PRICE)
     private BigDecimal price;
 }

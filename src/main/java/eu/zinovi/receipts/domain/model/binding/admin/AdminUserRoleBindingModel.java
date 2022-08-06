@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.REQUIRED_ROLE_NAME;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminUserRoleBindingModel {
 
-    @NotNull
+    @NotNull(message = REQUIRED_ROLE_NAME)
     @RoleExists
     private String name;
 

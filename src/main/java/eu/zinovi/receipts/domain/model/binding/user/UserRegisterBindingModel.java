@@ -9,28 +9,30 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data
-@FieldMatch(first = "password", second = "confirmPassword", message = "Паролите не съвпадат")
+@FieldMatch(first = "password", second = "confirmPassword", message = INVALID_PASSWORD_MATCH)
 public class UserRegisterBindingModel {
-    @NotNull(message = "Името е задължително")
-    @Size(min = 3, max = 20, message = "Името трябва да е между 3 и 20 символа")
+    @NotNull(message = REQUIRED_NAME)
+    @Size(min = 3, max = 20, message = INVALID_NAME_LENGTH)
     private String firstName;
 
-    @NotNull(message = "Фамилията е задължителна")
-    @Size(min = 3, max = 20, message = "Фамилията трябва да е между 3 и 20 символа")
+    @NotNull(message = REQUIRED_LAST_NAME)
+    @Size(min = 3, max = 20, message = INVALID_LAST_NAME_LENGTH)
     private String lastName;
 
-    @NotNull(message = "Псевдонима е задължителен")
-    @Size(min = 3, max = 20, message = "Псевдонима трябва да е между 3 и 20 символа")
+    @NotNull(message = REQUIRED_DISPLAY_NAME)
+    @Size(min = 3, max = 20, message = INVALID_DISPLAY_NAME_LENGTH)
     private String displayName;
 
-    @EmailIsFree(message = "Това имейл вече съществува")
-    @NotBlank(message = "Имейла е задължителен")
-    @Email(message = "Невалиден имейл")
+    @EmailIsFree
+    @NotBlank(message = REQUIRED_EMAIL)
+    @Email(message = INVALID_EMAIL)
     private String email;
 
-    @NotNull(message = "Паролата е задължителна")
-    @Size(min = 6, max = 40, message = "Паролата трябва да е между 6 и 40 символа")
+    @NotNull(message = REQUIRED_PASSWORD)
+    @Size(min = 6, max = 200, message = INVALID_PASSWORD_LENGTH)
     private String password;
 
     private String confirmPassword;

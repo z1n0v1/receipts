@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 
 import java.util.HashSet;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,7 +62,7 @@ public class AdminRoleRestControllerIT {
                                 .contentType("application/json")
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Нямате право да добавяте роли"));
+                .andExpect(jsonPath("$.message").value(NO_PERMISSION_ROLE_ADD));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Правото не съществува\n"));
+                        INVALID_CAPABILITY + "\n"));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате списъка с роли"));
+                        NO_PERMISSION_ROLE_LIST));
     }
 
     @Test
@@ -136,7 +137,7 @@ public class AdminRoleRestControllerIT {
                                 .contentType("application/json")
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Нямате право да редактирате роли"));
+                .andExpect(jsonPath("$.message").value(NO_PERMISSION_ROLE_EDIT));
     }
 
     @Test
@@ -154,7 +155,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Правото не съществува\n"));
+                        INVALID_CAPABILITY + "\n"));
     }
 
     @Test
@@ -183,7 +184,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да изтривате роли"));
+                        NO_PERMISSION_ROLE_DELETE));
     }
 
     @Test
@@ -196,7 +197,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Ролята не съществува\n"));
+                        INVALID_ROLE + "\n"));
     }
 
     @Test
@@ -209,7 +210,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Не можете да изтриете ролите когато има потребители с тази роля"));
+                        NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS));
     }
 
     @Test

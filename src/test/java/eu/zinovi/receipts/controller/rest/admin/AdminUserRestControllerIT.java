@@ -27,6 +27,7 @@ import javax.transaction.Transactional;
 
 import java.util.HashSet;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -64,7 +65,7 @@ public class AdminUserRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате детайлите на потребителя"));
+                        NO_PERMISSION_USER_DETAILS));
     }
 
     @Test
@@ -77,7 +78,7 @@ public class AdminUserRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Имейл адресът трябва да е валиден.\nНяма такъв потребител.\n"));
+                        INVALID_EMAIL + "\n" + INVALID_USER + "\n"));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class AdminUserRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате списъка с потребители"));
+                        NO_PERMISSION_USER_LIST));
     }
 
     @Test
@@ -164,7 +165,7 @@ public class AdminUserRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Началото на списъка трябва да е положително число\n"));
+                        NEGATIVE_LIST_START_INDEX + "\n"));
     }
 
     @Test
@@ -222,7 +223,7 @@ public class AdminUserRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да редактирате детайлите на потребителя"));
+                        NO_PERMISSION_USER_EDIT));
     }
 
     @Test
@@ -244,7 +245,7 @@ public class AdminUserRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Името е задължително\n"));
+                        REQUIRED_NAME + "\n"));
     }
 
     @Test
@@ -277,7 +278,7 @@ public class AdminUserRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да триете потребители"));
+                        NO_PERMISSION_USER_DELETE));
     }
 
     @Test
@@ -290,7 +291,7 @@ public class AdminUserRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Имейл е задължителен\nПотребителят не съществува\n"));
+                        REQUIRED_EMAIL +"\n" + INVALID_USER + "\n"));
     }
 
     @Test

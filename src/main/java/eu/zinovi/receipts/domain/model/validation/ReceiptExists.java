@@ -7,11 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.INVALID_RECEIPT;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Constraint(validatedBy = ReceiptExistsValidator.class)
 public @interface ReceiptExists {
-    String message() default "Касовата бележка не съществува";
+    String message() default INVALID_RECEIPT;
 
     Class<?>[] groups() default {};
 

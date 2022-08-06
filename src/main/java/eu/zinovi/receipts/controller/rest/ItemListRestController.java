@@ -23,6 +23,8 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @RestController
 @RequestMapping("/api")
 public class ItemListRestController {
@@ -55,7 +57,7 @@ public class ItemListRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADD_ITEM")) {
-            throw new AccessDeniedException("Нямате право да добавяте продукти");
+            throw new AccessDeniedException(NO_PERMISSION_ITEM_ADD);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -73,7 +75,7 @@ public class ItemListRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_LIST_ITEMS")) {
-            throw new AccessDeniedException("Нямате право да разглеждате касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_VIEW);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -89,7 +91,7 @@ public class ItemListRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_EDIT_ITEM")) {
-            throw new AccessDeniedException("Нямате право да променяте продукти");
+            throw new AccessDeniedException(NO_PERMISSION_ITEM_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -108,7 +110,7 @@ public class ItemListRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_DELETE_ITEM")) {
-            throw new AccessDeniedException("Нямате право да триете артикули");
+            throw new AccessDeniedException(NO_PERMISSION_ITEM_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -166,7 +167,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да добавяте продукти"));
+                        NO_PERMISSION_ITEM_ADD));
     }
 
     @Test
@@ -210,7 +211,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Категорията не съществува\n"));
+                        INVALID_CATEGORY + "\n"));
     }
 
     @Test
@@ -247,7 +248,7 @@ public class ItemListControllerIT {
                         .content(gson.toJson(fromDatatable)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате касови бележки"));
+                        NO_PERMISSION_RECEIPT_VIEW));
     }
 
     @Test
@@ -285,7 +286,7 @@ public class ItemListControllerIT {
                         .content(gson.toJson(fromDatatable)))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Трябва да има идентификатор на заявката\n"));
+                        MISSING_REQUEST_ID + "\n"));
     }
 
     @Test
@@ -341,7 +342,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да променяте продукти"));
+                        NO_PERMISSION_ITEM_EDIT));
     }
 
     @Test
@@ -361,7 +362,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Касовата бележка не съществува\nНе сте подали номер на касовата бележка\n"));
+                        INVALID_RECEIPT + "\n" +INVALID_RECEIPT_ID + "\n"));
     }
 
     @Test
@@ -403,7 +404,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да триете артикули"));
+                        NO_PERMISSION_ITEM_DELETE));
     }
 
     @Test
@@ -419,7 +420,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Касовата бележка не съществува\nНомера на касовата бележка е задължителен\n"));
+                        INVALID_RECEIPT + "\n"+ REQUIRED_RECEIPT_ID +"\n"));
     }
 
     @Test

@@ -12,7 +12,6 @@ import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.service.MessagingService;
 import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +21,8 @@ import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 
 @RestController
 @RequestMapping("/api")
@@ -46,7 +47,7 @@ public class ReceiptRestController {
             @RequestParam("file") MultipartFile[] files) {
 
         if (!userService.checkCapability("CAP_ADD_RECEIPT")) {
-            throw new AccessDeniedException("Нямате право да добавяте касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_ADD);
         }
 
         Set<UUID> receiptUuids = new HashSet<>();
@@ -77,7 +78,7 @@ public class ReceiptRestController {
 
         if (!userService.checkCapability("CAP_LIST_RECEIPTS") &&
                 !userService.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
-            throw new AccessDeniedException("Нямате право да разглеждате касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_VIEW);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -97,7 +98,7 @@ public class ReceiptRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_EDIT_RECEIPT")) {
-            throw new AccessDeniedException("Нямате право да редактирате касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -116,7 +117,7 @@ public class ReceiptRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_DELETE_RECEIPT")) {
-            throw new AccessDeniedException("Нямате право да изтривате касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_CAPABILITY_LIST;
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_RECEIPT_LIST;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminHomeRestController {
@@ -32,7 +35,7 @@ public class AdminHomeRestController {
             BindingResult bindingResult) {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADMIN_LIST_RECEIPTS")) {
-            throw new AccessDeniedException("Нямате право да разглеждате списъка с касови бележки");
+            throw new AccessDeniedException(NO_PERMISSION_RECEIPT_LIST);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
@@ -47,7 +50,7 @@ public class AdminHomeRestController {
     public ResponseEntity<List<AdminCapabilityView>> getCapabilities() {
 
         if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CAPABILITIES")) {
-            throw new AccessDeniedException("Нямате право да разглеждате списъка с права");
+            throw new AccessDeniedException(NO_PERMISSION_CAPABILITY_LIST);
         }
 
         return ResponseEntity.ok(adminService.getCapabilities());

@@ -7,11 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.INVALID_CATEGORY;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Constraint(validatedBy = CategoryExistsValidator.class)
 public @interface CategoryExists {
-    String message() default "Категорията не съществува";
+    String message() default INVALID_CATEGORY;
 
     Class<?>[] groups() default {};
 

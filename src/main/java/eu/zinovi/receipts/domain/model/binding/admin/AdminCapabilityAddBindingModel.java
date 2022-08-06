@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.EMPTY_CAPABILITY;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminCapabilityAddBindingModel {
 
-    @NotBlank(message = "Правото не може да е празно")
+    @NotBlank(message = EMPTY_CAPABILITY)
     @CapabilityExists
     String name;
 }

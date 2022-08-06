@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.transaction.Transactional;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,7 +68,7 @@ public class AdminCategoryRestControllerIT {
                                 .contentType("application/json")
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Нямате право да добавяте категории"));
+                .andExpect(jsonPath("$.message").value(NO_PERMISSION_CATEGORY_ADD));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class AdminCategoryRestControllerIT {
                                 .contentType("application/json")
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
-                .andExpect(jsonPath("$.message").value("Невалиден цвят на категорията\n"));
+                .andExpect(jsonPath("$.message").value(INVALID_CATEGORY_COLOR + "\n"));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class AdminCategoryRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message")
-                        .value("Нямате право да разглеждате списъка с категории"));
+                        .value(NO_PERMISSION_CATEGORY_LIST));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class AdminCategoryRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да редактирате категориите"));
+                        NO_PERMISSION_CATEGORY_EDIT));
     }
 
     @Test
@@ -144,7 +145,7 @@ public class AdminCategoryRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Невалиден цвят на категорията\n"));
+                        INVALID_CATEGORY_COLOR + "\n"));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class AdminCategoryRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да триете категории"));
+                        NO_PERMISSION_CATEGORY_DELETE));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class AdminCategoryRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Невалидно ID на категорията\n"));
+                        INVALID_CATEGORY_ID + "\n"));
     }
 
     @Test

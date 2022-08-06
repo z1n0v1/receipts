@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @RestController
 @RequestMapping("/api/home")
 public class HomeRestController {
@@ -27,7 +29,7 @@ public class HomeRestController {
     public ResponseEntity<PieChart> monthlyExpensesPieChart() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате месечните разходи по категории");
+            throw new AccessDeniedException(NO_PERMISSION_MONTHLY_STATS_BY_CATEGORIES);
         }
 
         return ResponseEntity.ok(expensesService.monthlyExpensesByCategoryPieChart());
@@ -38,7 +40,7 @@ public class HomeRestController {
     public ResponseEntity<PieChart> totalExpensesPieChart() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате разходите по категории");
+            throw new AccessDeniedException(NO_PERMISSION_STATS_BY_CATEGORIES);
         }
 
         return ResponseEntity.ok(expensesService.totalExpensesByCategoryPieChart());
@@ -49,7 +51,7 @@ public class HomeRestController {
     public ResponseEntity<LineChart> lastMonthExpensesByWeekLineChart() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате седмичните разходи през последния месец");
+            throw new AccessDeniedException(NO_PERMISSION_STATS_MONTH_BY_WEEK);
         }
 
         return ResponseEntity.ok(expensesService.lastMonthExpensesByWeekLineChart());
@@ -60,7 +62,7 @@ public class HomeRestController {
     public ResponseEntity<HomeStatisticsView> statistics() {
 
         if (!userService.checkCapability("CAP_VIEW_HOME")) {
-            throw new AccessDeniedException("Нямате право да разглеждате статистиката");
+            throw new AccessDeniedException(NO_PERMISSION_STATS_VIEW);
         }
 
         return ResponseEntity.ok(expensesService.statistics());

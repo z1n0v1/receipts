@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.transaction.Transactional;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.INVALID_EIK;
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_RECEIPT_EDIT;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -65,7 +67,7 @@ public class CompanyRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да редактирате касовата бележка"));
+                        NO_PERMISSION_RECEIPT_EDIT));
     }
 
     @Test
@@ -77,7 +79,7 @@ public class CompanyRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Невалиден ЕИК\n"));
+                        INVALID_EIK + "\n"));
     }
 
     @Test

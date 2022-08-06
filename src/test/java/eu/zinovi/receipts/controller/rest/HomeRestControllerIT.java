@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.transaction.Transactional;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,7 +41,7 @@ public class HomeRestControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/home/expenses/categories/last-month/pie"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате месечните разходи по категории"));
+                        NO_PERMISSION_MONTHLY_STATS_BY_CATEGORIES));
     }
 
     @Test
@@ -56,7 +57,7 @@ public class HomeRestControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/home/expenses/categories/total/pie"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате разходите по категории"));
+                        NO_PERMISSION_STATS_BY_CATEGORIES));
     }
 
     @Test
@@ -72,7 +73,7 @@ public class HomeRestControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/home/expenses/last-month/by-week/line"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате седмичните разходи през последния месец"));
+                        NO_PERMISSION_STATS_MONTH_BY_WEEK));
     }
 
     @Test
@@ -88,7 +89,7 @@ public class HomeRestControllerIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/home/statistics"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате статистиката"));
+                        NO_PERMISSION_STATS_VIEW));
     }
 
     @Test

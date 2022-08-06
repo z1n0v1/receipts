@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -143,7 +144,7 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да добавяте касови бележки"));
+                        NO_PERMISSION_RECEIPT_ADD));
     }
 
     // TODO: fix the file upload tests,
@@ -215,7 +216,7 @@ public class ReceiptRestControllerIT {
                         .content(gson.toJson(fromDatatable)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате касови бележки"));
+                        NO_PERMISSION_RECEIPT_VIEW));
     }
 
     @Test
@@ -257,7 +258,7 @@ public class ReceiptRestControllerIT {
                         .content(gson.toJson(fromDatatable)))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Началото на списъка трябва да е положително число\n"));
+                        NEGATIVE_LIST_START_INDEX + "\n"));
     }
 
     @Test
@@ -358,7 +359,7 @@ public class ReceiptRestControllerIT {
                         .content(gson.toJson(receiptEditBindingModel)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да редактирате касови бележки"));
+                        NO_PERMISSION_RECEIPT_EDIT));
     }
 
     @Test
@@ -379,7 +380,7 @@ public class ReceiptRestControllerIT {
                         .content(gson.toJson(receiptEditBindingModel)))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "ЕИК трябва да е съставен от 9 цифри\n"));
+                        INVALID_EIK + "\n"));
     }
 
     @Test
@@ -414,7 +415,7 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да изтривате касови бележки"));
+                        NO_PERMISSION_RECEIPT_DELETE));
     }
 
     @Test
@@ -427,7 +428,7 @@ public class ReceiptRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Касовата бележка не съществува\n"));
+                        INVALID_RECEIPT + "\n"));
     }
 
 

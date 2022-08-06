@@ -8,30 +8,32 @@ import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Getter @Setter @ToString @EqualsAndHashCode @NoArgsConstructor @AllArgsConstructor
 public class ReceiptEditBindingModel {
 
-    @NotNull(message = "Не е подаден идентификатор на касовия бележка")
+    @NotNull(message = REQUIRED_RECEIPT_ID)
     @ReceiptExists
     private String id;
 
-    @NotNull(message = "Не е подаден ЕИК на компанията")
-    @Pattern(regexp = "^[0-9]{9}$", message = "ЕИК трябва да е съставен от 9 цифри")
+    @NotNull(message = REQUIRED_EIK)
+    @Pattern(regexp = "^[0-9]{9}$", message = INVALID_EIK)
     private String eik;
 
-    @NotBlank(message = "Не е подадено името на магазина")
+    @NotBlank(message = REQUIRED_STORE_NAME)
     private String name;
 
-    @NotNull(message = "Не е подадена сумата на касовата бележка")
-    @PositiveOrZero(message = "Не е подадена сума на касовата бележка")
+    @NotNull(message = REQUIRED_RECEIPT_SUM)
+    @PositiveOrZero(message = INVALID_RECEIPT_SUM)
     private BigDecimal total;
 
 
-    @NotBlank(message = "Не е подаден адреса на магазина")
+    @NotBlank(message = REQUIRED_STORE_ADDRESS)
     private String address;
 
-    @NotNull(message = "Не е подадена дата на касовата бележка")
-    @PastOrPresent(message = "Датата на касовата бележка не може да бъде в бъдещето")
+    @NotNull(message = REQUIRED_RECEIPT_DATE)
+    @PastOrPresent(message = INVALID_RECEIPT_DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime date;
 }

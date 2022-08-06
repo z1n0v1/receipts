@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS;
+
 @Service
 public class AdminService {
     private final CapabilityToAdminView capabilityToAdminView;
@@ -39,7 +41,7 @@ public class AdminService {
     private final CapabilityRepository capabilityRepository;
     private final ReceiptImageRepository receiptImageRepository;
 
-    public AdminService(CapabilityToAdminView capabilityToAdminView, AdminRoleToView adminRoleToView, UserToAdminView userToAdminView, ReceiptRepository receiptRepository, RoleRepository roleRepository, UserRepository userRepository, CapabilityRepository capabilityRepository, ReceiptImageRepository receiptImageRepository) {
+    public AdminService(CapabilityToAdminView capabilityToAdminView, AdminRoleToView adminRoleToView, UserToAdminView userToAdminView, RoleRepository roleRepository, UserRepository userRepository, CapabilityRepository capabilityRepository, ReceiptImageRepository receiptImageRepository) {
         this.capabilityToAdminView = capabilityToAdminView;
         this.adminRoleToView = adminRoleToView;
         this.userToAdminView = userToAdminView;
@@ -263,7 +265,7 @@ public class AdminService {
         userRepository.findAll().forEach(user -> {
             if (user.getRoles().stream().anyMatch(
                     role -> role.getName().equals(adminRoleDeleteServiceModel.getName()))) {
-                throw new AccessDeniedException("Не можете да изтриете ролите когато има потребители с тази роля");
+                throw new AccessDeniedException(NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS);
             }});
 
         Role role = roleRepository.getByName(adminRoleDeleteServiceModel.getName())

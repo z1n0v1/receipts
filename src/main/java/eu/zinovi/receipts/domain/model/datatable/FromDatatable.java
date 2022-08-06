@@ -9,16 +9,19 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.MISSING_REQUEST_ID;
+import static eu.zinovi.receipts.util.constants.MessageConstants.NEGATIVE_LIST_START_INDEX;
+
 
 // TODO: Validate
 @Data @NoArgsConstructor @AllArgsConstructor
 public class FromDatatable {
 
-    @NotNull(message = "Трябва да има идентификатор на заявката")
+    @NotNull(message = MISSING_REQUEST_ID)
     private Long draw;
 
     @NotNull(message = "Трябва да има начало на списъка")
-    @PositiveOrZero(message = "Началото на списъка трябва да е положително число")
+    @PositiveOrZero(message = NEGATIVE_LIST_START_INDEX)
     private Integer start;
 
     @NotNull(message = "Трябва да има дължина на списъка")

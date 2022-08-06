@@ -8,22 +8,24 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminCategorySaveBindingModel {
 
 
-    @NotNull(message = "Невалидно ID на категорията")
+    @NotNull(message = INVALID_CATEGORY_ID)
     @Pattern(regexp="^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-            message = "Невалидно ID на категорията")
+            message = INVALID_CATEGORY_ID)
     private String id;
 
-    @NotNull(message = "Името на категорията е задължително")
-    @Size(min = 3,message = "Името на категорията трябва да е поне 3 символа")
+    @NotNull(message = REQUIRED_CATEGORY_NAME)
+    @Size(min = 3,message = REQUIRED_CATEGORY_NAME_MINIMUM_LENGTH)
     private String name;
 
-    @NotNull(message = "Цвят на категорията е задължителен")
+    @NotNull(message = REQUIRED_CATEGORY_COLOR)
     @Pattern(regexp="^#([A-Fa-f0-9]{6})$",
-            message = "Невалиден цвят на категорията")
+            message = INVALID_CATEGORY_COLOR)
     private String color;
 
 }

@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.UNEXPECTED_ERROR;
+
 @Data
 public class ApiError {
 
@@ -27,7 +29,7 @@ public class ApiError {
     public ApiError(HttpStatus status, Throwable ex) {
         this();
         this.status = status;
-        this.message = "Unexpected error";
+        this.message = UNEXPECTED_ERROR;
         this.debugMessage = ex.getLocalizedMessage();
     }
 

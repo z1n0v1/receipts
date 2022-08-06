@@ -7,11 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.INVALID_CAPABILITY;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Constraint(validatedBy = CapabilityExistsValidator.class)
 public @interface CapabilityExists {
-    String message() default "Правото не съществува";
+    String message() default INVALID_CAPABILITY;
 
     Class<?>[] groups() default {};
 

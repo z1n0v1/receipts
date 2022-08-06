@@ -8,15 +8,17 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class ItemDeleteBindingModel {
 
-    @NotNull(message = "Номера на касовата бележка е задължителен")
+    @NotNull(message = REQUIRED_RECEIPT_ID)
     @ReceiptExists
     private String receiptId;
 
     // Should check if the position is valid for the given receiptId
-    @NotNull(message = "Не е подадено позицията на продукта")
-    @Positive(message = "Невалидна позиция")
+    @NotNull(message = REQUIRED_ITEM_POSITION)
+    @Positive(message = INVALID_ITEM_POSITION)
     private Integer position;
 }

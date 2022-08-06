@@ -7,15 +7,17 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data
-@FieldMatch(first = "newPassword", second = "confirmPassword", message = "Passwords must match")
+@FieldMatch(first = "newPassword", second = "confirmPassword", message = INVALID_PASSWORD_MATCH)
 public class UserPasswordChangeBindingModel {
 
     @PasswordMatch
     private String oldPassword;
 
-    @NotNull(message = "Новата парола не може да бъде празна")
-    @Size(min = 6, max = 200, message = "Новата парола трябва да бъде поне 6 символа")
+    @NotNull(message = REQURED_PASSWORD_NEW)
+    @Size(min = 6, max = 200, message = INVALID_PASSWORD_NEW_LENGTH)
     private String newPassword;
 
 

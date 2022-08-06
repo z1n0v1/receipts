@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.transaction.Transactional;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,7 +81,7 @@ public class AdminHomeRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате списъка с касови бележки"));
+                        NO_PERMISSION_RECEIPT_LIST));
     }
 
     @Test
@@ -120,7 +121,7 @@ public class AdminHomeRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isExpectationFailed())
                 .andExpect(jsonPath("$.message").value(
-                        "Трябва да има идентификатор на заявката\n"));
+                        MISSING_REQUEST_ID + "\n"));
 
     }
 
@@ -170,7 +171,7 @@ public class AdminHomeRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(
-                        "Нямате право да разглеждате списъка с права"));
+                        NO_PERMISSION_CAPABILITY_LIST));
     }
 
     @Test

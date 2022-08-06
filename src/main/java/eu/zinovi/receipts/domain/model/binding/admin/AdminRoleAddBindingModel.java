@@ -10,12 +10,14 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.Collection;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
+
 @Data @NoArgsConstructor @AllArgsConstructor
 public class AdminRoleAddBindingModel {
-    @NotBlank(message = "Ролята не може да е празна")
-    @Size(min = 3, max = 30, message = "Ролята трябва да е между 3 и 30 символа")
+    @NotBlank(message = REQUIRED_ROLE_NAME)
+    @Size(min = 3, max = 30, message = REQUIRED_ROLE_NAME_MINIMUM_LENGTH)
     private String name;
 
-    @NotEmpty(message = "Ролята трябва да има поне едно право")
+    @NotEmpty(message = REQUIRED_ROLE_NUM_CAPABILITIES)
     private Collection<@Valid AdminCapabilityAddBindingModel> capabilities;
 }
