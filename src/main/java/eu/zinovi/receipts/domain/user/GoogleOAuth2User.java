@@ -2,12 +2,10 @@ package eu.zinovi.receipts.domain.user;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.*;
 
@@ -30,7 +28,10 @@ public class GoogleOAuth2User implements OidcUser {
                 " userInfo: " + userInfo +
                 attributes.toString() +
                 authorities.toString();
+    }
 
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public GoogleOAuth2User() {

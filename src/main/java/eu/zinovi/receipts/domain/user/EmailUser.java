@@ -1,4 +1,5 @@
 package eu.zinovi.receipts.domain.user;
+
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +14,7 @@ public class EmailUser implements UserDetails, CredentialsContainer {
 //    private String lastName;
 
 
-    private final String displayName;
+    private String displayName;
     private final String picture;
     private final String email;
     private String password;
@@ -41,12 +42,16 @@ public class EmailUser implements UserDetails, CredentialsContainer {
     }
 
     public String getDisplayName() {
-            return displayName;
-        }
+        return displayName;
+    }
 
-        public String getEmail() {
-            return email;
-        }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
     public String toString() {
         return getClass().getName() + " [" +

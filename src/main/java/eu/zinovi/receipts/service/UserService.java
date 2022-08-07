@@ -186,6 +186,15 @@ public class UserService {
         user.setFirstName(userDetailsServiceModel.getFirstName());
         user.setLastName(userDetailsServiceModel.getLastName());
         user.setDisplayName(userDetailsServiceModel.getDisplayName());
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof EmailUser) {
+            ((EmailUser) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
+        } else if (principal instanceof GoogleOAuth2User) {
+        ((GoogleOAuth2User) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
+        }
+
         userRepository.save(user);
     }
 
