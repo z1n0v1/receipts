@@ -42,10 +42,15 @@
                 <div class="container-fluid">
 
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-nowrap">
+                        <th:block sec:authorize="isAnonymous()">
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/}">Начало</a>
                         </li>
+                        </th:block>
                         <th:block sec:authorize="isAuthenticated()">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/}">Разходи</a>
+                            </li>
                             <li sec:authorize="hasAuthority('CAP_ADD_RECEIPT')" class="nav-item">
                                 <a class="nav-link" th:href="@{/receipt/add}">Добави</a>
                             </li>
