@@ -107,7 +107,7 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
                 throw new ReceiptProcessException("Неуспешен анализ.");
             }
 
-            String polygonsJson = processMLToJason(response);
+            String polygonsJson = processMLToJson(response);
 
             try {
                 GCSUpload(new ByteArrayInputStream(polygonsJson.getBytes()),
@@ -143,7 +143,7 @@ public class GoogleReceiptProcessApi implements ReceiptProcessApi {
         }
     }
 
-    private String processMLToJason(BatchAnnotateImagesResponse response) {
+    private String processMLToJson(BatchAnnotateImagesResponse response) {
         List<ReceiptPolyJsonServiceModel> polygons = new ArrayList<>();
 
         for (AnnotateImageResponse imageResponse : response.getResponsesList()) {
