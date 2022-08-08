@@ -63,7 +63,12 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" th:href="@{/user/details}"
-                                   th:text="${#authentication.getPrincipal().getDisplayName()}">User</a>
+                                   th:title="${#authentication.getPrincipal().getDisplayName()}">
+                                    <img th:src="${#authentication.getPrincipal().getPicture()}"
+                                         th:alt="${#authentication.getPrincipal().getDisplayName()}"
+                                         th:title="${#authentication.getPrincipal().getDisplayName()}"
+                                         class="rounded-circle" width="30" height="30">
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <form th:action="@{/user/logout}" method="post">
