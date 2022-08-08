@@ -34,6 +34,10 @@ public class GoogleOAuth2User implements OidcUser {
         this.displayName = displayName;
     }
 
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
     public GoogleOAuth2User() {
         this.authorities = new HashSet<>();
         this.attributes = new HashMap<>();

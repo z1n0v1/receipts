@@ -172,6 +172,14 @@ public class UserService {
         User user = getCurrentUser();
         user.setPicture(pictureURL);
         userRepository.save(user);
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof EmailUser) {
+            ((EmailUser) principal).setPicture(pictureURL);
+        } else if (principal instanceof GoogleOAuth2User) {
+            ((GoogleOAuth2User) principal).setPicture(pictureURL);
+        }
     }
 
     public void setPassword(UserPasswordSetServiceModel userPasswordSetServiceModel) {

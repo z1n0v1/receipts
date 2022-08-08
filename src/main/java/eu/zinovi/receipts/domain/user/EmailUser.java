@@ -15,7 +15,7 @@ public class EmailUser implements UserDetails, CredentialsContainer {
 
 
     private String displayName;
-    private final String picture;
+    private String picture;
     private final String email;
     private String password;
     private final boolean emailVerified;
@@ -39,6 +39,10 @@ public class EmailUser implements UserDetails, CredentialsContainer {
 
     public String getPicture() {
         return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public String getDisplayName() {
