@@ -1,7 +1,7 @@
 package eu.zinovi.receipts.config;
 
-import eu.zinovi.receipts.service.ReceiptsUserDetailsService;
-import eu.zinovi.receipts.service.AuthService;
+import eu.zinovi.receipts.service.impl.ReceiptsUserDetailsService;
+import eu.zinovi.receipts.service.impl.AuthServiceImpl;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, AuthService authService) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, AuthServiceImpl authServiceImpl) throws Exception {
 
         return http
                 .authorizeRequests()
@@ -35,11 +35,11 @@ public class SecurityConfig {
                     .and()
                 .formLogin()
                     .loginPage("/user/login").permitAll()
-                    .successHandler(authService::loginSuccess)
+                    .successHandler(authServiceImpl::loginSuccess)
                     .and()
                 .oauth2Login()
                     .userInfoEndpoint(userInfoEndpointConfig ->
-                        userInfoEndpointConfig.oidcUserService(this.oidcUserService(authService)))
+                        userInfoEndpointConfig.oidcUserService(this.oidcUserService(authServiceImpl)))
                     .and()
                 .logout()
                     .logoutUrl("/user/logout")
@@ -51,18 +51,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(AuthService authService) {
-        return new ReceiptsUserDetailsService(authService);
+    public UserDetailsService userDetailsService(AuthServiceImpl authServiceImpl) {
+        return new ReceiptsUserDetailsService(authServiceImpl);
     }
 
-    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(AuthService authService) {
+    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(AuthServiceImpl authServiceImpl) {
         final OidcUserService delegate = new OidcUserService();
 
         return (userRequest) -> {
             // Delegate to the default implementation for loading a user
             OidcUser oidcUser = delegate.loadUser(userRequest);
 
-            return authService.googleOAuth2LoginOrRegister(oidcUser);
+            return authServiceImpl.googleOAuth2LoginOrRegister(oidcUser);
 
         };
     }

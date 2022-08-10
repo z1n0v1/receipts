@@ -1,4 +1,4 @@
-package eu.zinovi.receipts.service;
+package eu.zinovi.receipts.service.impl;
 
 import be.ceau.chart.LineChart;
 import be.ceau.chart.PieChart;
@@ -22,20 +22,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
-public class ExpensesService {
-    private final UserService userService;
+public class ExpensesServiceImpl implements ExpensesService {
+    private final UserServiceImpl userServiceImpl;
     private final ReceiptRepository receiptRepository;
 
-    public ExpensesService(UserService userService, ReceiptRepository receiptRepository) {
-        this.userService = userService;
+    public ExpensesServiceImpl(UserServiceImpl userServiceImpl, ReceiptRepository receiptRepository) {
+        this.userServiceImpl = userServiceImpl;
         this.receiptRepository = receiptRepository;
     }
 
+    @Override
     @Transactional
     public PieChart monthlyExpensesByCategoryPieChart() {
 
         Map<Category, BigDecimal> expenses = new LinkedHashMap<>();
-        User user = userService.getCurrentUser();
+        User user = userServiceImpl.getCurrentUser();
 
         List<Receipt> receipts = receiptRepository.findAllByUserAndDateOfPurchaseAfterAndDateOfPurchaseBefore(
                 user, LocalDateTime.now().minusMonths(1), LocalDateTime.now());
@@ -64,10 +65,11 @@ public class ExpensesService {
         return new PieChart(data);
     }
 
+    @Override
     @Transactional
     public PieChart totalExpensesByCategoryPieChart() {
         Map<Category, BigDecimal> expenses = new LinkedHashMap<>();
-        User user = userService.getCurrentUser();
+        User user = userServiceImpl.getCurrentUser();
 
         List<Receipt> receipts = receiptRepository.findAllByUser(user);
 
@@ -96,12 +98,11 @@ public class ExpensesService {
 
     }
 
+    @Override
     @Transactional
     public LineChart lastMonthExpensesByWeekLineChart() {
         Map<LocalDate, BigDecimal> expenses = new LinkedHashMap<>();
-        User user = userService.getCurrentUser();
-
-
+        User user = userServiceImpl.getCurrentUser();
 
         for (int i = 4; i >= 1; i--) {
             BigDecimal weekExpenses = receiptRepository.sumByUserAndDateOfPurchaseAfterAndDateOfPurchaseBefore(
@@ -121,18 +122,17 @@ public class ExpensesService {
             data.addLabel(entry.getKey()
                     .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
             dataset.addData(entry.getValue() == null ? BigDecimal.ZERO : entry.getValue());
-//            dataset.addBackgroundColor(Color.random());
         }
-//        dataset.addBorderWidth(2);
         data.addDataset(dataset);
 
         return new LineChart(data);
     }
 
+    @Override
     @Transactional
     public HomeStatisticsView statistics() {
         HomeStatisticsView statistics = new HomeStatisticsView();
-        User user = userService.getCurrentUser();
+        User user = userServiceImpl.getCurrentUser();
 
         statistics.setLastMonthReceipts(receiptRepository.
                 countByUserAndDateOfPurchaseAfterAndDateOfPurchaseBefore(user,

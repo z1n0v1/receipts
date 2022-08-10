@@ -1,6 +1,6 @@
 package eu.zinovi.receipts.domain.scheduler;
 
-import eu.zinovi.receipts.service.StatisticsService;
+import eu.zinovi.receipts.service.impl.StatisticsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
 @EnableScheduling
 public class ScheduledStatistics {
     private final static Logger LOGGER = LoggerFactory.getLogger(ScheduledStatistics.class);
-    private final StatisticsService statisticsService;
+    private final StatisticsServiceImpl statisticsServiceImpl;
 
-    public ScheduledStatistics(StatisticsService statisticsService) {
-        this.statisticsService = statisticsService;
+    public ScheduledStatistics(StatisticsServiceImpl statisticsServiceImpl) {
+        this.statisticsServiceImpl = statisticsServiceImpl;
     }
 
     @Scheduled(cron = "0 2 0 * * *")
     public void calculateStatistics() {
         LOGGER.info("Calculating statistics");
-        statisticsService.calculateStatistics();
+        statisticsServiceImpl.calculateStatistics();
     }
 }

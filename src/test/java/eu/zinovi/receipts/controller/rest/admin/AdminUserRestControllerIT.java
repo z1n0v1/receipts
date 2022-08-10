@@ -10,7 +10,7 @@ import eu.zinovi.receipts.domain.model.datatable.DatatableColumn;
 import eu.zinovi.receipts.domain.model.datatable.DatatableOrder;
 import eu.zinovi.receipts.domain.model.datatable.DatatableSearch;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
@@ -53,7 +53,7 @@ public class AdminUserRestControllerIT {
     private Gson gson;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Test
     @WithMockEmailUser
@@ -304,7 +304,7 @@ public class AdminUserRestControllerIT {
                         .with(csrf()))
                 .andExpect(status().isOk());
 
-        Assertions.assertFalse(userService.emailExists("demo@demo"));
+        Assertions.assertFalse(userServiceImpl.emailExists("demo@demo"));
 
     }
 }

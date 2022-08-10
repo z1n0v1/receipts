@@ -1,16 +1,16 @@
 package eu.zinovi.receipts.domain.interceptor;
 
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class EmailVerificationInterceptor implements HandlerInterceptor {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
-    public EmailVerificationInterceptor(UserService userService) {
-        this.userService = userService;
+    public EmailVerificationInterceptor(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (userService.emailNotVerified(request.getRemoteUser())) {
+        if (userServiceImpl.emailNotVerified(request.getRemoteUser())) {
             response.sendRedirect("/user/verify/email");
             return false;
         }

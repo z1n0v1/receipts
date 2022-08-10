@@ -1,19 +1,19 @@
 package eu.zinovi.receipts.domain.model.validation;
 
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class PasswordMatchValidator implements ConstraintValidator<PasswordMatch, String> {
-private final UserService userService;
+private final UserServiceImpl userServiceImpl;
 
-public PasswordMatchValidator(UserService userService) {
-        this.userService = userService;
+public PasswordMatchValidator(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
         }
 
 @Override
 public boolean isValid(String value, ConstraintValidatorContext context) {
-        return userService.checkPassword(value);
+        return userServiceImpl.checkPassword(value);
         }
 }

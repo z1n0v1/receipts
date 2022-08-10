@@ -7,6 +7,8 @@ import eu.zinovi.receipts.domain.model.enums.CapabilityEnum;
 import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.repository.RoleRepository;
 import eu.zinovi.receipts.repository.UserRepository;
+import eu.zinovi.receipts.service.impl.AuthServiceImpl;
+import eu.zinovi.receipts.service.impl.ReceiptsUserDetailsService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,8 +37,8 @@ public class ReceiptsUserDetailsServiceTest {
 
     @BeforeEach
     public void setUp() {
-        AuthService authService = new AuthService(userRepository, roleRepository);
-        toTest = new ReceiptsUserDetailsService(authService);
+        AuthServiceImpl authServiceImpl = new AuthServiceImpl(userRepository, roleRepository);
+        toTest = new ReceiptsUserDetailsService(authServiceImpl);
     }
 
     @Test

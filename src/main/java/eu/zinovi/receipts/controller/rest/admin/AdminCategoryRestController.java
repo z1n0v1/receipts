@@ -9,8 +9,8 @@ import eu.zinovi.receipts.domain.model.mapper.AdminCategorySaveBindingToService;
 import eu.zinovi.receipts.domain.model.view.admin.AdminCategoryView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.CategoryService;
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.CategoryServiceImpl;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,15 +29,15 @@ public class AdminCategoryRestController {
     private final AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService;
     private final AdminCategoryAddBindingToService adminCategoryAddBindingToService;
     private final AdminCategorySaveBindingToService adminCategorySaveBindingToService;
-    private final UserService userService;
-    private final CategoryService categoryService;
+    private final UserServiceImpl userServiceImpl;
+    private final CategoryServiceImpl categoryServiceImpl;
 
-    public AdminCategoryRestController(AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService, AdminCategoryAddBindingToService adminCategoryAddBindingToService, AdminCategorySaveBindingToService adminCategorySaveBindingToService, UserService userService, CategoryService categoryService) {
+    public AdminCategoryRestController(AdminCategoryDeleteBindingToService adminCategoryDeleteBindingToService, AdminCategoryAddBindingToService adminCategoryAddBindingToService, AdminCategorySaveBindingToService adminCategorySaveBindingToService, UserServiceImpl userServiceImpl, CategoryServiceImpl categoryServiceImpl) {
         this.adminCategoryDeleteBindingToService = adminCategoryDeleteBindingToService;
         this.adminCategoryAddBindingToService = adminCategoryAddBindingToService;
         this.adminCategorySaveBindingToService = adminCategorySaveBindingToService;
-        this.userService = userService;
-        this.categoryService = categoryService;
+        this.userServiceImpl = userServiceImpl;
+        this.categoryServiceImpl = categoryServiceImpl;
     }
 
     @RequestMapping(value = "/category", method = RequestMethod.POST,
@@ -46,14 +46,14 @@ public class AdminCategoryRestController {
             @Valid @RequestBody AdminCategoryAddBindingModel adminCategoryAddBindingModel,
             BindingResult bindingResult) {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADD_CATEGORY")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_ADD_CATEGORY")) {
             throw new AccessDeniedException(NO_PERMISSION_CATEGORY_ADD);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        categoryService.addCategory(adminCategoryAddBindingToService
+        categoryServiceImpl.addCategory(adminCategoryAddBindingToService
                 .map(adminCategoryAddBindingModel));
 
         return ResponseEntity.ok().build();
@@ -63,11 +63,11 @@ public class AdminCategoryRestController {
             consumes = "application/json")
     public ResponseEntity<List<AdminCategoryView>> allCategories() {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CATEGORIES")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_CATEGORIES")) {
             throw new AccessDeniedException(NO_PERMISSION_CATEGORY_LIST);
         }
 
-        return ResponseEntity.ok(categoryService.getAdminAllCategories());
+        return ResponseEntity.ok(categoryServiceImpl.getAdminAllCategories());
     }
 
     @RequestMapping(value = "/category", method = RequestMethod.PUT,
@@ -76,14 +76,14 @@ public class AdminCategoryRestController {
             @Valid @RequestBody AdminCategorySaveBindingModel adminCategorySaveBindingModel,
             BindingResult bindingResult) {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_CATEGORY")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_EDIT_CATEGORY")) {
             throw new AccessDeniedException(NO_PERMISSION_CATEGORY_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        categoryService.saveCategory(adminCategorySaveBindingToService
+        categoryServiceImpl.saveCategory(adminCategorySaveBindingToService
                 .map(adminCategorySaveBindingModel));
 
         return ResponseEntity.ok().build();
@@ -95,14 +95,14 @@ public class AdminCategoryRestController {
             @Valid @RequestBody AdminCategoryDeleteBindingModel adminUserDeleteBindingModel,
             BindingResult bindingResult) {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_DELETE_CATEGORY")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_DELETE_CATEGORY")) {
             throw new AccessDeniedException(NO_PERMISSION_CATEGORY_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        categoryService.deleteCategory(adminCategoryDeleteBindingToService
+        categoryServiceImpl.deleteCategory(adminCategoryDeleteBindingToService
                 .map(adminUserDeleteBindingModel));
 
         return ResponseEntity.ok().build();

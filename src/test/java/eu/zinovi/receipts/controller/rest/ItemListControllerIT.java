@@ -11,8 +11,8 @@ import eu.zinovi.receipts.domain.model.datatable.DatatableSearch;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.entity.*;
 import eu.zinovi.receipts.repository.*;
-import eu.zinovi.receipts.service.ItemService;
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.ItemServiceImpl;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
@@ -75,9 +75,9 @@ public class ItemListControllerIT {
     @Autowired
     private ItemRepository itemRepository;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
-    ItemService itemService;
+    ItemServiceImpl itemServiceImpl;
 
     private Receipt receipt;
 
@@ -94,7 +94,7 @@ public class ItemListControllerIT {
                 LocalDateTime.of(2020, 1, 1, 0, 0, 0),
                 false,
                 null,
-                userService.getCurrentUser()
+                userServiceImpl.getCurrentUser()
         );
         receiptImageRepository.save(receiptImage);
         receipt = new Receipt(
@@ -106,7 +106,7 @@ public class ItemListControllerIT {
                 store,
                 new ArrayList<>(),
                 BigDecimal.valueOf(100),
-                userService.getCurrentUser(),
+                userServiceImpl.getCurrentUser(),
                 receiptImage
         );
         receiptRepository.save(receipt);
@@ -186,7 +186,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isOk());
 
-        Item newItem = itemService.getItems(receipt.getId()).stream()
+        Item newItem = itemServiceImpl.getItems(receipt.getId()).stream()
                 .filter(i -> i.getName().equals("Item") &&
                         i.getCategory().getName().equals("Други") &&
                         i.getPrice().equals(BigDecimal.valueOf(1.5)) &&
@@ -382,7 +382,7 @@ public class ItemListControllerIT {
                         ))
                 .andExpect(status().isOk());
 
-        Item newItem = itemService.getItems(receipt.getId()).stream()
+        Item newItem = itemServiceImpl.getItems(receipt.getId()).stream()
                 .filter(i -> i.getName().equals("Item") &&
                         i.getCategory().getName().equals("Други") &&
                         i.getPrice().equals(BigDecimal.valueOf(0.5)) &&
@@ -436,7 +436,7 @@ public class ItemListControllerIT {
                 )
                 .andExpect(status().isOk());
 
-        List<Item> items = itemService.getItems(receipt.getId()).stream()
+        List<Item> items = itemServiceImpl.getItems(receipt.getId()).stream()
                 .sorted(Comparator.comparing(Item::getPosition))
                 .toList();
 

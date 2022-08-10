@@ -10,8 +10,8 @@ import eu.zinovi.receipts.domain.model.mapper.AdminUserSaveBindingToService;
 import eu.zinovi.receipts.domain.model.view.admin.AdminUserView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.AdminService;
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.AdminServiceImpl;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,14 +30,14 @@ public class AdminUserRestController {
     private final AdminUserSaveBindingToService adminUserSaveBindingToService;
     private final AdminUserDeleteBindingToService adminUserDeleteBindingToService;
 
-    private final UserService userService;
-    private final AdminService adminService;
+    private final UserServiceImpl userServiceImpl;
+    private final AdminServiceImpl adminServiceImpl;
 
-    public AdminUserRestController(AdminUserSaveBindingToService adminUserSaveBindingToService, AdminUserDeleteBindingToService adminUserDeleteBindingToService, UserService userService, AdminService adminService) {
+    public AdminUserRestController(AdminUserSaveBindingToService adminUserSaveBindingToService, AdminUserDeleteBindingToService adminUserDeleteBindingToService, UserServiceImpl userServiceImpl, AdminServiceImpl adminServiceImpl) {
         this.adminUserSaveBindingToService = adminUserSaveBindingToService;
         this.adminUserDeleteBindingToService = adminUserDeleteBindingToService;
-        this.userService = userService;
-        this.adminService = adminService;
+        this.userServiceImpl = userServiceImpl;
+        this.adminServiceImpl = adminServiceImpl;
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.POST,
@@ -46,14 +46,14 @@ public class AdminUserRestController {
             @Valid @RequestBody AdminGetUserDetailsBindingModel adminGetUserDetailsBindingModel,
             BindingResult bindingResult) {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_USERS")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_USERS")) {
             throw new AccessDeniedException(NO_PERMISSION_USER_DETAILS);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        return ResponseEntity.ok(adminService.getUserDetails(
+        return ResponseEntity.ok(adminServiceImpl.getUserDetails(
                 adminGetUserDetailsBindingModel.getEmail()));
     }
 
@@ -63,14 +63,14 @@ public class AdminUserRestController {
             @Valid @RequestBody FromDatatable fromDatatable,
             BindingResult bindingResult) {
 
-        if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_LIST_USERS"))) {
+        if (!(userServiceImpl.checkCapability("CAP_ADMIN") && userServiceImpl.checkCapability("CAP_LIST_USERS"))) {
             throw new AccessDeniedException(NO_PERMISSION_USER_LIST);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        return ResponseEntity.ok(adminService.listUsers(fromDatatable));
+        return ResponseEntity.ok(adminServiceImpl.listUsers(fromDatatable));
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.PUT,
@@ -79,14 +79,14 @@ public class AdminUserRestController {
             @Valid @RequestBody AdminUserSaveBindingModel adminUserSaveBindingModel,
             BindingResult bindingResult) {
 
-        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_ALL_USERS")) {
+        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_EDIT_ALL_USERS")) {
             throw new AccessDeniedException(NO_PERMISSION_USER_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminService.updateUser(adminUserSaveBindingToService
+        adminServiceImpl.updateUser(adminUserSaveBindingToService
                 .map(adminUserSaveBindingModel));
 
         return ResponseEntity.ok().build();
@@ -98,14 +98,14 @@ public class AdminUserRestController {
             @Valid @RequestBody AdminUserDeleteBindingModel adminUserDeleteBindingModel,
             BindingResult bindingResult) {
 
-        if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_DELETE_USER"))) {
+        if (!(userServiceImpl.checkCapability("CAP_ADMIN") && userServiceImpl.checkCapability("CAP_DELETE_USER"))) {
             throw new AccessDeniedException(NO_PERMISSION_USER_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        userService.deleteUserByEmail(adminUserDeleteBindingToService
+        userServiceImpl.deleteUserByEmail(adminUserDeleteBindingToService
                 .map(adminUserDeleteBindingModel));
 
         return ResponseEntity.ok().build();

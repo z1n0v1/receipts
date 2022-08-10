@@ -11,8 +11,8 @@ import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.entity.*;
 import eu.zinovi.receipts.domain.model.service.CompanyRegisterBGApiServiceModel;
 import eu.zinovi.receipts.repository.*;
-import eu.zinovi.receipts.service.ItemService;
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.ItemServiceImpl;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
@@ -73,9 +73,9 @@ public class ReceiptRestControllerIT {
     @Autowired
     private ItemRepository itemRepository;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
     @Autowired
-    ItemService itemService;
+    ItemServiceImpl itemServiceImpl;
 
     private Receipt receipt;
     private Company company;
@@ -96,7 +96,7 @@ public class ReceiptRestControllerIT {
                 LocalDateTime.of(2020, 1, 1, 0, 0, 0),
                 false,
                 null,
-                userService.getCurrentUser()
+                userServiceImpl.getCurrentUser()
         );
         receiptImageRepository.save(receiptImage);
         receipt = new Receipt(
@@ -108,7 +108,7 @@ public class ReceiptRestControllerIT {
                 store,
                 new ArrayList<>(),
                 BigDecimal.valueOf(100),
-                userService.getCurrentUser(),
+                userServiceImpl.getCurrentUser(),
                 receiptImage
         );
         receiptRepository.save(receipt);

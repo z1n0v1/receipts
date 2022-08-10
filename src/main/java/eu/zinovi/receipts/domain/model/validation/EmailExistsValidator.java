@@ -1,19 +1,19 @@
 package eu.zinovi.receipts.domain.model.validation;
 
-import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.impl.UserServiceImpl;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class EmailExistsValidator implements ConstraintValidator<EmailExists, String> {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
-    public EmailExistsValidator(UserService userService) {
-        this.userService = userService;
+    public EmailExistsValidator(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return userService.emailExists(value);
+        return userServiceImpl.emailExists(value);
     }
 }

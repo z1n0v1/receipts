@@ -1,20 +1,20 @@
 package eu.zinovi.receipts.domain.model.validation;
 
-import eu.zinovi.receipts.service.RoleService;
+import eu.zinovi.receipts.service.impl.RoleServiceImpl;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class RoleExistsValidator implements ConstraintValidator<RoleExists, String> {
 
-    private final RoleService roleService;
+    private final RoleServiceImpl roleServiceImpl;
 
-    public RoleExistsValidator(RoleService rolService) {
-        this.roleService = rolService;
+    public RoleExistsValidator(RoleServiceImpl rolService) {
+        this.roleServiceImpl = rolService;
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return roleService.existsByName(value);
+        return roleServiceImpl.existsByName(value);
     }
 }
