@@ -6,6 +6,7 @@ import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
 import eu.zinovi.receipts.domain.model.service.ItemEditServiceModel;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.ItemRepository;
+import eu.zinovi.receipts.service.CategoryService;
 import eu.zinovi.receipts.service.ItemService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,13 +21,14 @@ import java.util.UUID;
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
-    private final CategoryServiceImpl categoryServiceImpl;
+    private final CategoryService categoryService;
 
-    public ItemServiceImpl(ItemRepository itemRepository, CategoryServiceImpl categoryServiceImpl) {
+    public ItemServiceImpl(ItemRepository itemRepository, CategoryService categoryService) {
         this.itemRepository = itemRepository;
-        this.categoryServiceImpl = categoryServiceImpl;
+        this.categoryService = categoryService;
     }
 
+    @Override
     public void save(Item item) {
         itemRepository.save(item);
     }
@@ -100,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findByReceiptIdAndPosition(itemEditServiceModel.getReceiptId(),
                 itemEditServiceModel.getPosition()).orElseThrow(EntityNotFoundException::new);
 
-        item.setCategory(categoryServiceImpl.findByName(itemEditServiceModel.getCategory())
+        item.setCategory(categoryService.findByName(itemEditServiceModel.getCategory())
                 .orElseThrow(EntityNotFoundException::new));
 
         item.setName(itemEditServiceModel.getName());
@@ -109,6 +111,7 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.save(item);
     }
 
+    @Override
     public void delete(Item item) {
          itemRepository.delete(item);
     }

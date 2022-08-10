@@ -10,10 +10,14 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ItemService {
+    void save(Item item);
+
     List<Item> getItems(UUID receiptId);
 
     ToDatatable getItemListDatatable(UUID receiptId, FromDatatable fromDatatable);
 
     @Transactional
     void updateItem(ItemEditServiceModel itemEditServiceModel);
+
+    void delete(Item item);
 }

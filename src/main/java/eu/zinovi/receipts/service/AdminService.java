@@ -2,6 +2,7 @@ package eu.zinovi.receipts.service;
 
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
+import eu.zinovi.receipts.domain.model.service.AdminRoleAddServiceModel;
 import eu.zinovi.receipts.domain.model.service.AdminRoleDeleteServiceModel;
 import eu.zinovi.receipts.domain.model.service.AdminRoleServiceModel;
 import eu.zinovi.receipts.domain.model.service.AdminUserSaveServiceModel;
@@ -32,6 +33,8 @@ public interface AdminService {
 
     @Transactional
     List<AdminCapabilityView> getCapabilities();
+
+    void addRole(AdminRoleAddServiceModel AdminRoleAddServiceModel);
 
     @Transactional
     void deleteRole(AdminRoleDeleteServiceModel adminRoleDeleteServiceModel);

@@ -4,8 +4,8 @@ import eu.zinovi.receipts.domain.model.binding.receipt.ReceiptEikBindingModel;
 import eu.zinovi.receipts.domain.model.view.ReceiptCompanyByEikView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.impl.CompanyServiceImpl;
-import eu.zinovi.receipts.service.impl.UserServiceImpl;
+import eu.zinovi.receipts.service.CompanyService;
+import eu.zinovi.receipts.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +20,12 @@ import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_R
 @RestController
 @RequestMapping("/api/company")
 public class CompanyRestController {
-    private final UserServiceImpl userServiceImpl;
-    private final CompanyServiceImpl companyServiceImpl;
+    private final UserService userService;
+    private final CompanyService companyService;
 
-    public CompanyRestController(UserServiceImpl userServiceImpl, CompanyServiceImpl companyServiceImpl) {
-        this.userServiceImpl = userServiceImpl;
-        this.companyServiceImpl = companyServiceImpl;
+    public CompanyRestController(UserService userService, CompanyService companyService) {
+        this.userService = userService;
+        this.companyService = companyService;
     }
 
     @RequestMapping(value = "/eik", method = RequestMethod.POST,
@@ -34,13 +34,13 @@ public class CompanyRestController {
             @Valid @RequestBody ReceiptEikBindingModel eik,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_RECEIPT")) {
+        if (!userService.checkCapability("CAP_EDIT_RECEIPT")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        return ResponseEntity.ok(companyServiceImpl.receiptEikView(eik.getEik()));
+        return ResponseEntity.ok(companyService.receiptEikView(eik.getEik()));
     }
 }

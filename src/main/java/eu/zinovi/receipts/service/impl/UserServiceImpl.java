@@ -12,7 +12,9 @@ import eu.zinovi.receipts.repository.RoleRepository;
 import eu.zinovi.receipts.repository.UserRepository;
 import eu.zinovi.receipts.domain.user.EmailUser;
 import eu.zinovi.receipts.domain.user.GoogleOAuth2User;
+import eu.zinovi.receipts.service.EmailVerificationService;
 import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.VerificationTokenService;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ImageProcessing;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,18 +36,26 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final EmailVerificationServiceImpl emailVerificationServiceImpl;
-    private final VerificationTokenServiceImpl verificationTokenServiceImpl;
+    private final EmailVerificationService emailVerificationService;
+    private final VerificationTokenService verificationTokenService;
     private final CloudStorage cloudStorage;
 
-    public UserServiceImpl(UserToBindingDetails userToBindingDetails, UserToDetails userToDetails, RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, EmailVerificationServiceImpl emailVerificationServiceImpl, VerificationTokenServiceImpl verificationTokenServiceImpl, CloudStorage cloudStorage) {
+    public UserServiceImpl(
+            UserToBindingDetails userToBindingDetails,
+            UserToDetails userToDetails,
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            EmailVerificationService emailVerificationService,
+            VerificationTokenService verificationTokenService,
+            CloudStorage cloudStorage) {
         this.userToBindingDetails = userToBindingDetails;
         this.userToDetails = userToDetails;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.emailVerificationServiceImpl = emailVerificationServiceImpl;
-        this.verificationTokenServiceImpl = verificationTokenServiceImpl;
+        this.emailVerificationService = emailVerificationService;
+        this.verificationTokenService = verificationTokenService;
         this.cloudStorage = cloudStorage;
     }
 
@@ -110,7 +120,7 @@ public class UserServiceImpl implements UserService {
         user.getRoles().add(roleRepository.getByName("USER").orElse(null));
         user.setPassword(passwordEncoder.encode(userRegisterServiceModel.getPassword()));
         userRepository.saveAndFlush(user);
-        emailVerificationServiceImpl.sendVerificationEmail(user.getEmail());
+        emailVerificationService.sendVerificationEmail(user.getEmail());
         return true;
     }
 
@@ -130,7 +140,7 @@ public class UserServiceImpl implements UserService {
             throw new AccessDeniedException("Нямате право да триете администратора");
         }
 
-        verificationTokenServiceImpl.deleteAllByUser(user);
+        verificationTokenService.deleteAllByUser(user);
 
         userRepository.deleteByEmail(
                 adminUserDeleteServiceModel.getEmail());

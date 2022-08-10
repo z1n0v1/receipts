@@ -9,9 +9,9 @@ import eu.zinovi.receipts.domain.model.mapper.ReceiptEditBindingToService;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
 import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
-import eu.zinovi.receipts.service.impl.MessagingServiceImpl;
-import eu.zinovi.receipts.service.impl.ReceiptsServiceImpl;
-import eu.zinovi.receipts.service.impl.UserServiceImpl;
+import eu.zinovi.receipts.service.MessagingService;
+import eu.zinovi.receipts.service.ReceiptsService;
+import eu.zinovi.receipts.service.UserService;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,16 +29,20 @@ import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 public class ReceiptRestController {
     private final ReceiptDeleteBindingToService receiptDeleteBindingToService;
     private final ReceiptEditBindingToService receiptEditBindingToService;
-    private final ReceiptsServiceImpl receiptsServiceImpl;
-    private final UserServiceImpl userServiceImpl;
-    private final MessagingServiceImpl messagingServiceImpl;
+    private final ReceiptsService receiptsService;
+    private final UserService userService;
+    private final MessagingService messagingService;
 
-    public ReceiptRestController(ReceiptDeleteBindingToService receiptDeleteBindingToService, ReceiptEditBindingToService receiptEditBindingToService, ReceiptsServiceImpl receiptsServiceImpl, UserServiceImpl userServiceImpl, MessagingServiceImpl messagingServiceImpl) {
+    public ReceiptRestController(
+            ReceiptDeleteBindingToService receiptDeleteBindingToService,
+            ReceiptEditBindingToService receiptEditBindingToService,
+            ReceiptsService receiptsService, UserService userService,
+            MessagingService messagingService) {
         this.receiptDeleteBindingToService = receiptDeleteBindingToService;
         this.receiptEditBindingToService = receiptEditBindingToService;
-        this.receiptsServiceImpl = receiptsServiceImpl;
-        this.userServiceImpl = userServiceImpl;
-        this.messagingServiceImpl = messagingServiceImpl;
+        this.receiptsService = receiptsService;
+        this.userService = userService;
+        this.messagingService = messagingService;
     }
 
     @RequestMapping(value = "/receipt", method = RequestMethod.POST,
@@ -46,19 +50,19 @@ public class ReceiptRestController {
     public ResponseEntity<Set<UUID>> uploadReceipt(
             @RequestParam("file") MultipartFile[] files) {
 
-        if (!userServiceImpl.checkCapability("CAP_ADD_RECEIPT")) {
+        if (!userService.checkCapability("CAP_ADD_RECEIPT")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_ADD);
         }
 
         Set<UUID> receiptUuids = new HashSet<>();
-        messagingServiceImpl.sendMessage("Обработка...");
+        messagingService.sendMessage("Обработка...");
         for (MultipartFile file : files) {
             try {
-                receiptUuids.add(receiptsServiceImpl.uploadReceipt(file));
+                receiptUuids.add(receiptsService.uploadReceipt(file));
 
                 System.gc(); // Needed for memory cleanup after the image processing
             } catch (ReceiptProcessException ex) {
-                messagingServiceImpl.sendMessage(file.getOriginalFilename() + ": " + ex.getMessage(), "danger");
+                messagingService.sendMessage(file.getOriginalFilename() + ": " + ex.getMessage(), "danger");
             }
         }
         System.gc(); // Needed for memory cleanup after the image processing
@@ -76,18 +80,18 @@ public class ReceiptRestController {
             @Valid @RequestBody FromDatatable fromDatatable,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_LIST_RECEIPTS") &&
-                !userServiceImpl.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
+        if (!userService.checkCapability("CAP_LIST_RECEIPTS") &&
+                !userService.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_VIEW);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        if (userServiceImpl.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
-            return ResponseEntity.ok(receiptsServiceImpl.getAllReceipts(fromDatatable));
+        if (userService.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
+            return ResponseEntity.ok(receiptsService.getAllReceipts(fromDatatable));
         } else {
-            return ResponseEntity.ok(receiptsServiceImpl.getReceipts(fromDatatable));
+            return ResponseEntity.ok(receiptsService.getReceipts(fromDatatable));
         }
     }
 
@@ -97,14 +101,14 @@ public class ReceiptRestController {
             @Valid @RequestBody ReceiptEditBindingModel receiptEditBindingModel,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_RECEIPT")) {
+        if (!userService.checkCapability("CAP_EDIT_RECEIPT")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        receiptsServiceImpl.saveReceipt(
+        receiptsService.saveReceipt(
                 receiptEditBindingToService.map(receiptEditBindingModel));
 
         return ResponseEntity.ok().build();
@@ -116,14 +120,14 @@ public class ReceiptRestController {
             @Valid @RequestBody ReceiptDeleteBindingModel receiptDeleteBindingModel,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_DELETE_RECEIPT")) {
+        if (!userService.checkCapability("CAP_DELETE_RECEIPT")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        receiptsServiceImpl.deleteReceipt(
+        receiptsService.deleteReceipt(
                 receiptDeleteBindingToService.map(receiptDeleteBindingModel));
 
         return ResponseEntity.ok().build();

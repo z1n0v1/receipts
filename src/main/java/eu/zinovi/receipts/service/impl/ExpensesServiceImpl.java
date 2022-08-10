@@ -12,6 +12,7 @@ import eu.zinovi.receipts.domain.model.entity.Receipt;
 import eu.zinovi.receipts.domain.model.entity.User;
 import eu.zinovi.receipts.domain.model.view.HomeStatisticsView;
 import eu.zinovi.receipts.repository.ReceiptRepository;
+import eu.zinovi.receipts.service.ExpensesService;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

@@ -3,7 +3,7 @@ package eu.zinovi.receipts.controller.rest.admin;
 import com.google.gson.Gson;
 import eu.zinovi.receipts.WithMockEmailUser;
 import eu.zinovi.receipts.domain.model.binding.admin.*;
-import eu.zinovi.receipts.service.impl.RoleServiceImpl;
+import eu.zinovi.receipts.service.RoleService;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
@@ -46,7 +46,7 @@ public class AdminRoleRestControllerIT {
     private Gson gson;
 
     @Autowired
-    private RoleServiceImpl roleServiceImpl;
+    private RoleService roleService;
 
     @Test
     @WithMockEmailUser
@@ -98,7 +98,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        Assertions.assertTrue(roleServiceImpl.existsByName("newRole"));
+        Assertions.assertTrue(roleService.existsByName("newRole"));
     }
 
     @Test
@@ -229,7 +229,7 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        Assertions.assertTrue(roleServiceImpl.existsByName("newRole"));
+        Assertions.assertTrue(roleService.existsByName("newRole"));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete("/api/admin/role")
@@ -238,6 +238,6 @@ public class AdminRoleRestControllerIT {
                                 .with(csrf()))
                 .andExpect(status().isOk());
 
-        Assertions.assertFalse(roleServiceImpl.existsByName("newRole"));
+        Assertions.assertFalse(roleService.existsByName("newRole"));
     }
 }

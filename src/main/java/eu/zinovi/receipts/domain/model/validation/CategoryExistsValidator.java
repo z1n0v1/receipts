@@ -1,20 +1,20 @@
 package eu.zinovi.receipts.domain.model.validation;
 
-import eu.zinovi.receipts.service.impl.CategoryServiceImpl;
+import eu.zinovi.receipts.service.CategoryService;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class CategoryExistsValidator implements ConstraintValidator<CategoryExists, String> {
 
-    private final CategoryServiceImpl categoryServiceImpl;
+    private final CategoryService categoryService;
 
-    public CategoryExistsValidator(CategoryServiceImpl categoryServiceImpl) {
-        this.categoryServiceImpl = categoryServiceImpl;
+    public CategoryExistsValidator(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return categoryServiceImpl.existsByName(value);
+        return categoryService.existsByName(value);
     }
 }

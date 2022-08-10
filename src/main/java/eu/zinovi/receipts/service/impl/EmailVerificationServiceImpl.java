@@ -9,6 +9,7 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import eu.zinovi.receipts.domain.exception.EmailVerificationException;
 import eu.zinovi.receipts.service.EmailVerificationService;
+import eu.zinovi.receipts.service.VerificationTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,7 +21,7 @@ import java.io.IOException;
 @Service
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
-    private final VerificationTokenServiceImpl verificationTokenServiceImpl;
+    private final VerificationTokenService verificationTokenService;
 
     @Value("${receipts.email.from}")
     private String emailFrom;
@@ -35,16 +36,16 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private String sendGridKey;
 
 
-    public EmailVerificationServiceImpl(VerificationTokenServiceImpl verificationTokenServiceImpl) {
-        this.verificationTokenServiceImpl = verificationTokenServiceImpl;
+    public EmailVerificationServiceImpl(VerificationTokenService verificationTokenService) {
+        this.verificationTokenService = verificationTokenService;
     }
 
     @Override
     public void sendVerificationEmail(String email) {
         if (emailProvider.equals("mailHog")) {
-            sendLocalConfirmationCode(email, verificationTokenServiceImpl.createVerificationToken(email));
+            sendLocalConfirmationCode(email, verificationTokenService.createVerificationToken(email));
         } else if (emailProvider.equals("sendGrid")) {
-            sendGridConfirmationCode(email, verificationTokenServiceImpl.createVerificationToken(email));
+            sendGridConfirmationCode(email, verificationTokenService.createVerificationToken(email));
         } else {
             throw new EmailVerificationException("Unknown email provider: " + emailProvider);
 

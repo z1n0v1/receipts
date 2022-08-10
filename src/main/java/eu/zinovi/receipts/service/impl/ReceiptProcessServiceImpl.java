@@ -7,7 +7,7 @@ import eu.zinovi.receipts.domain.model.service.ReceiptPolyJsonServiceModel;
 import eu.zinovi.receipts.domain.exception.ReceiptProcessException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
-import eu.zinovi.receipts.service.ReceiptProcessService;
+import eu.zinovi.receipts.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,24 +28,32 @@ import java.util.regex.Pattern;
 
 @Service
 public class ReceiptProcessServiceImpl implements ReceiptProcessService {
-    private final UserServiceImpl userServiceImpl;
-    private final MessagingServiceImpl messagingServiceImpl;
-    private final CompanyServiceImpl companyServiceImpl;
-    private final StoreServiceImpl storeServiceImpl;
-    private final CategoryServiceImpl categoryServiceImpl;
-    private final ItemServiceImpl itemServiceImpl;
+    private final UserService userService;
+    private final MessagingService messagingService;
+    private final CompanyService companyService;
+    private final StoreService storeService;
+    private final CategoryService categoryService;
+    private final ItemService itemService;
     private final ReceiptImageRepository receiptImageRepository;
     private final ReceiptRepository receiptRepository;
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final Gson gson;
 
-    public ReceiptProcessServiceImpl(UserServiceImpl userServiceImpl, MessagingServiceImpl messagingServiceImpl, CompanyServiceImpl companyServiceImpl, StoreServiceImpl storeServiceImpl, CategoryServiceImpl categoryServiceImpl, ItemServiceImpl itemServiceImpl, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, Gson gson) {
-        this.userServiceImpl = userServiceImpl;
-        this.messagingServiceImpl = messagingServiceImpl;
-        this.companyServiceImpl = companyServiceImpl;
-        this.storeServiceImpl = storeServiceImpl;
-        this.categoryServiceImpl = categoryServiceImpl;
-        this.itemServiceImpl = itemServiceImpl;
+    public ReceiptProcessServiceImpl(
+            UserServiceImpl userService,
+            MessagingService messagingService,
+            CompanyService companyService,
+            StoreService storeService,
+            CategoryService categoryService,
+            ItemService itemService,
+            ReceiptImageRepository receiptImageRepository,
+            ReceiptRepository receiptRepository, Gson gson) {
+        this.userService = userService;
+        this.messagingService = messagingService;
+        this.companyService = companyService;
+        this.storeService = storeService;
+        this.categoryService = categoryService;
+        this.itemService = itemService;
         this.receiptImageRepository = receiptImageRepository;
         this.receiptRepository = receiptRepository;
         this.gson = gson;
@@ -59,7 +67,7 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         Receipt receipt = new Receipt();
         receipt.setReceiptImage(receiptImage);
         receipt.setAnalyzed(false);
-        receipt.setUser(userServiceImpl.getCurrentUser());
+        receipt.setUser(userService.getCurrentUser());
 
         // Read the QR code
         boolean hasQRCode = qrCode != null;
@@ -124,13 +132,13 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         if (eik == null) {
             throw new ReceiptProcessException("ЕИК не е разчетен!");
         }
-        Company company = companyServiceImpl.findByEik(eik);
+        Company company = companyService.findByEik(eik);
         if (company == null) {
             throw new ReceiptProcessException("Фирмата не е разчетена!");
         }
         receipt.setCompany(company);
 
-        receipt.setStore(storeServiceImpl.findByNameAndAddressAndCompany(storeName, storeAddress, company));
+        receipt.setStore(storeService.findByNameAndAddressAndCompany(storeName, storeAddress, company));
 
         receiptRepository.save(receipt);
 
@@ -274,7 +282,7 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         }
 
         BigDecimal itemsTotal = BigDecimal.ZERO;
-        Category other = categoryServiceImpl.findByName("Други").orElse(null);
+        Category other = categoryService.findByName("Други").orElse(null);
         for (Item item : items) {
             itemsTotal = itemsTotal.add(item.getPrice());
 //            item.setName("");
@@ -297,7 +305,7 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         for (int i = 0; i < items.size(); i++) {
             items.get(i).setReceipt(receipt);
             items.get(i).setPosition(i + 1);
-            itemServiceImpl.save(items.get(i));
+            itemService.save(items.get(i));
         }
 
         receipt.getItems().addAll(items);
@@ -305,7 +313,7 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         receiptImage.setIsProcessed(true);
         receiptImage.setReceipt(receipt);
         receiptImageRepository.save(receiptImage);
-        messagingServiceImpl.sendMessage(fileName + ": " +
+        messagingService.sendMessage(fileName + ": " +
                         receipt.getTotal() + "лв. - " +
                         company.getName() + " - " +
                         receipt.getDateOfPurchase()

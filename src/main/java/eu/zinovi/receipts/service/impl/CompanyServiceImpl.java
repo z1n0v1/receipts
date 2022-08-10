@@ -6,6 +6,7 @@ import eu.zinovi.receipts.domain.model.service.CompanyRegisterBGApiServiceModel;
 import eu.zinovi.receipts.domain.model.view.ReceiptCompanyByEikView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.CompanyRepository;
+import eu.zinovi.receipts.service.AddressService;
 import eu.zinovi.receipts.service.CompanyService;
 import eu.zinovi.receipts.util.RegisterBGApi;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,17 @@ import java.util.Optional;
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik;
     private final CompanyRepository companyRepository;
-    private final AddressServiceImpl addressServiceImpl;
+    private final AddressService addressService;
     private final RegisterBGApi registerBGApi;
 
-    public CompanyServiceImpl(CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik, CompanyRepository companyRepository, AddressServiceImpl addressServiceImpl, RegisterBGApi registerBGApi) {
+    public CompanyServiceImpl(
+            CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik,
+            CompanyRepository companyRepository,
+            AddressService addressService,
+            RegisterBGApi registerBGApi) {
         this.companyToReceiptCompanyByEik = companyToReceiptCompanyByEik;
         this.companyRepository = companyRepository;
-        this.addressServiceImpl = addressServiceImpl;
+        this.addressService = addressService;
         this.registerBGApi = registerBGApi;
     }
 
@@ -44,7 +49,7 @@ public class CompanyServiceImpl implements CompanyService {
         companyEntity.setEik(eik);
         companyEntity.setName(companyRegisterBGApiServiceModel.getCompanyName());
         companyEntity.setActivity(companyRegisterBGApiServiceModel.getCompanyActivity());
-        companyEntity.setAddress(addressServiceImpl.getAddress(companyRegisterBGApiServiceModel.getCompanyAddress()));
+        companyEntity.setAddress(addressService.getAddress(companyRegisterBGApiServiceModel.getCompanyAddress()));
         companyRepository.save(companyEntity);
         return companyEntity;
     }

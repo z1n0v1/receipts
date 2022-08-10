@@ -6,7 +6,6 @@ import eu.zinovi.receipts.domain.model.entity.ReceiptImage;
 import eu.zinovi.receipts.domain.model.service.CompanyRegisterBGApiServiceModel;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
-import eu.zinovi.receipts.service.impl.ReceiptProcessServiceImpl;
 import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
@@ -31,7 +30,7 @@ import java.util.UUID;
 public class ReceiptProcessServiceImplIT {
 
     @Autowired
-    private ReceiptProcessServiceImpl receiptProcessServiceImpl;
+    private ReceiptProcessService receiptProcessService;
 
     @Autowired
     private ReceiptImageRepository receiptImageRepository;
@@ -76,7 +75,7 @@ public class ReceiptProcessServiceImplIT {
     @Test
     @WithMockEmailUser
     public void testParseReceiptTotal() {
-        UUID receiptId = receiptProcessServiceImpl.parseReceipt
+        UUID receiptId = receiptProcessService.parseReceipt
                 (processedMLJson, receiptImage, "file.jpg", null);
 
         Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();
@@ -87,7 +86,7 @@ public class ReceiptProcessServiceImplIT {
     @Test
     @WithMockEmailUser
     public void testParseItemsTotal() {
-        UUID receiptId = receiptProcessServiceImpl.parseReceipt
+        UUID receiptId = receiptProcessService.parseReceipt
                 (processedMLJson, receiptImage, "file.jpg", null);
 
         Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();
@@ -98,7 +97,7 @@ public class ReceiptProcessServiceImplIT {
     @Test
     @WithMockEmailUser
     public void testParseItemsCount() {
-        UUID receiptId = receiptProcessServiceImpl.parseReceipt
+        UUID receiptId = receiptProcessService.parseReceipt
                 (processedMLJson, receiptImage, "file.jpg", null);
 
         Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();
@@ -109,7 +108,7 @@ public class ReceiptProcessServiceImplIT {
     @Test
     @WithMockEmailUser
     public void testParseReceiptDate() {
-        UUID receiptId = receiptProcessServiceImpl.parseReceipt
+        UUID receiptId = receiptProcessService.parseReceipt
                 (processedMLJson, receiptImage, "file.jpg", null);
 
         Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();
@@ -122,7 +121,7 @@ public class ReceiptProcessServiceImplIT {
     @WithMockEmailUser
     public void testProcessReceiptLines() {
 
-        UUID receiptId = receiptProcessServiceImpl.parseReceipt
+        UUID receiptId = receiptProcessService.parseReceipt
                 (processedMLJson, receiptImage, "file.jpg", null);
 
         Receipt receipt = receiptRepository.findById(receiptId).orElseThrow();

@@ -5,7 +5,8 @@ import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
 import eu.zinovi.receipts.domain.model.view.admin.AdminCapabilityView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.impl.AdminServiceImpl;
+import eu.zinovi.receipts.service.AdminService;
+import eu.zinovi.receipts.service.UserService;
 import eu.zinovi.receipts.service.impl.UserServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,12 +21,12 @@ import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_R
 @RestController
 @RequestMapping("/api/admin")
 public class AdminHomeRestController {
-    private final AdminServiceImpl adminServiceImpl;
-    private final UserServiceImpl userServiceImpl;
+    private final AdminService adminService;
+    private final UserService userService;
 
-    public AdminHomeRestController(AdminServiceImpl adminServiceImpl, UserServiceImpl userServiceImpl) {
-        this.adminServiceImpl = adminServiceImpl;
-        this.userServiceImpl = userServiceImpl;
+    public AdminHomeRestController(AdminService adminService, UserService userService) {
+        this.adminService = adminService;
+        this.userService = userService;
     }
 
     @RequestMapping(value = "/receipt/all", method = RequestMethod.POST,
@@ -34,14 +35,14 @@ public class AdminHomeRestController {
             @Valid @RequestBody FromDatatable fromDatatable,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_ADMIN_LIST_RECEIPTS")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADMIN_LIST_RECEIPTS")) {
             throw new AccessDeniedException(NO_PERMISSION_RECEIPT_LIST);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        return ResponseEntity.ok(adminServiceImpl.listReceipts(fromDatatable));
+        return ResponseEntity.ok(adminService.listReceipts(fromDatatable));
 
     }
 
@@ -49,10 +50,10 @@ public class AdminHomeRestController {
             produces = {"application/json"})
     public ResponseEntity<List<AdminCapabilityView>> getCapabilities() {
 
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_CAPABILITIES")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CAPABILITIES")) {
             throw new AccessDeniedException(NO_PERMISSION_CAPABILITY_LIST);
         }
 
-        return ResponseEntity.ok(adminServiceImpl.getCapabilities());
+        return ResponseEntity.ok(adminService.getCapabilities());
     }
 }

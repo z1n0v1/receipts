@@ -14,7 +14,7 @@ import eu.zinovi.receipts.domain.model.view.ReceiptListView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
-import eu.zinovi.receipts.service.ReceiptsService;
+import eu.zinovi.receipts.service.*;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,29 +47,41 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     private final ReceiptToListView receiptToListView;
     private final ReceiptImageRepository receiptImageRepository;
     private final ReceiptRepository receiptRepository;
-    private final UserServiceImpl userServiceImpl;
-    private final MessagingServiceImpl messagingServiceImpl;
-    private final ReceiptProcessServiceImpl receiptProcessServiceImpl;
-    private final CompanyServiceImpl companyServiceImpl;
-    private final ItemServiceImpl itemServiceImpl;
-    private final CategoryServiceImpl categoryServiceImpl;
-    private final StoreServiceImpl storeServiceImpl;
+    private final UserService userService;
+    private final MessagingService messagingService;
+    private final ReceiptProcessService receiptProcessService;
+    private final CompanyService companyService;
+    private final ItemService itemService;
+    private final CategoryService categoryService;
+    private final StoreService storeService;
     private final ReceiptProcessApi receiptProcessApi;
 
-    public ReceiptsServiceImpl(ItemAddServiceToItem itemAddServiceToItem, ReceiptToReceiptDetailsView receiptToReceiptDetailsView, ReceiptToListView receiptToListView, ReceiptImageRepository receiptImageRepository, ReceiptRepository receiptRepository, UserServiceImpl userServiceImpl, MessagingServiceImpl messagingServiceImpl, ReceiptProcessServiceImpl receiptProcessServiceImpl, CompanyServiceImpl companyServiceImpl,
-                               ItemServiceImpl itemServiceImpl, CategoryServiceImpl categoryServiceImpl, StoreServiceImpl storeServiceImpl, ReceiptProcessApi receiptProcessApi) {
+    public ReceiptsServiceImpl(
+            ItemAddServiceToItem itemAddServiceToItem,
+            ReceiptToReceiptDetailsView receiptToReceiptDetailsView,
+            ReceiptToListView receiptToListView,
+            ReceiptImageRepository receiptImageRepository,
+            ReceiptRepository receiptRepository,
+            UserService userService,
+            MessagingService messagingService,
+            ReceiptProcessService receiptProcessService,
+            CompanyService companyService,
+            ItemService itemService,
+            CategoryService categoryService,
+            StoreService storeService,
+            ReceiptProcessApi receiptProcessApi) {
         this.itemAddServiceToItem = itemAddServiceToItem;
         this.receiptToReceiptDetailsView = receiptToReceiptDetailsView;
         this.receiptToListView = receiptToListView;
         this.receiptImageRepository = receiptImageRepository;
         this.receiptRepository = receiptRepository;
-        this.userServiceImpl = userServiceImpl;
-        this.messagingServiceImpl = messagingServiceImpl;
-        this.receiptProcessServiceImpl = receiptProcessServiceImpl;
-        this.companyServiceImpl = companyServiceImpl;
-        this.itemServiceImpl = itemServiceImpl;
-        this.categoryServiceImpl = categoryServiceImpl;
-        this.storeServiceImpl = storeServiceImpl;
+        this.userService = userService;
+        this.messagingService = messagingService;
+        this.receiptProcessService = receiptProcessService;
+        this.companyService = companyService;
+        this.itemService = itemService;
+        this.categoryService = categoryService;
+        this.storeService = storeService;
 
         this.receiptProcessApi = receiptProcessApi;
     }
@@ -104,25 +116,25 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
         String qrCode = readQRCode(image);
 
-        messagingServiceImpl.sendMessage(fileName + ": Обработка...");
+        messagingService.sendMessage(fileName + ": Обработка...");
         ByteArrayInputStream processedImageStream = graphicallyProcessReceipt(image);
 
         ReceiptImage receiptImage = new ReceiptImage();
         receiptImage.setIsProcessed(false);
         receiptImage.setAddedOn(LocalDateTime.now());
-        receiptImage.setUser(userServiceImpl.getCurrentUser());
+        receiptImage.setUser(userService.getCurrentUser());
         receiptImageRepository.save(receiptImage);
 
         receiptProcessApi.setReceiptId(receiptImage.getId());
 
         receiptImage.setImageUrl(receiptProcessApi.uploadReceipt(processedImageStream));
 
-        messagingServiceImpl.sendMessage(fileName + ": Анализ...");
+        messagingService.sendMessage(fileName + ": Анализ...");
         String polyJson = receiptProcessApi.doOCR();
 
         receiptImageRepository.save(receiptImage);
 
-        return receiptProcessServiceImpl.parseReceipt(polyJson, receiptImage, fileName, qrCode);
+        return receiptProcessService.parseReceipt(polyJson, receiptImage, fileName, qrCode);
     }
 
     @Override
@@ -136,7 +148,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     @Override
     public List<ReceiptListView> getReceiptImagesWithDate() {
-        return receiptRepository.findByUserOrderByDateOfPurchaseDesc(userServiceImpl.getCurrentUser()).stream()
+        return receiptRepository.findByUserOrderByDateOfPurchaseDesc(userService.getCurrentUser()).stream()
                 .map(receiptToListView::map)
                 .collect(Collectors.toList());
     }
@@ -150,7 +162,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 .orElseThrow(EntityNotFoundException::new);
 
         for (Item item : receipt.getItems()) {
-            itemServiceImpl.delete(item);
+            itemService.delete(item);
         }
 
         String receiptImageId = receipt.getReceiptImage().getId().toString();
@@ -188,7 +200,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
         for (Item item : receipt.getItems()) {
             if (item.getPosition().equals(itemDeleteServiceModel.getPosition())) {
-                itemServiceImpl.delete(item);
+                itemService.delete(item);
                 continue;
             }
             itemsTotal = itemsTotal.add(item.getPrice());
@@ -211,13 +223,13 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 .orElseThrow(EntityNotFoundException::new);
 
         Item item = itemAddServiceToItem.map(itemAddServiceModel);
-        item.setCategory(categoryServiceImpl.findByName(itemAddServiceModel.getCategory())
+        item.setCategory(categoryService.findByName(itemAddServiceModel.getCategory())
                 .orElseThrow(EntityNotFoundException::new));
 
         item.setPosition(receipt.getItems().size() + 1);
         item.setReceipt(receipt);
 
-        itemServiceImpl.save(item);
+        itemService.save(item);
         receipt.getItems().add(item);
         receipt.setItemsTotal(receipt.getItemsTotal().add(item.getPrice()));
         receiptRepository.save(receipt);
@@ -308,7 +320,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
                 sort);
 
         Page<Receipt> page;
-        User user = userServiceImpl.getCurrentUser();
+        User user = userService.getCurrentUser();
 
         if (fromDatatable.getSearch().getValue() == null || fromDatatable.getSearch().getValue().isEmpty()) {
 
@@ -356,10 +368,10 @@ public class ReceiptsServiceImpl implements ReceiptsService {
         receipt.setDateOfPurchase(receiptEditServiceModel.getReceiptDate());
         receipt.setTotal(receiptEditServiceModel.getTotal());
 
-        Company company = companyServiceImpl.findByEik(receiptEditServiceModel.getCompanyEik());
+        Company company = companyService.findByEik(receiptEditServiceModel.getCompanyEik());
         receipt.setCompany(company);
 
-        Store store = storeServiceImpl.findByNameAndAddressAndCompany(receiptEditServiceModel.getStoreName(),
+        Store store = storeService.findByNameAndAddressAndCompany(receiptEditServiceModel.getStoreName(),
                 receiptEditServiceModel.getStoreAddress(),
                 company);
 

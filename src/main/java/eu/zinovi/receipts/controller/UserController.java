@@ -9,9 +9,9 @@ import eu.zinovi.receipts.domain.model.mapper.UserPasswordSetBindingToService;
 import eu.zinovi.receipts.domain.model.mapper.UserRegisterBindingToService;
 import eu.zinovi.receipts.domain.model.mapper.UserSettingsServiceModelMapper;
 import eu.zinovi.receipts.domain.user.EmailUser;
-import eu.zinovi.receipts.service.impl.EmailVerificationServiceImpl;
-import eu.zinovi.receipts.service.impl.UserServiceImpl;
-import eu.zinovi.receipts.service.impl.VerificationTokenServiceImpl;
+import eu.zinovi.receipts.service.EmailVerificationService;
+import eu.zinovi.receipts.service.UserService;
+import eu.zinovi.receipts.service.VerificationTokenService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,18 +28,25 @@ public class UserController {
     private final UserRegisterBindingToService userRegisterBindingToService;
     private final UserPasswordSetBindingToService userPasswordSetBindingToService;
     private final UserDetailsBindingToService userDetailsBindingToService;
-    private final EmailVerificationServiceImpl emailVerificationServiceImpl;
-    private final VerificationTokenServiceImpl verificationTokenServiceImpl;
-    private final UserServiceImpl userServiceImpl;
+    private final EmailVerificationService emailVerificationService;
+    private final VerificationTokenService verificationTokenService;
+    private final UserService userService;
     private final UserSettingsServiceModelMapper userSettingsServiceModelMapper;
 
-    public UserController(UserRegisterBindingToService userRegisterBindingToService, UserPasswordSetBindingToService userPasswordSetBindingToService, UserDetailsBindingToService userDetailsBindingToService, EmailVerificationServiceImpl emailVerificationServiceImpl, VerificationTokenServiceImpl verificationTokenServiceImpl, UserServiceImpl userServiceImpl, UserSettingsServiceModelMapper userSettingsServiceModelMapper) {
+    public UserController(
+            UserRegisterBindingToService userRegisterBindingToService,
+            UserPasswordSetBindingToService userPasswordSetBindingToService,
+            UserDetailsBindingToService userDetailsBindingToService,
+            EmailVerificationService emailVerificationService,
+            VerificationTokenService verificationTokenService,
+            UserService userService,
+            UserSettingsServiceModelMapper userSettingsServiceModelMapper) {
         this.userRegisterBindingToService = userRegisterBindingToService;
         this.userPasswordSetBindingToService = userPasswordSetBindingToService;
         this.userDetailsBindingToService = userDetailsBindingToService;
-        this.emailVerificationServiceImpl = emailVerificationServiceImpl;
-        this.verificationTokenServiceImpl = verificationTokenServiceImpl;
-        this.userServiceImpl = userServiceImpl;
+        this.emailVerificationService = emailVerificationService;
+        this.verificationTokenService = verificationTokenService;
+        this.userService = userService;
         this.userSettingsServiceModelMapper = userSettingsServiceModelMapper;
     }
 
@@ -55,7 +62,7 @@ public class UserController {
                                   RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors() ||
-                !userServiceImpl.registerEmailUser(userRegisterBindingToService.map(userRegisterBindingModel))) {
+                !userService.registerEmailUser(userRegisterBindingToService.map(userRegisterBindingModel))) {
             redirectAttributes.addFlashAttribute("userRegisterBindingModel", userRegisterBindingModel);
             redirectAttributes.addFlashAttribute(
                     "org.springframework.validation.BindingResult.userRegisterBindingModel",
@@ -81,11 +88,11 @@ public class UserController {
     @GetMapping("/details")
     public String details(Model model) {
 
-        if (!userServiceImpl.checkCapability("CAP_VIEW_USER_DETAILS")) {
+        if (!userService.checkCapability("CAP_VIEW_USER_DETAILS")) {
             return "redirect:/home";
         }
 
-        model.addAttribute("user", userServiceImpl.getUserDetails());
+        model.addAttribute("user", userService.getUserDetails());
 
         return "user/details/home";
     }
@@ -93,11 +100,11 @@ public class UserController {
     @GetMapping("/details/edit")
     public String detailsEdit(Model model) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER")) {
+        if (!userService.checkCapability("CAP_EDIT_USER")) {
             return "redirect:/user/details";
         }
 
-        model.addAttribute("picture", userServiceImpl.getCurrentUserPicture());
+        model.addAttribute("picture", userService.getCurrentUserPicture());
 
         return "user/details/edit";
     }
@@ -109,7 +116,7 @@ public class UserController {
                                      BindingResult bindingResult,
                                      RedirectAttributes redirectAttributes) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER")) {
+        if (!userService.checkCapability("CAP_EDIT_USER")) {
             return "redirect:/user/details";
         }
 
@@ -121,25 +128,25 @@ public class UserController {
 
             return "redirect:/user/details/edit";
         }
-        userServiceImpl.editUser(userDetailsBindingToService.map(userDetailsBindingModel));
+        userService.editUser(userDetailsBindingToService.map(userDetailsBindingModel));
 
         return "redirect:/user/details";
     }
 
     @ModelAttribute
     public UserDetailsBindingModel userDetailsBindingModel() {
-        return userServiceImpl.getCurrentUserBindingDetails();
+        return userService.getCurrentUserBindingDetails();
     }
 
     @PostMapping("/details/picture/save")
     public String savePicture(@RequestParam("picture") MultipartFile picture, RedirectAttributes redirectAttributes) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER")) {
+        if (!userService.checkCapability("CAP_EDIT_USER")) {
             return "redirect:/user/details";
         }
 
         try {
-            userServiceImpl.savePicture(picture);
+            userService.savePicture(picture);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/user/details/edit";
@@ -151,7 +158,7 @@ public class UserController {
     @GetMapping("/details/password/change")
     public String userPasswordChange() {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER") || !userServiceImpl.checkCapability("CAP_CHANGE_PASSWORD")) {
+        if (!userService.checkCapability("CAP_EDIT_USER") || !userService.checkCapability("CAP_CHANGE_PASSWORD")) {
             return "redirect:/user/details";
         }
 
@@ -162,7 +169,7 @@ public class UserController {
     public String changePassword(@Valid UserPasswordChangeBindingModel userPasswordChangeBindingModel, BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER") || !userServiceImpl.checkCapability("CAP_CHANGE_PASSWORD")) {
+        if (!userService.checkCapability("CAP_EDIT_USER") || !userService.checkCapability("CAP_CHANGE_PASSWORD")) {
             return "redirect:/user/details";
         }
 
@@ -174,7 +181,7 @@ public class UserController {
             return "redirect:/user/details/password/change";
         }
 
-        userServiceImpl.changePassword(userSettingsServiceModelMapper.INSTANCE
+        userService.changePassword(userSettingsServiceModelMapper.INSTANCE
                 .userSettingsServiceModel(userPasswordChangeBindingModel));
 
         redirectAttributes.addFlashAttribute("passwordChanged", true);
@@ -189,7 +196,7 @@ public class UserController {
     @GetMapping("/details/password/set")
     public String settingsPasswordSet() {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER") || !userServiceImpl.checkCapability("CAP_CHANGE_PASSWORD")) {
+        if (!userService.checkCapability("CAP_EDIT_USER") || !userService.checkCapability("CAP_CHANGE_PASSWORD")) {
             return "redirect:/user/details";
         }
 
@@ -200,7 +207,7 @@ public class UserController {
     public String setPassword(@Valid UserPasswordSetBindingModel userPasswordSetBindingModel, BindingResult bindingResult,
                               RedirectAttributes redirectAttributes) {
 
-        if (!userServiceImpl.checkCapability("CAP_EDIT_USER") || !userServiceImpl.checkCapability("CAP_CHANGE_PASSWORD")) {
+        if (!userService.checkCapability("CAP_EDIT_USER") || !userService.checkCapability("CAP_CHANGE_PASSWORD")) {
             return "redirect:/user/details";
         }
 
@@ -212,7 +219,7 @@ public class UserController {
             return "redirect:/user/details/password/set";
         }
 
-        userServiceImpl.setPassword(userPasswordSetBindingToService.map(userPasswordSetBindingModel));
+        userService.setPassword(userPasswordSetBindingToService.map(userPasswordSetBindingModel));
 
         redirectAttributes.addFlashAttribute("passwordSet", true);
         return "redirect:/user/details";
@@ -236,12 +243,12 @@ public class UserController {
         }
 
         if (principal instanceof EmailUser user && again != null && again) {
-            emailVerificationServiceImpl.sendVerificationEmail(user.getEmail());
+            emailVerificationService.sendVerificationEmail(user.getEmail());
             redirectAttributes.addFlashAttribute("emailVerificationSent", true);
             return "redirect:/user/verify/email";
         }
 
-        if (verificationTokenServiceImpl.verifyToken(code)) {
+        if (verificationTokenService.verifyToken(code)) {
             return "redirect:/home";
         }
 

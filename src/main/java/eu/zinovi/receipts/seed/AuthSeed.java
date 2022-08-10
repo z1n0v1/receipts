@@ -10,7 +10,7 @@ import eu.zinovi.receipts.repository.CapabilityRepository;
 import eu.zinovi.receipts.repository.CategoryRepository;
 import eu.zinovi.receipts.repository.RoleRepository;
 import eu.zinovi.receipts.repository.UserRepository;
-import eu.zinovi.receipts.service.impl.StatisticsServiceImpl;
+import eu.zinovi.receipts.service.StatisticsService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -28,7 +28,7 @@ public class AuthSeed implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final CapabilityRepository capabilityRepository;
     private final CategoryRepository categoryRepository;
-    private final StatisticsServiceImpl statisticsServiceImpl;
+    private final StatisticsService statisticsServiceImpl;
     private final PasswordEncoder passwordEncoder;
     private final static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AuthSeed.class);
 
@@ -42,12 +42,18 @@ public class AuthSeed implements CommandLineRunner {
     @Value("${receipts.user.admin.password}")
     private String adminPassword;
 
-    public AuthSeed(UserRepository userRepository, RoleRepository roleRepository, CapabilityRepository capabilityRepository, CategoryRepository categoryRepository, StatisticsServiceImpl statisticsServiceImpl, PasswordEncoder passwordEncoder) {
+    public AuthSeed(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            CapabilityRepository capabilityRepository,
+            CategoryRepository categoryRepository,
+            StatisticsService statisticsService,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.capabilityRepository = capabilityRepository;
         this.categoryRepository = categoryRepository;
-        this.statisticsServiceImpl = statisticsServiceImpl;
+        this.statisticsServiceImpl = statisticsService;
         this.passwordEncoder = passwordEncoder;
     }
 

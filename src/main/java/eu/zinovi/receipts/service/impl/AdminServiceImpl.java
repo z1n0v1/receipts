@@ -250,6 +250,7 @@ public class AdminServiceImpl implements AdminService {
         return capabilities;
     }
 
+    @Override
     public void addRole(AdminRoleAddServiceModel AdminRoleAddServiceModel) {
         Role role = new Role();
         role.setName(AdminRoleAddServiceModel.getName());

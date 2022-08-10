@@ -37,8 +37,8 @@ public class ReceiptsUserDetailsServiceTest {
 
     @BeforeEach
     public void setUp() {
-        AuthServiceImpl authServiceImpl = new AuthServiceImpl(userRepository, roleRepository);
-        toTest = new ReceiptsUserDetailsService(authServiceImpl);
+        AuthService authService = new AuthServiceImpl(userRepository, roleRepository);
+        toTest = new ReceiptsUserDetailsService(authService);
     }
 
     @Test

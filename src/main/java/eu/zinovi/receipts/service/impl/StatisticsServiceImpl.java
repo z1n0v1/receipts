@@ -432,6 +432,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return receiptRepository.countByDateOfPurchaseAfterAndDateOfPurchaseBefore(from, to);
     }
 
+    @Override
     public IndexStatisticsView getIndexStatistics() {
         IndexStatisticsView statistics = new IndexStatisticsView();
 

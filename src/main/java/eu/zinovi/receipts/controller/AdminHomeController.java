@@ -1,8 +1,8 @@
 package eu.zinovi.receipts.controller;
 
-import eu.zinovi.receipts.service.impl.AddressServiceImpl;
-import eu.zinovi.receipts.service.impl.StatisticsServiceImpl;
-import eu.zinovi.receipts.service.impl.UserServiceImpl;
+import eu.zinovi.receipts.service.AddressService;
+import eu.zinovi.receipts.service.StatisticsService;
+import eu.zinovi.receipts.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,34 +16,36 @@ import java.util.UUID;
 @RequestMapping("/admin")
 public class AdminHomeController {
 
-    private final AddressServiceImpl addressServiceImpl;
-    private final UserServiceImpl userServiceImpl;
-    private final StatisticsServiceImpl statisticsServiceImpl;
+    private final AddressService addressService;
+    private final UserService userService;
+    private final StatisticsService statisticsService;
 
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
-    public AdminHomeController(AddressServiceImpl addressServiceImpl, UserServiceImpl userServiceImpl, StatisticsServiceImpl statisticsServiceImpl) {
-        this.addressServiceImpl = addressServiceImpl;
-        this.userServiceImpl = userServiceImpl;
-        this.statisticsServiceImpl = statisticsServiceImpl;
+    public AdminHomeController(
+            AddressService addressService, UserService userService,
+            StatisticsService statisticsService) {
+        this.addressService = addressService;
+        this.userService = userService;
+        this.statisticsService = statisticsService;
     }
 
     @GetMapping("/")
     public String admin(Model model) {
 
-        if (!userServiceImpl.checkCapability("CAP_ADMIN")) {
+        if (!userService.checkCapability("CAP_ADMIN")) {
             return "redirect:/home";
         }
 
-        model.addAttribute("statistics", statisticsServiceImpl.getStatistics());
+        model.addAttribute("statistics", statisticsService.getStatistics());
 
         return "admin/home";
     }
 
     @GetMapping("/roles")
     public String roles() {
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_ROLES")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_ROLES")) {
             return "redirect:/home";
         }
 
@@ -53,7 +55,7 @@ public class AdminHomeController {
 
     @GetMapping("/users")
     public String users() {
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_USERS")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_USERS")) {
             return "redirect:/home";
         }
 
@@ -62,7 +64,7 @@ public class AdminHomeController {
 
     @GetMapping("/categories")
     public String categories() {
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_LIST_CATEGORIES")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_LIST_CATEGORIES")) {
             return "redirect:/home";
         }
 
@@ -71,11 +73,11 @@ public class AdminHomeController {
 
     @GetMapping("/receipt/{receiptId}")
     public String viewReceipt(@PathVariable("receiptId") UUID receiptId, Model model) {
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_ADMIN_VIEW_RECEIPT")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_ADMIN_VIEW_RECEIPT")) {
             return "redirect:/home";
         }
 
-        model.addAttribute("receipt", addressServiceImpl.getReceipt(receiptId));
+        model.addAttribute("receipt", addressService.getReceipt(receiptId));
         model.addAttribute("bucket", bucket);
 
         return "admin/receipt-view";

@@ -9,8 +9,8 @@ import eu.zinovi.receipts.domain.model.mapper.AdminRoleDeleteBindingToService;
 import eu.zinovi.receipts.domain.model.view.admin.AdminRoleView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.impl.AdminServiceImpl;
-import eu.zinovi.receipts.service.impl.UserServiceImpl;
+import eu.zinovi.receipts.service.AdminService;
+import eu.zinovi.receipts.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,15 +29,19 @@ public class AdminRoleRestController {
     private final AdminRoleDeleteBindingToService adminRoleDeleteBindingToService;
     private final AdminRoleBindingToService adminRoleBindingToService;
     private final AdminRoleAddBindingToService adminRoleAddBindingToService;
-    private final UserServiceImpl userServiceImpl;
-    private final AdminServiceImpl adminServiceImpl;
+    private final UserService userService;
+    private final AdminService adminService;
 
-    public AdminRoleRestController(AdminRoleDeleteBindingToService adminRoleDeleteBindingToService, AdminRoleBindingToService adminRoleBindingToService, AdminRoleAddBindingToService adminRoleAddBindingToService, UserServiceImpl userServiceImpl, AdminServiceImpl adminServiceImpl) {
+    public AdminRoleRestController(
+            AdminRoleDeleteBindingToService adminRoleDeleteBindingToService,
+            AdminRoleBindingToService adminRoleBindingToService,
+            AdminRoleAddBindingToService adminRoleAddBindingToService,
+            UserService userService, AdminService adminService) {
         this.adminRoleDeleteBindingToService = adminRoleDeleteBindingToService;
         this.adminRoleBindingToService = adminRoleBindingToService;
         this.adminRoleAddBindingToService = adminRoleAddBindingToService;
-        this.userServiceImpl = userServiceImpl;
-        this.adminServiceImpl = adminServiceImpl;
+        this.userService = userService;
+        this.adminService = adminService;
     }
 
     @RequestMapping(value = "/role", method = RequestMethod.POST,
@@ -46,14 +50,14 @@ public class AdminRoleRestController {
             @Valid @RequestBody AdminRoleAddBindingModel adminRoleAddBindingModel,
             BindingResult bindingResult) {
 
-        if (!(userServiceImpl.checkCapability("CAP_ADMIN") && userServiceImpl.checkCapability("CAP_ADD_ROLE"))) {
+        if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_ADD_ROLE"))) {
             throw new AccessDeniedException(NO_PERMISSION_ROLE_ADD);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminServiceImpl.addRole(adminRoleAddBindingToService
+        adminService.addRole(adminRoleAddBindingToService
                 .map(adminRoleAddBindingModel));
 
         return ResponseEntity.ok().build();
@@ -63,11 +67,11 @@ public class AdminRoleRestController {
             produces = {"application/json"})
     public ResponseEntity<List<AdminRoleView>> listRoles() {
 
-        if (!(userServiceImpl.checkCapability("CAP_ADMIN") && userServiceImpl.checkCapability("CAP_LIST_ROLES"))) {
+        if (!(userService.checkCapability("CAP_ADMIN") && userService.checkCapability("CAP_LIST_ROLES"))) {
             throw new AccessDeniedException(NO_PERMISSION_ROLE_LIST);
         }
 
-        return ResponseEntity.ok(adminServiceImpl.listRoles());
+        return ResponseEntity.ok(adminService.listRoles());
     }
 
     @RequestMapping(value = "/role", method = RequestMethod.PUT,
@@ -76,14 +80,14 @@ public class AdminRoleRestController {
             @Valid @RequestBody AdminRoleBindingModel adminRoleBindingModel,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_EDIT_ROLE")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_EDIT_ROLE")) {
             throw new AccessDeniedException(NO_PERMISSION_ROLE_EDIT);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminServiceImpl.updateRole(adminRoleBindingToService
+        adminService.updateRole(adminRoleBindingToService
                 .map(adminRoleBindingModel));
 
         return ResponseEntity.ok().build();
@@ -95,14 +99,14 @@ public class AdminRoleRestController {
             @Valid @RequestBody AdminRoleDeleteBindingModel adminRoleDeleteBindingModel,
             BindingResult bindingResult) {
 
-        if (!userServiceImpl.checkCapability("CAP_ADMIN") || !userServiceImpl.checkCapability("CAP_DELETE_ROLE")) {
+        if (!userService.checkCapability("CAP_ADMIN") || !userService.checkCapability("CAP_DELETE_ROLE")) {
             throw new AccessDeniedException(NO_PERMISSION_ROLE_DELETE);
         }
         if (bindingResult.hasErrors()) {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminServiceImpl.deleteRole(adminRoleDeleteBindingToService
+        adminService.deleteRole(adminRoleDeleteBindingToService
                 .map(adminRoleDeleteBindingModel));
 
         return ResponseEntity.ok().build();

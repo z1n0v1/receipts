@@ -1,4 +1,4 @@
-package eu.zinovi.receipts.service.impl;
+package eu.zinovi.receipts.service;
 
 import be.ceau.chart.LineChart;
 import be.ceau.chart.PieChart;
