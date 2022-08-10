@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ReceiptsUserDetailsServiceTest {
 
-    private ReceiptsUserDetailsService toTest;
+    private ReceiptsUserDetailsService receiptsUserDetailsService;
 
     @Mock
     private UserRepository userRepository;
@@ -38,7 +38,7 @@ public class ReceiptsUserDetailsServiceTest {
     @BeforeEach
     public void setUp() {
         AuthService authService = new AuthServiceImpl(userRepository, roleRepository);
-        toTest = new ReceiptsUserDetailsService(authService);
+        receiptsUserDetailsService = new ReceiptsUserDetailsService(authService);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class ReceiptsUserDetailsServiceTest {
 
         // act
 
-        EmailUser emailUser = (EmailUser) toTest.loadUserByUsername(user.getEmail());
+        EmailUser emailUser = (EmailUser) receiptsUserDetailsService.loadUserByUsername(user.getEmail());
 
         // assert
 
@@ -116,7 +116,7 @@ public class ReceiptsUserDetailsServiceTest {
         // act & assert
 
         Assertions.assertThrows(UsernameNotFoundException.class,
-                () -> toTest.loadUserByUsername("email"));
+                () -> receiptsUserDetailsService.loadUserByUsername("email"));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class ReceiptsUserDetailsServiceTest {
         // act & assert
 
         Assertions.assertThrows(UsernameNotFoundException.class,
-                () -> toTest.loadUserByUsername("email"));
+                () -> receiptsUserDetailsService.loadUserByUsername("email"));
     }
 
 

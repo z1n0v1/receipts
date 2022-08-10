@@ -2,7 +2,6 @@ package eu.zinovi.receipts.service.impl;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -29,15 +28,15 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     @Value("${receipts.baseUrl}")
     private String baseUrl;
 
-    @Value("${receipts.email.provider}")
-    private String emailProvider;
+    private final String emailProvider;
 
-    @Value("${receipts.email.provider.sendgrid.api-key}")
-    private String sendGridKey;
-
-
-    public EmailVerificationServiceImpl(VerificationTokenService verificationTokenService) {
+    private final SendGrid sendGrid;
+    public EmailVerificationServiceImpl(
+            VerificationTokenService verificationTokenService,
+            @Value("${receipts.email.provider}") String emailProvider, SendGrid sendGrid) {
         this.verificationTokenService = verificationTokenService;
+        this.emailProvider = emailProvider;
+        this.sendGrid = sendGrid;
     }
 
     @Override
@@ -61,16 +60,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         Mail mail = new Mail(from, subject, to, content);
 
         try {
-            SendGrid sg = new SendGrid(this.sendGridKey);
             Request request = new Request();
 
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
+            sendGrid.api(request);
         } catch (IOException ex) {
             throw new EmailVerificationException();
         }

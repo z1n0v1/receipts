@@ -1,6 +1,7 @@
 package eu.zinovi.receipts.config;
 
 
+import com.sendgrid.SendGrid;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ReceiptProcessApi;
 import eu.zinovi.receipts.util.RegisterBGApi;
@@ -19,6 +20,9 @@ public class ApiBeanConfig {
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
+    @Value("${receipts.email.provider.sendgrid.api-key}")
+    private String sendGridKey;
+
     @Bean
     public ReceiptProcessApi receiptProcessApi() {
         return new GoogleReceiptProcessApi(googleCreds, bucket);
@@ -32,5 +36,10 @@ public class ApiBeanConfig {
     @Bean
     public RegisterBGApi registerBGApi() {
         return new RegisterBGPapagalScraper();
+    }
+
+    @Bean
+    public SendGrid sendGrid() {
+        return new SendGrid(sendGridKey);
     }
 }

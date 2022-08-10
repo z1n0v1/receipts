@@ -19,7 +19,7 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
         if (request.getRequestURI() != null &&
                 (request.getRequestURI().equals("/user/login") ||
                         request.getRequestURI().equals("/user/logout") ||
-                        request.getRequestURI().equals("/error") ||
+                        request.getRequestURI().startsWith("/error") ||
                         request.getRequestURI().startsWith("/js") ||
                         request.getRequestURI().startsWith("/css") ||
                         request.getRequestURI().startsWith("/image") ||
