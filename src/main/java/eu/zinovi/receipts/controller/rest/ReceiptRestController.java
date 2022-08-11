@@ -91,7 +91,7 @@ public class ReceiptRestController {
         if (userService.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
             return ResponseEntity.ok(receiptsService.getAllReceipts(fromDatatable));
         } else {
-            return ResponseEntity.ok(receiptsService.getReceipts(fromDatatable));
+            return ResponseEntity.ok(receiptsService.getUserReceipts(fromDatatable));
         }
     }
 

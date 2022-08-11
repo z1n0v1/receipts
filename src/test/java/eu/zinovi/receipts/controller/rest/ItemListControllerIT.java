@@ -30,10 +30,7 @@ import javax.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -292,37 +289,39 @@ public class ItemListControllerIT {
     @Test
     @WithMockEmailUser(roles = {"CAP_LIST_ITEMS"})
     public void itemsTableValidWithCap() throws Exception {
-        FromDatatable fromDatatable = new FromDatatable(
-                0L,
-                0,
-                10,
-                null,
-                null,
-                null,
-                new DatatableColumn[]{
-                        new DatatableColumn("0", "position", "false", "true",
-                                new DatatableSearch("", "false")),
-                        new DatatableColumn("1", "category", "true", "true",
-                                new DatatableSearch("", "false")),
-                        new DatatableColumn("2", "name", "true", "true",
-                                new DatatableSearch("", "false")),
-                        new DatatableColumn("3", "quantity", "false", "true",
-                                new DatatableSearch("", "false")),
-                        new DatatableColumn("4", "price", "false", "true",
-                                new DatatableSearch("", "false")),
-                },
-                new DatatableOrder[]{
-                        new DatatableOrder("0", "asc")
-                },
-                new DatatableSearch("", "false")
-        );
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/item/{id}", receipt.getId())
-                        .with(csrf())
-                        .contentType("application/json")
-                        .content(gson.toJson(fromDatatable)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(3));
+        for (int i = 0; i < 5; i++) {
+            FromDatatable fromDatatable = new FromDatatable(
+                    0L,
+                    0,
+                    10,
+                    null,
+                    null,
+                    null,
+                    new DatatableColumn[]{
+                            new DatatableColumn("0", "position", "false", "true",
+                                    new DatatableSearch("", "false")),
+                            new DatatableColumn("1", "category", "true", "true",
+                                    new DatatableSearch("", "false")),
+                            new DatatableColumn("2", "name", "true", "true",
+                                    new DatatableSearch("", "false")),
+                            new DatatableColumn("3", "quantity", "false", "true",
+                                    new DatatableSearch("", "false")),
+                            new DatatableColumn("4", "price", "false", "true",
+                                    new DatatableSearch("", "false")),
+                    },
+                    new DatatableOrder[]{
+                            new DatatableOrder(String.valueOf(i), "asc")
+                    },
+                    new DatatableSearch("", "false")
+            );
+            mockMvc.perform(MockMvcRequestBuilders.post("/api/item/{id}", receipt.getId())
+                            .with(csrf())
+                            .contentType("application/json")
+                            .content(gson.toJson(fromDatatable)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.length()").value(3));
+        }
     }
 
     @Test

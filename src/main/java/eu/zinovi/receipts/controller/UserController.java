@@ -92,7 +92,7 @@ public class UserController {
             return "redirect:/home";
         }
 
-        model.addAttribute("user", userService.getUserDetails());
+        model.addAttribute("user", userService.getCurrentUserDetails());
 
         return "user/details/home";
     }

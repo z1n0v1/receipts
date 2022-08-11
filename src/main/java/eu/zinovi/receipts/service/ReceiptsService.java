@@ -20,34 +20,34 @@ public interface ReceiptsService {
     @Transactional
     UUID uploadReceipt(MultipartFile file) throws ReceiptProcessException;
 
-    @Transactional
-    List<ReceiptListView> getAllReceiptImagesWithDate();
-
-    List<ReceiptListView> getReceiptImagesWithDate();
-
-    @Transactional
-    void deleteReceipt(ReceiptDeleteServiceModel receiptDeleteServiceModel);
+    boolean existsById(UUID id);
 
     @Transactional
     ReceiptDetailsView getReceiptDetails(UUID id);
 
-    @Transactional
-    void deleteItem(ItemDeleteServiceModel itemDeleteServiceModel);
+    List<ReceiptListView> getUserReceiptsWithDate();
 
     @Transactional
-    void addItem(ItemAddServiceModel itemAddServiceModel);
+    List<ReceiptListView> getAllReceiptsWithDate();
+
+    @Transactional
+    ToDatatable getUserReceipts(FromDatatable fromDatatable);
 
     @Transactional
     ToDatatable getAllReceipts(FromDatatable fromDatatable);
 
     @Transactional
-    ToDatatable getReceipts(FromDatatable fromDatatable);
+    AdminReceiptView getAdminReceipt(UUID receiptId);
 
     @Transactional
     void saveReceipt(ReceiptEditServiceModel receiptEditServiceModel);
 
-    boolean existsById(UUID id);
+    @Transactional
+    void deleteReceipt(ReceiptDeleteServiceModel receiptDeleteServiceModel);
 
     @Transactional
-    AdminReceiptView getAdminReceipt(UUID receiptId);
+    void addItem(ItemAddServiceModel itemAddServiceModel);
+
+    @Transactional
+    void deleteItem(ItemDeleteServiceModel itemDeleteServiceModel);
 }

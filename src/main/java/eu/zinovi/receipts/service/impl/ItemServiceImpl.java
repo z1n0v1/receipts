@@ -29,11 +29,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void save(Item item) {
-        itemRepository.save(item);
-    }
-
-    @Override
     public List<Item> getItems(UUID receiptId) {
         return itemRepository.findByReceiptIdOrderByPosition(receiptId);
     }
@@ -108,6 +103,11 @@ public class ItemServiceImpl implements ItemService {
         item.setName(itemEditServiceModel.getName());
         item.setQuantity(itemEditServiceModel.getQuantity());
         item.setPrice(itemEditServiceModel.getPrice());
+        itemRepository.save(item);
+    }
+
+    @Override
+    public void save(Item item) {
         itemRepository.save(item);
     }
 

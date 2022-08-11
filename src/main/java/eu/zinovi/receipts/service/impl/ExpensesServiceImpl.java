@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static eu.zinovi.receipts.util.constants.LabelConstants.*;
+
 @Service
 public class ExpensesServiceImpl implements ExpensesService {
     private final UserServiceImpl userServiceImpl;
@@ -52,7 +54,7 @@ public class ExpensesServiceImpl implements ExpensesService {
             }
         }
         PieDataset dataset = new PieDataset()
-                .setLabel("Месечни разходи по категории");
+                .setLabel(EXPENSES_BY_CATEGORY_PIE_CHART_LABEL);
         PieData data = new PieData();
 
         for (Map.Entry<Category, BigDecimal> entry : expenses.entrySet()) {
@@ -84,7 +86,7 @@ public class ExpensesServiceImpl implements ExpensesService {
             }
         }
         PieDataset dataset = new PieDataset()
-                .setLabel("Месечни разходи по категории");
+                .setLabel(TOTAL_EXPENSES_BY_CATEGORY_PIE_CHART_LABEL);
         PieData data = new PieData();
 
         for (Map.Entry<Category, BigDecimal> entry : expenses.entrySet()) {
@@ -116,7 +118,7 @@ public class ExpensesServiceImpl implements ExpensesService {
         expenses.put(LocalDate.now(), thisWeekExpenses == null ? BigDecimal.ZERO : thisWeekExpenses);
 
         LineDataset dataset = new LineDataset()
-                .setLabel("Разходи последния месец по седмици");
+                .setLabel(EXPENSES_BY_WEEK_LINE_CHART_LABEL);
         LineData data = new LineData();
 
         for (Map.Entry<LocalDate, BigDecimal> entry : expenses.entrySet()) {

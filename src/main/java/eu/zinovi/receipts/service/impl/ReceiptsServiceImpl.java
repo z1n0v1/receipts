@@ -142,42 +142,8 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     }
 
     @Override
-    @Transactional
-    public List<ReceiptListView> getAllReceiptImagesWithDate() {
-
-        return receiptRepository.findAllByOrderByDateOfPurchaseDesc().stream()
-                .map(receiptToListView::map)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ReceiptListView> getReceiptImagesWithDate() {
-        return receiptRepository.findByUserOrderByDateOfPurchaseDesc(userService.getCurrentUser()).stream()
-                .map(receiptToListView::map)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public void deleteReceipt(ReceiptDeleteServiceModel receiptDeleteServiceModel) {
-
-        Receipt receipt = receiptRepository.findById(
-                        receiptDeleteServiceModel.getReceiptId())
-                .orElseThrow(EntityNotFoundException::new);
-
-        for (Item item : receipt.getItems()) {
-            itemService.delete(item);
-        }
-
-        String receiptImageId = receipt.getReceiptImage().getId().toString();
-
-        receiptImageRepository.delete(receipt.getReceiptImage());
-
-        receiptRepository.delete(receipt);
-
-        receiptProcessApi.deleteReceipt(receiptImageId);
-        receiptProcessApi.close();
-
+    public boolean existsById(UUID id) {
+        return receiptRepository.existsById(id);
     }
 
     @Override
@@ -191,52 +157,82 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     }
 
     @Override
-    @Transactional
-    public void deleteItem(ItemDeleteServiceModel itemDeleteServiceModel) {
-        Receipt receipt = receiptRepository.findById(itemDeleteServiceModel.getReceiptId())
-                .orElseThrow(EntityNotFoundException::new);
-        if (itemDeleteServiceModel.getPosition() > receipt.getItems().size()) {
-            throw new EntityNotFoundException();
-        }
-
-        BigDecimal itemsTotal = BigDecimal.ZERO;
-
-
-        for (Item item : receipt.getItems()) {
-            if (item.getPosition().equals(itemDeleteServiceModel.getPosition())) {
-                itemService.delete(item);
-                continue;
-            }
-            itemsTotal = itemsTotal.add(item.getPrice());
-        }
-
-        for (Item item : receipt.getItems()) {
-            if (item.getPosition() > itemDeleteServiceModel.getPosition()) {
-                item.setPosition(item.getPosition() - 1);
-            }
-        }
-
-        receipt.setItemsTotal(itemsTotal);
-        receiptRepository.save(receipt);
+    public List<ReceiptListView> getUserReceiptsWithDate() {
+        return receiptRepository.findByUserOrderByDateOfPurchaseDesc(userService.getCurrentUser()).stream()
+                .map(receiptToListView::map)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void addItem(ItemAddServiceModel itemAddServiceModel) {
-        Receipt receipt = receiptRepository.findById(itemAddServiceModel.getReceiptId())
-                .orElseThrow(EntityNotFoundException::new);
+    public List<ReceiptListView> getAllReceiptsWithDate() {
 
-        Item item = itemAddServiceToItem.map(itemAddServiceModel);
-        item.setCategory(categoryService.findByName(itemAddServiceModel.getCategory())
-                .orElseThrow(EntityNotFoundException::new));
+        return receiptRepository.findAllByOrderByDateOfPurchaseDesc().stream()
+                .map(receiptToListView::map)
+                .collect(Collectors.toList());
+    }
 
-        item.setPosition(receipt.getItems().size() + 1);
-        item.setReceipt(receipt);
+    @Override
+    @Transactional
+    public ToDatatable getUserReceipts(FromDatatable fromDatatable) {
+        Sort sort = null;
 
-        itemService.save(item);
-        receipt.getItems().add(item);
-        receipt.setItemsTotal(receipt.getItemsTotal().add(item.getPrice()));
-        receiptRepository.save(receipt);
+        String[][] sortOrder = fromDatatable.getSortOrder();
+
+        for (String[] sortLine : sortOrder) {
+            switch (sortLine[0]) {
+                case "total" -> sort = sortLine[1].equals("asc") ?
+                        Sort.by(Sort.Direction.ASC, "total") :
+                        Sort.by(Sort.Direction.DESC, "total");
+                case "dateOfPurchase" -> sort = sortLine[1].equals("asc") ?
+                        Sort.by(Sort.Direction.ASC, "dateOfPurchase") :
+                        Sort.by(Sort.Direction.DESC, "dateOfPurchase");
+                default -> sort = Sort.by(Sort.Direction.DESC, "dateOfPurchase");
+            }
+        }
+
+        Pageable pageable = PageRequest.of(fromDatatable.getStart() / fromDatatable.getLength(),
+                fromDatatable.getLength(),
+                sort);
+
+        Page<Receipt> page;
+        User user = userService.getCurrentUser();
+
+        if (fromDatatable.getSearch().getValue() == null || fromDatatable.getSearch().getValue().isEmpty()) {
+
+            page = receiptRepository.findByUser(user, pageable);
+
+        } else {
+
+            page = receiptRepository.findByUserAndCompanyNameContainingOrStoreNameContaining(
+                    user,
+                    fromDatatable.getSearch().getValue(),
+                    fromDatatable.getSearch().getValue(),
+                    pageable);
+        }
+        ToDatatable toDatatable = new ToDatatable();
+        toDatatable.setRecordsTotal(page.getTotalElements());
+        toDatatable.setDraw(fromDatatable.getDraw());
+        toDatatable.setRecordsFiltered(page.getTotalElements());
+
+        String[][] result = new String[page.getContent().size()][6];
+        for (int i = 0; i < page.getContent().size(); i++) {
+            result[i][0] = page.getContent().get(i).getId().toString();
+            result[i][1] = page.getContent().get(i).getDateOfPurchase()
+                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+            result[i][2] = page.getContent().get(i).getTotal().toString() + " лв.";
+
+            Set<String> categories = new HashSet<>();
+            for (Item item : page.getContent().get(i).getItems()) {
+                categories.add(item.getCategory().getName());
+            }
+            result[i][3] = String.join(", ", categories);
+
+            result[i][4] = page.getContent().get(i).getCompany().getName();
+            result[i][5] = page.getContent().get(i).getStore().getName();
+        }
+        toDatatable.setData(result);
+        return toDatatable;
     }
 
     @Override
@@ -302,65 +298,10 @@ public class ReceiptsServiceImpl implements ReceiptsService {
 
     @Override
     @Transactional
-    public ToDatatable getReceipts(FromDatatable fromDatatable) {
-        Sort sort = null;
+    public AdminReceiptView getAdminReceipt(UUID receiptId) {
+        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow(EntityNotFoundException::new);
 
-        String[][] sortOrder = fromDatatable.getSortOrder();
-
-        for (String[] sortLine : sortOrder) {
-            switch (sortLine[0]) {
-                case "total" -> sort = sortLine[1].equals("asc") ?
-                        Sort.by(Sort.Direction.ASC, "total") :
-                        Sort.by(Sort.Direction.DESC, "total");
-                case "dateOfPurchase" -> sort = sortLine[1].equals("asc") ?
-                        Sort.by(Sort.Direction.ASC, "dateOfPurchase") :
-                        Sort.by(Sort.Direction.DESC, "dateOfPurchase");
-                default -> sort = Sort.by(Sort.Direction.DESC, "dateOfPurchase");
-            }
-        }
-
-        Pageable pageable = PageRequest.of(fromDatatable.getStart() / fromDatatable.getLength(),
-                fromDatatable.getLength(),
-                sort);
-
-        Page<Receipt> page;
-        User user = userService.getCurrentUser();
-
-        if (fromDatatable.getSearch().getValue() == null || fromDatatable.getSearch().getValue().isEmpty()) {
-
-            page = receiptRepository.findByUser(user, pageable);
-
-        } else {
-
-            page = receiptRepository.findByUserAndCompanyNameContainingOrStoreNameContaining(
-                    user,
-                    fromDatatable.getSearch().getValue(),
-                    fromDatatable.getSearch().getValue(),
-                    pageable);
-        }
-        ToDatatable toDatatable = new ToDatatable();
-        toDatatable.setRecordsTotal(page.getTotalElements());
-        toDatatable.setDraw(fromDatatable.getDraw());
-        toDatatable.setRecordsFiltered(page.getTotalElements());
-
-        String[][] result = new String[page.getContent().size()][6];
-        for (int i = 0; i < page.getContent().size(); i++) {
-            result[i][0] = page.getContent().get(i).getId().toString();
-            result[i][1] = page.getContent().get(i).getDateOfPurchase()
-                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
-            result[i][2] = page.getContent().get(i).getTotal().toString() + " лв.";
-
-            Set<String> categories = new HashSet<>();
-            for (Item item : page.getContent().get(i).getItems()) {
-                categories.add(item.getCategory().getName());
-            }
-            result[i][3] = String.join(", ", categories);
-
-            result[i][4] = page.getContent().get(i).getCompany().getName();
-            result[i][5] = page.getContent().get(i).getStore().getName();
-        }
-        toDatatable.setData(result);
-        return toDatatable;
+        return receiptToAdminView.map(receipt);
     }
 
     @Override
@@ -385,15 +326,74 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     }
 
     @Override
-    public boolean existsById(UUID id) {
-        return receiptRepository.existsById(id);
+    @Transactional
+    public void deleteReceipt(ReceiptDeleteServiceModel receiptDeleteServiceModel) {
+
+        Receipt receipt = receiptRepository.findById(
+                        receiptDeleteServiceModel.getReceiptId())
+                .orElseThrow(EntityNotFoundException::new);
+
+        for (Item item : receipt.getItems()) {
+            itemService.delete(item);
+        }
+
+        String receiptImageId = receipt.getReceiptImage().getId().toString();
+
+        receiptImageRepository.delete(receipt.getReceiptImage());
+
+        receiptRepository.delete(receipt);
+
+        receiptProcessApi.deleteReceipt(receiptImageId);
+        receiptProcessApi.close();
+
     }
 
     @Override
     @Transactional
-    public AdminReceiptView getAdminReceipt(UUID receiptId) {
-        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow(EntityNotFoundException::new);
+    public void addItem(ItemAddServiceModel itemAddServiceModel) {
+        Receipt receipt = receiptRepository.findById(itemAddServiceModel.getReceiptId())
+                .orElseThrow(EntityNotFoundException::new);
 
-        return receiptToAdminView.map(receipt);
+        Item item = itemAddServiceToItem.map(itemAddServiceModel);
+        item.setCategory(categoryService.findByName(itemAddServiceModel.getCategory())
+                .orElseThrow(EntityNotFoundException::new));
+
+        item.setPosition(receipt.getItems().size() + 1);
+        item.setReceipt(receipt);
+
+        itemService.save(item);
+        receipt.getItems().add(item);
+        receipt.setItemsTotal(receipt.getItemsTotal().add(item.getPrice()));
+        receiptRepository.save(receipt);
+    }
+
+    @Override
+    @Transactional
+    public void deleteItem(ItemDeleteServiceModel itemDeleteServiceModel) {
+        Receipt receipt = receiptRepository.findById(itemDeleteServiceModel.getReceiptId())
+                .orElseThrow(EntityNotFoundException::new);
+        if (itemDeleteServiceModel.getPosition() > receipt.getItems().size()) {
+            throw new EntityNotFoundException();
+        }
+
+        BigDecimal itemsTotal = BigDecimal.ZERO;
+
+
+        for (Item item : receipt.getItems()) {
+            if (item.getPosition().equals(itemDeleteServiceModel.getPosition())) {
+                itemService.delete(item);
+                continue;
+            }
+            itemsTotal = itemsTotal.add(item.getPrice());
+        }
+
+        for (Item item : receipt.getItems()) {
+            if (item.getPosition() > itemDeleteServiceModel.getPosition()) {
+                item.setPosition(item.getPosition() - 1);
+            }
+        }
+
+        receipt.setItemsTotal(itemsTotal);
+        receiptRepository.save(receipt);
     }
 }

@@ -45,9 +45,9 @@ public class ReceiptController {
         }
 
         if (userService.checkCapability("CAP_LIST_ALL_RECEIPTS")) {
-            model.addAttribute("receipts", receiptService.getAllReceiptImagesWithDate());
+            model.addAttribute("receipts", receiptService.getAllReceiptsWithDate());
         } else {
-            model.addAttribute("receipts", receiptService.getReceiptImagesWithDate());
+            model.addAttribute("receipts", receiptService.getUserReceiptsWithDate());
         }
 
         return "receipt/all";

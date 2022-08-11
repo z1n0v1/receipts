@@ -101,10 +101,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         final String verificationUrl = this.baseUrl + "/user/verify/email?code=" + verificationToken;
 
         return String.format(EMAIL_BODY, verificationUrl, verificationUrl);
-
-//        return  "<p> Моля потвърдете вашата електронна поща </p>" +
-//                "<p> <a href=\"" + this.baseUrl + "/user/verify/email?code=" + verificationToken + "\">" +
-//                this.baseUrl + "/user/email/verify?code=" + verificationToken + "</a></p>";
     }
 
 }

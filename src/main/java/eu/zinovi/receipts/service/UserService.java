@@ -10,32 +10,33 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 
 public interface UserService {
+
+    boolean registerEmailUser(UserRegisterServiceModel userRegisterServiceModel);
+
+    boolean emailExists(String email);
+
+    boolean isEmailNotVerified(String email);
+
     boolean checkCapability(String capability);
 
     boolean checkPassword(String password);
 
-    void changePassword(UserSettingsServiceModel userSettingsServiceModel);
-
     User getCurrentUser();
 
-    boolean emailExists(String email);
+    String getCurrentUserPicture();
 
-    boolean registerEmailUser(UserRegisterServiceModel userRegisterServiceModel);
+    UserDetailsView getCurrentUserDetails();
 
-    boolean emailNotVerified(String email);
+    UserDetailsBindingModel getCurrentUserBindingDetails();
 
-    @Transactional
-    void deleteUserByEmail(AdminUserDeleteServiceModel adminUserDeleteServiceModel);
-
-    UserDetailsView getUserDetails();
+    void editUser(UserDetailsServiceModel userDetailsServiceModel);
 
     void savePicture(MultipartFile picture) throws IOException;
 
     void setPassword(UserPasswordSetServiceModel userPasswordSetServiceModel);
 
-    void editUser(UserDetailsServiceModel userDetailsServiceModel);
+    void changePassword(UserSettingsServiceModel userSettingsServiceModel);
 
-    UserDetailsBindingModel getCurrentUserBindingDetails();
-
-    String getCurrentUserPicture();
+    @Transactional
+    void deleteUserByEmail(AdminUserDeleteServiceModel adminUserDeleteServiceModel);
 }

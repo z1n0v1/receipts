@@ -17,6 +17,9 @@ import eu.zinovi.receipts.service.UserService;
 import eu.zinovi.receipts.service.VerificationTokenService;
 import eu.zinovi.receipts.util.CloudStorage;
 import eu.zinovi.receipts.util.ImageProcessing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +33,7 @@ import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserToBindingDetails userToBindingDetails;
     private final UserToDetails userToDetails;
     private final RoleRepository roleRepository;
@@ -39,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private final EmailVerificationService emailVerificationService;
     private final VerificationTokenService verificationTokenService;
     private final CloudStorage cloudStorage;
+    private final CacheManager cacheManager;
 
     public UserServiceImpl(
             UserToBindingDetails userToBindingDetails,
@@ -48,7 +53,7 @@ public class UserServiceImpl implements UserService {
             PasswordEncoder passwordEncoder,
             EmailVerificationService emailVerificationService,
             VerificationTokenService verificationTokenService,
-            CloudStorage cloudStorage) {
+            CloudStorage cloudStorage, CacheManager cacheManager) {
         this.userToBindingDetails = userToBindingDetails;
         this.userToDetails = userToDetails;
         this.roleRepository = roleRepository;
@@ -57,48 +62,7 @@ public class UserServiceImpl implements UserService {
         this.emailVerificationService = emailVerificationService;
         this.verificationTokenService = verificationTokenService;
         this.cloudStorage = cloudStorage;
-    }
-
-    @Override
-    public boolean checkCapability(String capability) {
-        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(capability));
-    }
-
-    @Override
-    public boolean checkPassword(String password) {
-
-        return userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(u -> passwordEncoder.matches(password, u.getPassword()))
-                .orElse(false);
-    }
-
-    @Override
-    public void changePassword(UserSettingsServiceModel userSettingsServiceModel) {
-        User user = userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(() -> new EntityNotFoundException("Потребителят не е намерен"));
-
-        user.setPassword(passwordEncoder.encode(userSettingsServiceModel.getPassword()));
-        userRepository.saveAndFlush(user);
-
-    }
-
-    @Override
-    public User getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof EmailUser) {
-            return userRepository.getByEmail(((EmailUser) principal).getEmail()).orElse(null);
-        } else if (principal instanceof GoogleOAuth2User) {
-            return userRepository.getByEmail(((GoogleOAuth2User) principal).getEmail()).orElse(null);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean emailExists(String email) {
-        return userRepository.existsByEmail(email);
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -121,34 +85,102 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(userRegisterServiceModel.getPassword()));
         userRepository.saveAndFlush(user);
         emailVerificationService.sendVerificationEmail(user.getEmail());
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
+        }
         return true;
     }
 
     @Override
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
     @Cacheable("emailVerification")
-    public boolean emailNotVerified(String email) {
+    public boolean isEmailNotVerified(String email) {
         return userRepository.existsByEmailAndEmailVerified(email, false);
     }
 
     @Override
-    @Transactional
-    public void deleteUserByEmail(AdminUserDeleteServiceModel adminUserDeleteServiceModel) {
-        User user = userRepository.getByEmail(adminUserDeleteServiceModel.getEmail())
-                .orElseThrow(EntityNotFoundException::new);
-
-        if (user.getRoles().contains(roleRepository.getByName("ADMIN").orElse(null))) {
-            throw new AccessDeniedException("Нямате право да триете администратора");
-        }
-
-        verificationTokenService.deleteAllByUser(user);
-
-        userRepository.deleteByEmail(
-                adminUserDeleteServiceModel.getEmail());
+    public boolean checkCapability(String capability) {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(capability));
     }
 
     @Override
-    public UserDetailsView getUserDetails() {
+    public boolean checkPassword(String password) {
+
+        return userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .map(u -> passwordEncoder.matches(password, u.getPassword()))
+                .orElse(false);
+    }
+
+    @Override
+    @Cacheable("userDetails")
+    public User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof EmailUser) {
+            return userRepository.getByEmail(((EmailUser) principal).getEmail()).orElse(null);
+        } else if (principal instanceof GoogleOAuth2User) {
+            return userRepository.getByEmail(((GoogleOAuth2User) principal).getEmail()).orElse(null);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getCurrentUserPicture() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof EmailUser) {
+            return ((EmailUser) principal).getPicture();
+        } else if (principal instanceof GoogleOAuth2User) {
+            return ((GoogleOAuth2User) principal).getPicture();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public UserDetailsView getCurrentUserDetails() {
         return userToDetails.map(getCurrentUser());
+    }
+
+    @Override
+    public UserDetailsBindingModel getCurrentUserBindingDetails() {
+        User user = getCurrentUser();
+        if (user == null) {
+            return new UserDetailsBindingModel();
+        }
+        return userToBindingDetails.map(user);
+
+    }
+
+    @Override
+    public void editUser(UserDetailsServiceModel userDetailsServiceModel) {
+        User user = getCurrentUser();
+        user.setFirstName(userDetailsServiceModel.getFirstName());
+        user.setLastName(userDetailsServiceModel.getLastName());
+        user.setDisplayName(userDetailsServiceModel.getDisplayName());
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof EmailUser) {
+            ((EmailUser) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
+        } else if (principal instanceof GoogleOAuth2User) {
+            ((GoogleOAuth2User) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
+        }
+
+        userRepository.save(user);
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
+        }
     }
 
     @Override
@@ -186,6 +218,11 @@ public class UserServiceImpl implements UserService {
         } else if (principal instanceof GoogleOAuth2User) {
             ((GoogleOAuth2User) principal).setPicture(pictureURL);
         }
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
+        }
     }
 
     @Override
@@ -194,46 +231,46 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(userPasswordSetServiceModel.getPassword()));
         user.setEmailLoginDisabled(false);
         userRepository.save(user);
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
+        }
     }
 
     @Override
-    public void editUser(UserDetailsServiceModel userDetailsServiceModel) {
-        User user = getCurrentUser();
-        user.setFirstName(userDetailsServiceModel.getFirstName());
-        user.setLastName(userDetailsServiceModel.getLastName());
-        user.setDisplayName(userDetailsServiceModel.getDisplayName());
+    public void changePassword(UserSettingsServiceModel userSettingsServiceModel) {
+        User user = userRepository.getByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new EntityNotFoundException("Потребителят не е намерен"));
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof EmailUser) {
-            ((EmailUser) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
-        } else if (principal instanceof GoogleOAuth2User) {
-        ((GoogleOAuth2User) principal).setDisplayName(userDetailsServiceModel.getDisplayName());
+        user.setPassword(passwordEncoder.encode(userSettingsServiceModel.getPassword()));
+        userRepository.saveAndFlush(user);
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
         }
 
-        userRepository.save(user);
     }
 
     @Override
-    public UserDetailsBindingModel getCurrentUserBindingDetails() {
-        User user = getCurrentUser();
-        if (user == null) {
-            return new UserDetailsBindingModel();
+    @Transactional
+    public void deleteUserByEmail(AdminUserDeleteServiceModel adminUserDeleteServiceModel) {
+        User user = userRepository.getByEmail(adminUserDeleteServiceModel.getEmail())
+                .orElseThrow(EntityNotFoundException::new);
+
+        if (user.getRoles().contains(roleRepository.getByName("ADMIN").orElse(null))) {
+            throw new AccessDeniedException("Нямате право да триете администратора");
         }
-        return userToBindingDetails.map(user);
 
-    }
+        verificationTokenService.deleteAllByUser(user);
 
-    @Override
-    public String getCurrentUserPicture() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof EmailUser) {
-            return ((EmailUser) principal).getPicture();
-        } else if (principal instanceof GoogleOAuth2User) {
-            return ((GoogleOAuth2User) principal).getPicture();
-        } else {
-            return null;
+        userRepository.deleteByEmail(
+                adminUserDeleteServiceModel.getEmail());
+        try {
+            cacheManager.getCache("userDetails").evict(user.getEmail());
+        } catch (NullPointerException e) {
+            LOGGER.error("Error evicting cache for email {}", user.getEmail());
         }
     }
 }

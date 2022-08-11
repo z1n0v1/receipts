@@ -32,7 +32,7 @@ public class EmailVerificationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (userServiceImpl.emailNotVerified(request.getRemoteUser())) {
+        if (userServiceImpl.isEmailNotVerified(request.getRemoteUser())) {
             response.sendRedirect("/user/verify/email");
             return false;
         }
