@@ -113,6 +113,7 @@ public class AuthSeed implements CommandLineRunner {
             } // else the only way to login will be through Google oauth2
 
             admin.setDisplayName("admin");
+            admin.setPicture("/images/blank-avatar.png");
             admin.setLastSeen(LocalDateTime.now());
             admin.setRegisteredOn(LocalDateTime.now());
             admin.setEnabled(true);

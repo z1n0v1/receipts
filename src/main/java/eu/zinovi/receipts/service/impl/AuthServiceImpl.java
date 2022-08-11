@@ -61,7 +61,8 @@ public class AuthServiceImpl implements AuthService {
         } else {
             user.setGoogleId(oidcUser.getAttribute("sub"));
             user.setEmailVerified(true);
-            if (user.getPicture() == null || user.getPicture().isEmpty()) {
+            if (user.getPicture() == null || user.getPicture().isEmpty()
+            || user.getPicture().equals("/images/blank-avatar.png")) {
                 user.setPicture(oidcUser.getPicture());
             }
             user.setLastSeen(LocalDateTime.now());
