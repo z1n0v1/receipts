@@ -1,32 +1,23 @@
 package eu.zinovi.receipts.service.impl;
 
-import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
 import eu.zinovi.receipts.domain.model.entity.Address;
-import eu.zinovi.receipts.domain.model.entity.Receipt;
-import eu.zinovi.receipts.domain.model.mapper.ReceiptToAdminView;
-import eu.zinovi.receipts.domain.model.view.admin.AdminReceiptView;
 import eu.zinovi.receipts.repository.AddressRepository;
-import eu.zinovi.receipts.repository.ReceiptRepository;
 import eu.zinovi.receipts.service.AddressService;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class AddressServiceImpl implements AddressService {
-    private final ReceiptToAdminView receiptToAdminView;
+
 
     private final AddressRepository addressRepository;
-    private final ReceiptRepository receiptRepository;
 
-    public AddressServiceImpl(ReceiptToAdminView receiptToAdminView, AddressRepository addressRepository, ReceiptRepository receiptRepository) {
-        this.receiptToAdminView = receiptToAdminView;
+    public AddressServiceImpl(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
-        this.receiptRepository = receiptRepository;
     }
+
 
     @Override
     public Address getAddress(String value) {
@@ -48,11 +39,5 @@ public class AddressServiceImpl implements AddressService {
         return address;
     }
 
-    @Override
-    @Transactional
-    public AdminReceiptView getReceipt(UUID receiptId) {
-        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow(EntityNotFoundException::new);
 
-        return receiptToAdminView.map(receipt);
-    }
 }

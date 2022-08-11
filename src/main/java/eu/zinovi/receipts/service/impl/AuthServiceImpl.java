@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NOT_FOUND_USER_BY_EMAIL;
+import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_EMAIL_LOGIN;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
@@ -79,10 +82,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public EmailUser loadUserByUsername(String email) {
         User user = userRepository.getByEmail(email).orElseThrow(() -> new UsernameNotFoundException(
-                "Потребител с имейл " + email + " не съществува"));
+                String.format(NOT_FOUND_USER_BY_EMAIL, email)));
 
         if (user.isEmailLoginDisabled()) {
-            throw new UsernameNotFoundException("Потребителът е със забранен вход чрез имейл");
+            throw new UsernameNotFoundException(NO_PERMISSION_EMAIL_LOGIN);
         }
 
         return new EmailUser(

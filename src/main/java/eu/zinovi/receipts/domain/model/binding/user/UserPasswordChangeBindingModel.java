@@ -16,7 +16,7 @@ public class UserPasswordChangeBindingModel {
     @PasswordMatch
     private String oldPassword;
 
-    @NotNull(message = REQURED_PASSWORD_NEW)
+    @NotNull(message = REQUIRED_PASSWORD_NEW)
     @Size(min = 6, max = 200, message = INVALID_PASSWORD_NEW_LENGTH)
     private String newPassword;
 

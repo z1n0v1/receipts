@@ -9,7 +9,7 @@ import eu.zinovi.receipts.domain.model.mapper.AdminRoleDeleteBindingToService;
 import eu.zinovi.receipts.domain.model.view.admin.AdminRoleView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
 import eu.zinovi.receipts.domain.exception.FieldViolationException;
-import eu.zinovi.receipts.service.AdminService;
+import eu.zinovi.receipts.service.RoleService;
 import eu.zinovi.receipts.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -30,18 +30,19 @@ public class AdminRoleRestController {
     private final AdminRoleBindingToService adminRoleBindingToService;
     private final AdminRoleAddBindingToService adminRoleAddBindingToService;
     private final UserService userService;
-    private final AdminService adminService;
+    private final RoleService roleService;
 
     public AdminRoleRestController(
             AdminRoleDeleteBindingToService adminRoleDeleteBindingToService,
             AdminRoleBindingToService adminRoleBindingToService,
             AdminRoleAddBindingToService adminRoleAddBindingToService,
-            UserService userService, AdminService adminService) {
+            UserService userService,
+            RoleService roleService) {
         this.adminRoleDeleteBindingToService = adminRoleDeleteBindingToService;
         this.adminRoleBindingToService = adminRoleBindingToService;
         this.adminRoleAddBindingToService = adminRoleAddBindingToService;
         this.userService = userService;
-        this.adminService = adminService;
+        this.roleService = roleService;
     }
 
     @RequestMapping(value = "/role", method = RequestMethod.POST,
@@ -57,7 +58,7 @@ public class AdminRoleRestController {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminService.addRole(adminRoleAddBindingToService
+        roleService.addRole(adminRoleAddBindingToService
                 .map(adminRoleAddBindingModel));
 
         return ResponseEntity.ok().build();
@@ -71,7 +72,7 @@ public class AdminRoleRestController {
             throw new AccessDeniedException(NO_PERMISSION_ROLE_LIST);
         }
 
-        return ResponseEntity.ok(adminService.listRoles());
+        return ResponseEntity.ok(roleService.listRoles());
     }
 
     @RequestMapping(value = "/role", method = RequestMethod.PUT,
@@ -87,7 +88,7 @@ public class AdminRoleRestController {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminService.updateRole(adminRoleBindingToService
+        roleService.updateRole(adminRoleBindingToService
                 .map(adminRoleBindingModel));
 
         return ResponseEntity.ok().build();
@@ -106,7 +107,7 @@ public class AdminRoleRestController {
             throw new FieldViolationException(bindingResult.getAllErrors());
         }
 
-        adminService.deleteRole(adminRoleDeleteBindingToService
+        roleService.deleteRole(adminRoleDeleteBindingToService
                 .map(adminRoleDeleteBindingModel));
 
         return ResponseEntity.ok().build();

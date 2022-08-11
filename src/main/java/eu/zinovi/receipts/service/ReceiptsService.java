@@ -9,6 +9,7 @@ import eu.zinovi.receipts.domain.model.service.ReceiptDeleteServiceModel;
 import eu.zinovi.receipts.domain.model.service.ReceiptEditServiceModel;
 import eu.zinovi.receipts.domain.model.view.ReceiptDetailsView;
 import eu.zinovi.receipts.domain.model.view.ReceiptListView;
+import eu.zinovi.receipts.domain.model.view.admin.AdminReceiptView;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -46,4 +47,7 @@ public interface ReceiptsService {
     void saveReceipt(ReceiptEditServiceModel receiptEditServiceModel);
 
     boolean existsById(UUID id);
+
+    @Transactional
+    AdminReceiptView getAdminReceipt(UUID receiptId);
 }

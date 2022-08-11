@@ -12,6 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CategoryService {
+
+    void addCategory(AdminCategoryAddServiceModel adminCategoryAddServiceModel);
+
+    boolean existsByName(String category);
+
     Optional<Category> findByName(String name);
 
     List<CategoryView> getAllCategories();
@@ -21,9 +26,5 @@ public interface CategoryService {
 
     void saveCategory(AdminCategorySaveServiceModel adminCategorySaveServiceModel);
 
-    void addCategory(AdminCategoryAddServiceModel adminCategoryAddServiceModel);
-
     void deleteCategory(AdminCategoryDeleteServiceModel adminCategoryDeleteServiceModel);
-
-    boolean existsByName(String category);
 }

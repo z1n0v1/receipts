@@ -12,6 +12,7 @@ import eu.zinovi.receipts.domain.model.service.ReceiptEditServiceModel;
 import eu.zinovi.receipts.domain.model.view.ReceiptDetailsView;
 import eu.zinovi.receipts.domain.model.view.ReceiptListView;
 import eu.zinovi.receipts.domain.exception.EntityNotFoundException;
+import eu.zinovi.receipts.domain.model.view.admin.AdminReceiptView;
 import eu.zinovi.receipts.repository.ReceiptImageRepository;
 import eu.zinovi.receipts.repository.ReceiptRepository;
 import eu.zinovi.receipts.service.*;
@@ -45,6 +46,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     private final ItemAddServiceToItem itemAddServiceToItem;
     private final ReceiptToReceiptDetailsView receiptToReceiptDetailsView;
     private final ReceiptToListView receiptToListView;
+    private final ReceiptToAdminView receiptToAdminView;
     private final ReceiptImageRepository receiptImageRepository;
     private final ReceiptRepository receiptRepository;
     private final UserService userService;
@@ -60,6 +62,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
             ItemAddServiceToItem itemAddServiceToItem,
             ReceiptToReceiptDetailsView receiptToReceiptDetailsView,
             ReceiptToListView receiptToListView,
+            ReceiptToAdminView receiptToAdminView,
             ReceiptImageRepository receiptImageRepository,
             ReceiptRepository receiptRepository,
             UserService userService,
@@ -73,6 +76,7 @@ public class ReceiptsServiceImpl implements ReceiptsService {
         this.itemAddServiceToItem = itemAddServiceToItem;
         this.receiptToReceiptDetailsView = receiptToReceiptDetailsView;
         this.receiptToListView = receiptToListView;
+        this.receiptToAdminView = receiptToAdminView;
         this.receiptImageRepository = receiptImageRepository;
         this.receiptRepository = receiptRepository;
         this.userService = userService;
@@ -383,5 +387,13 @@ public class ReceiptsServiceImpl implements ReceiptsService {
     @Override
     public boolean existsById(UUID id) {
         return receiptRepository.existsById(id);
+    }
+
+    @Override
+    @Transactional
+    public AdminReceiptView getAdminReceipt(UUID receiptId) {
+        Receipt receipt = receiptRepository.findById(receiptId).orElseThrow(EntityNotFoundException::new);
+
+        return receiptToAdminView.map(receipt);
     }
 }

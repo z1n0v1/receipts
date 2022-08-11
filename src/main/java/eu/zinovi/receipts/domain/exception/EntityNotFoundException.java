@@ -3,6 +3,8 @@ package eu.zinovi.receipts.domain.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NOT_FOUND_ENTITY;
+
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(String message, Throwable cause) {
@@ -14,6 +16,6 @@ public class EntityNotFoundException extends RuntimeException {
     }
 
     public EntityNotFoundException() {
-        super("Продуктът не е намерен");
+        super(NOT_FOUND_ENTITY);
     }
 }

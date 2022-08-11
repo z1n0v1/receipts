@@ -30,6 +30,19 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public void addCategory(AdminCategoryAddServiceModel adminCategoryAddServiceModel) {
+        Category category = new Category();
+        category.setName(adminCategoryAddServiceModel.getName());
+        category.setColor(adminCategoryAddServiceModel.getColor());
+        categoryRepository.save(category);
+    }
+
+    @Override
+    public boolean existsByName(String category) {
+        return categoryRepository.existsByName(category);
+    }
+
+    @Override
     public Optional<Category> findByName(String name) {
         return categoryRepository.findByNameOrderByNameAsc(name);
     }
@@ -59,22 +72,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void addCategory(AdminCategoryAddServiceModel adminCategoryAddServiceModel) {
-        Category category = new Category();
-        category.setName(adminCategoryAddServiceModel.getName());
-        category.setColor(adminCategoryAddServiceModel.getColor());
-        categoryRepository.save(category);
-    }
-
-    @Override
     public void deleteCategory(AdminCategoryDeleteServiceModel adminCategoryDeleteServiceModel) {
         Category category = categoryRepository.findById(adminCategoryDeleteServiceModel.getId())
                 .orElseThrow(EntityNotFoundException::new);
         categoryRepository.delete(category);
     }
 
-    @Override
-    public boolean existsByName(String category) {
-        return categoryRepository.existsByName(category);
-    }
+
 }

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Optional;
 
+import static eu.zinovi.receipts.util.constants.MessageConstants.NOT_FOUND_COMPANY_BY_EIK;
+
 @Service
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyToReceiptCompanyByEik companyToReceiptCompanyByEik;
@@ -59,7 +61,7 @@ public class CompanyServiceImpl implements CompanyService {
     public ReceiptCompanyByEikView receiptEikView(String eik) {
         Company company = findByEik(eik);
         if (company == null) {
-            throw new EntityNotFoundException("Не е намерена компания с ЕИК " + eik);
+            throw new EntityNotFoundException(String.format(NOT_FOUND_COMPANY_BY_EIK, eik));
         }
         return companyToReceiptCompanyByEik.map(company);
     }

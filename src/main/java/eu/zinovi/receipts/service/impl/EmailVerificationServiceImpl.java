@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 
+import static eu.zinovi.receipts.util.constants.EmailConstants.*;
+
 @Service
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
@@ -52,12 +54,11 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     private void sendGridConfirmationCode(String email, String verificationToken) {
-        Email from = new Email(this.emailFrom, "Бележки.бг");
-        String subject = "Потвърдете вашата електронна поща";
+        Email from = new Email(this.emailFrom, EMAIL_FROM);
         Email to = new Email(email);
 
         Content content = new Content("text/html", getEmailBody(verificationToken));
-        Mail mail = new Mail(from, subject, to, content);
+        Mail mail = new Mail(from, EMAIL_SUBJECT, to, content);
 
         try {
             Request request = new Request();
@@ -88,8 +89,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         try {
             helper.setText(getEmailBody(verificationToken), true); // Use this or above line.
             helper.setTo(email);
-            helper.setSubject("Потвърдете вашата електронна поща");
-            helper.setFrom(this.emailFrom);
+            helper.setSubject(EMAIL_SUBJECT);
+            helper.setFrom(this.emailFrom, EMAIL_FROM);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new EmailVerificationException();
@@ -97,9 +98,13 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     private String getEmailBody(String verificationToken) {
-        return  "<p> Моля потвърдете вашата електронна поща </p>" +
-                "<p> <a href=\"" + this.baseUrl + "/user/verify/email?code=" + verificationToken + "\">" +
-                this.baseUrl + "/user/email/verify?code=" + verificationToken + "</a></p>";
+        final String verificationUrl = this.baseUrl + "/user/verify/email?code=" + verificationToken;
+
+        return String.format(EMAIL_BODY, verificationUrl, verificationUrl);
+
+//        return  "<p> Моля потвърдете вашата електронна поща </p>" +
+//                "<p> <a href=\"" + this.baseUrl + "/user/verify/email?code=" + verificationToken + "\">" +
+//                this.baseUrl + "/user/email/verify?code=" + verificationToken + "</a></p>";
     }
 
 }

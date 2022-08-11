@@ -1,6 +1,6 @@
 package eu.zinovi.receipts.controller;
 
-import eu.zinovi.receipts.service.AddressService;
+import eu.zinovi.receipts.service.ReceiptsService;
 import eu.zinovi.receipts.service.StatisticsService;
 import eu.zinovi.receipts.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,18 +16,19 @@ import java.util.UUID;
 @RequestMapping("/admin")
 public class AdminHomeController {
 
-    private final AddressService addressService;
     private final UserService userService;
+    private final ReceiptsService receiptsService;
     private final StatisticsService statisticsService;
 
     @Value("${receipts.google.storage.bucket}")
     private String bucket;
 
     public AdminHomeController(
-            AddressService addressService, UserService userService,
+            UserService userService,
+            ReceiptsService receiptsService,
             StatisticsService statisticsService) {
-        this.addressService = addressService;
         this.userService = userService;
+        this.receiptsService = receiptsService;
         this.statisticsService = statisticsService;
     }
 
@@ -77,7 +78,7 @@ public class AdminHomeController {
             return "redirect:/home";
         }
 
-        model.addAttribute("receipt", addressService.getReceipt(receiptId));
+        model.addAttribute("receipt", receiptsService.getAdminReceipt(receiptId));
         model.addAttribute("bucket", bucket);
 
         return "admin/receipt-view";

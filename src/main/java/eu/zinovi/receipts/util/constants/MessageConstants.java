@@ -1,7 +1,9 @@
 package eu.zinovi.receipts.util.constants;
 
+// Should we change NO_PERMISSION to UNAUTHORIZED?
 public class MessageConstants {
     public static final String UNEXPECTED_ERROR = "Неочаквана грешка";
+    public static final String NO_PERMISSION = "Нямате право да изпълнявате това действие";
     public static final String NO_PERMISSION_CATEGORY_ADD = "Нямате право да добавяте категории";
     public static final String INVALID_CATEGORY_COLOR = "Невалиден цвят на категорията";
     public static final String NO_PERMISSION_CATEGORY_LIST = "Нямате право да разглеждате списъка с категории";
@@ -18,6 +20,7 @@ public class MessageConstants {
     public static final String NO_PERMISSION_ROLE_DELETE = "Нямате право да изтривате роли";
     public static final String INVALID_ROLE = "Ролята не съществува";
     public static final String NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS = "Не можете да изтриете ролите когато има потребители с тази роля";
+    public static final String NO_PERMISSION_EDIT_ADMIN = "Нямате право да редактирате потребител с ролята ADMIN";
     public static final String NO_PERMISSION_USER_DETAILS = "Нямате право да разглеждате детайлите на потребителя";
     public static final String INVALID_EMAIL = "Невалиден имейл.";
     public static final String INVALID_USER = "Няма такъв потребител.";
@@ -73,7 +76,7 @@ public class MessageConstants {
     public static final String REQUIRED_STORE_ADDRESS = "Не е подаден адреса на магазина";
     public static final String REQUIRED_RECEIPT_DATE = "Не е подадена дата на касовата бележка";
     public static final String INVALID_RECEIPT_DATE = "Датата на касовата бележка не може да бъде в бъдещето";
-    public static final String REQURED_PASSWORD_NEW = "Новата парола не може да бъде празна";
+    public static final String REQUIRED_PASSWORD_NEW = "Новата парола не може да бъде празна";
     public static final String INVALID_PASSWORD_NEW_LENGTH = "Новата парола трябва да бъде поне 6 символа";
     public static final String INVALID_PASSWORD_MATCH = "Паролите не съвпадат";
     public static final String INVALID_PASSWORD = "Невалидна парола";
@@ -85,5 +88,11 @@ public class MessageConstants {
     public static final String EMAIL_EXISTS = "Това имейл вече съществува";
     public static final String EMAIL_DONT_EXIST = "Несъществуващ имейл";
     public static final String FIELDS_DONT_MATCH = "Полетата не съвпадат";
+    public static final String NO_PERMISSION_EMAIL_LOGIN = "Потребителът е със забранен вход чрез имейл";
+
+    public static final String NOT_FOUND_ENTITY = "Елемента не е намерен";
+    public static final String NOT_FOUND_CAPABILITY = "Правото не е намерено";
+    public static final String NOT_FOUND_USER_BY_EMAIL = "Потребител с имейл %s не съществува";
+    public static final String NOT_FOUND_COMPANY_BY_EIK = "Не е намерена компания с ЕИК %s";
 
 }

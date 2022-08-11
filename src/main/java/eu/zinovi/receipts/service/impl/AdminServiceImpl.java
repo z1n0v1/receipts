@@ -1,18 +1,14 @@
 package eu.zinovi.receipts.service.impl;
 
-import eu.zinovi.receipts.domain.model.entity.Capability;
 import eu.zinovi.receipts.domain.model.entity.ReceiptImage;
 import eu.zinovi.receipts.domain.model.entity.Role;
 import eu.zinovi.receipts.domain.model.entity.User;
-import eu.zinovi.receipts.domain.model.enums.CapabilityEnum;
 import eu.zinovi.receipts.domain.model.datatable.FromDatatable;
 import eu.zinovi.receipts.domain.model.datatable.ToDatatable;
-import eu.zinovi.receipts.domain.model.mapper.AdminRoleToView;
 import eu.zinovi.receipts.domain.model.mapper.CapabilityToAdminView;
 import eu.zinovi.receipts.domain.model.mapper.UserToAdminView;
 import eu.zinovi.receipts.domain.model.service.*;
 import eu.zinovi.receipts.domain.model.view.admin.AdminCapabilityView;
-import eu.zinovi.receipts.domain.model.view.admin.AdminRoleView;
 import eu.zinovi.receipts.domain.model.view.admin.AdminUserRoleView;
 import eu.zinovi.receipts.domain.model.view.admin.AdminUserView;
 import eu.zinovi.receipts.domain.exception.AccessDeniedException;
@@ -30,21 +26,25 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static eu.zinovi.receipts.util.constants.MessageConstants.NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS;
+import static eu.zinovi.receipts.util.constants.MessageConstants.*;
 
 @Service
 public class AdminServiceImpl implements AdminService {
     private final CapabilityToAdminView capabilityToAdminView;
-    private final AdminRoleToView adminRoleToView;
     private final UserToAdminView userToAdminView;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final CapabilityRepository capabilityRepository;
     private final ReceiptImageRepository receiptImageRepository;
 
-    public AdminServiceImpl(CapabilityToAdminView capabilityToAdminView, AdminRoleToView adminRoleToView, UserToAdminView userToAdminView, RoleRepository roleRepository, UserRepository userRepository, CapabilityRepository capabilityRepository, ReceiptImageRepository receiptImageRepository) {
+    public AdminServiceImpl(
+            CapabilityToAdminView capabilityToAdminView,
+            UserToAdminView userToAdminView,
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            CapabilityRepository capabilityRepository,
+            ReceiptImageRepository receiptImageRepository) {
         this.capabilityToAdminView = capabilityToAdminView;
-        this.adminRoleToView = adminRoleToView;
         this.userToAdminView = userToAdminView;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -98,38 +98,6 @@ public class AdminServiceImpl implements AdminService {
 
         toDatatable.setData(result);
         return toDatatable;
-    }
-
-    @Override
-    @Transactional
-    public List<AdminRoleView> listRoles() {
-        return roleRepository.findAll().stream()
-                .map(adminRoleToView::map)
-                .toList();
-
-    }
-
-    @Override
-    public void updateRole(AdminRoleServiceModel adminRoleServiceModel) {
-
-        if (adminRoleServiceModel.getRole().equals("ADMIN")) {
-            throw new AccessDeniedException("Нямате право да редактирате ролята ADMIN");
-        }
-
-        Role role = roleRepository.getByName(adminRoleServiceModel.getRole()).orElseThrow(EntityNotFoundException::new);
-
-        Collection<Capability> capabilities = new ArrayList<>();
-
-        for (AdminCapabilityServiceModel adminCapabilityServiceModel : adminRoleServiceModel.getCapabilities()) {
-            if (adminCapabilityServiceModel.getActive()) {
-//                CapabilityEnum capabilityEnum = CapabilityEnum.valueOf(capabilityView.getCapability());
-                Capability capability = capabilityRepository.getByName(adminCapabilityServiceModel.getCapability())
-                        .orElseThrow(EntityNotFoundException::new);
-                capabilities.add(capability);
-            }
-        }
-        role.setCapabilities(capabilities);
-        roleRepository.save(role);
     }
 
     @Override
@@ -217,7 +185,7 @@ public class AdminServiceImpl implements AdminService {
         Role adminRole = roleRepository.getByName("ADMIN").orElseThrow(EntityNotFoundException::new);
 
         if (user.getRoles().contains(adminRole)) {
-            throw new AccessDeniedException("Нямате право да редактирате потребител с ролята ADMIN");
+            throw new AccessDeniedException(NO_PERMISSION_EDIT_ADMIN);
         }
 
         Collection<Role> roles = new HashSet<>();
@@ -245,41 +213,8 @@ public class AdminServiceImpl implements AdminService {
         List<AdminCapabilityView> capabilities = capabilityRepository.findAll().stream()
                 .map( capabilityToAdminView::map).toList();
         if (capabilities.isEmpty()) {
-            throw new EntityNotFoundException("Capabilities not found");
+            throw new EntityNotFoundException(NOT_FOUND_CAPABILITY);
         }
         return capabilities;
-    }
-
-    @Override
-    public void addRole(AdminRoleAddServiceModel AdminRoleAddServiceModel) {
-        Role role = new Role();
-        role.setName(AdminRoleAddServiceModel.getName());
-
-        for (AdminCapabilityAddServiceModel capability : AdminRoleAddServiceModel.getCapabilities()) {
-            CapabilityEnum capabilityEnum = capability.getName();
-            Capability cap = capabilityRepository.getByName(capabilityEnum).orElseThrow(EntityNotFoundException::new);
-            role.getCapabilities().add(cap);
-        }
-        roleRepository.save(role);
-    }
-
-    @Override
-    @Transactional
-    public void deleteRole(AdminRoleDeleteServiceModel adminRoleDeleteServiceModel) {
-
-        if (adminRoleDeleteServiceModel.getName().equals("ADMIN") ||
-                adminRoleDeleteServiceModel.getName().equals("USER")) {
-            throw new AccessDeniedException("Не можете да изтриете ролите ADMIN и USER");
-        }
-
-        userRepository.findAll().forEach(user -> {
-            if (user.getRoles().stream().anyMatch(
-                    role -> role.getName().equals(adminRoleDeleteServiceModel.getName()))) {
-                throw new AccessDeniedException(NO_PERMISSION_ROLE_DELETE_WITH_ACTIVE_USERS);
-            }});
-
-        Role role = roleRepository.getByName(adminRoleDeleteServiceModel.getName())
-                .orElseThrow(EntityNotFoundException::new);
-        roleRepository.delete(role);
     }
 }
