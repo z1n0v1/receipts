@@ -28,3 +28,5 @@ Google Cloud Project Credentials - enabled Vision OCR
 Google Maps и Google Places API key
 
 Twilio Sendgrid API key
+
+PostgreSQL
