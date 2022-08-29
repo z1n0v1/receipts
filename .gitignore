@@ -36,4 +36,3 @@ build/
 #heroku push
 deploy.bat
 push-github.bat
-sonar.bat
