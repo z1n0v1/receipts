@@ -149,9 +149,9 @@ public class ReceiptProcessServiceImpl implements ReceiptProcessService {
         LocalDate date = null;
         LocalTime time = null;
 
-        Pattern datePattern = Pattern.compile("\\d\\d[-.]\\d\\d[-.]\\d{4,4}");
+        Pattern datePattern = Pattern.compile("\\d\\d[-.]\\d\\d[-.]\\d{4}");
         Pattern timePattern = Pattern.compile("\\d\\d:\\d\\d:\\d\\d");
-        Pattern costPattern = Pattern.compile("-{0,1}\\d+[.|,]\\d\\d$");
+        Pattern costPattern = Pattern.compile("-?\\d+[.|,]\\d\\d$");
         Pattern quantityPattern = Pattern.compile("\\d+[.|,]\\d\\d\\d");
 
         for (int i = receiptLines.size() - 1; i > itemListStartIndex; i--) {
